@@ -168,22 +168,15 @@ int main(int argc, char *argv[])
 
 		/* FIXME: This is awful. "sphereTex" is done in mySphere.pushToOgre,
 		 * restructure later to something more reasonable */
-		Ogre::MaterialPtr textureMap = Ogre::MaterialManager::getSingleton().create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+		Ogre::MaterialPtr textureMap = Ogre::MaterialManager::getSingleton()
+				.create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 		textureMap->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex");
 		textureMap->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_COLOUR);
 
 		// Set texture for the sphere
 		entity1->setMaterial(textureMap);
 
-
 		sphere1->setOrientation(1.3003361e-01f, -1.5604560e-01f, -7.5052901e-01f, 6.2884596e-01f);
-
-
-		// Set polygon mode
-		myOgre.Camera->setPolygonMode(Ogre::PM_SOLID);
-
-		// Clear events
-		myOgre.Root->clearEventTimes();
 
 		//createFrameListener
 		myOgre.CreateFrameListener();
@@ -197,7 +190,7 @@ int main(int argc, char *argv[])
 	// Let's make informative messages in case there is an error
 	catch(Ogre::Exception &error)
 	{
-		std::cout << "Ogre makes an exception! " <<error.what() << std::endl;
+		std::cout << "Ogre makes an exception! " << error.what() << std::endl;
 	}
 	catch(std::exception &error)
 	{

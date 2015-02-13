@@ -7,18 +7,18 @@
 #define TEX_HEIGHT 512
 
 PSphere::PSphere(){
-	vertexes = NULL;
-	vNorms = NULL;
-	colours = NULL;
-	texCoords = NULL;
-	indexes = NULL;
-	image = NULL;
+	vertexes =	NULL;
+	vNorms =	NULL;
+	colours =	NULL;
+	texCoords =	NULL;
+	indexes =	NULL;
+	image =		NULL;
 }
 
 void PSphere::calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour)
 {
-	Ogre::Vector3   vertexXYprojection, LongitudeRef, LatitudeRef;
-	Ogre::Real      u, v;
+	Ogre::Vector3	vertexXYprojection, LongitudeRef, LatitudeRef;
+	Ogre::Real		u, v;
 
 	// Make vector as long as sphere radius
 	vertex = vertex * radius/vertex.length();
@@ -128,7 +128,7 @@ void PSphere::fixTextureSeam()
 					// Give correct u
 					texCoords[vertexCount].x += 1.0f;
 
-					// uddate index to point to the new vertex
+					// update index to point to the new vertex
 					indexes[i+j] = vertexCount;
 
 					vertexCount++;
@@ -150,10 +150,11 @@ void PSphere::fixTextureSeam()
 
 /* Example that shows procedural generation of textures */
 void PSphere::generateImage(Ogre::uint32 octaves, Ogre::Real *amplitudes, Ogre::Real *frequencys,
-						   Ogre::Real height, Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom)
+							Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom)
 {
 	Ogre::Vector3 spherePoint;
 	Ogre::Vector2 texCoords;
+	Ogre::Real height;
 	Ogre::uint32 x, y;
 	Ogre::uint8 red, green, blue, tempVal;
 
@@ -275,7 +276,7 @@ void PSphere::deform(Ogre::Real seaFraction)
 	}
 
 	// Procedurally generated image for texturing
-	generateImage(octaves, amplitudes, frequencys, height, seaHeight, top, bottom);
+	generateImage(octaves, amplitudes, frequencys, seaHeight, top, bottom);
 }
 
 void PSphere::calculateNormals()
@@ -333,7 +334,7 @@ void PSphere::create(Ogre::Real diameter, Ogre::Real seaFraction, Ogre::uint32 i
 	if(iters < 3)
 	{
 		iters = 3;
-		std::cout << "Sphere needs atleast 3 iters" <<std::endl;
+		std::cout << "Sphere needs atleast 3 iters" << std::endl;
 	}
 
 	radius = diameter/2.0f;
@@ -356,11 +357,11 @@ void PSphere::create(Ogre::Real diameter, Ogre::Real seaFraction, Ogre::uint32 i
 
 	/* +iter*8 is for texture seam fix, duplicating some vertexes.
 	 * Approximate, but should be on a safe side */
-	vertexes =  new Ogre::Vector3[iters*iters*6 + iters*8];
-	vNorms =    new Ogre::Vector3[iters*iters*6 + iters*8];
-	colours =   new Ogre::ColourValue[iters*iters*6 + iters*8];
-	texCoords = new Ogre::Vector2[iters*iters*6 + iters*8];
-	indexes =   new Ogre::uint32[(iters-1)*(iters-1)*6*6];
+	vertexes =	new Ogre::Vector3[iters*iters*6 + iters*8];
+	vNorms =	new Ogre::Vector3[iters*iters*6 + iters*8];
+	colours =	new Ogre::ColourValue[iters*iters*6 + iters*8];
+	texCoords =	new Ogre::Vector2[iters*iters*6 + iters*8];
+	indexes =	new Ogre::uint32[(iters-1)*(iters-1)*6*6];
 
 	Ogre::Vector3 *vBuf = new Ogre::Vector3[iters*iters];   // Allocate memory for the square buffer
 	indexBuf = new Ogre::uint32[(iters-1)*(iters-1)*6];     // Allocate index buffer for the square
