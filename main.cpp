@@ -43,11 +43,8 @@
 
 int initOgre::start()
 {
-	Ogre::String ConfigFileName = "";
-	Ogre::String PluginsFileName = "";
-	Ogre::String LogFileName = "OgreDemo.LOG";
 
-	Root = new Ogre::Root(ConfigFileName, PluginsFileName, LogFileName);
+	Root = new Ogre::Root("", "", "Generator.LOG");
 	OverlaySystem = new Ogre::OverlaySystem();
 
 
@@ -63,7 +60,6 @@ int initOgre::start()
 
 	// Loads renderer plugin
 	Root->loadPlugin(PluginName);
-
 
 
 	// Check renderer availability
@@ -166,6 +162,10 @@ int main(int argc, char *argv[])
 		Ogre::SceneNode *sphere1 = myOgre.Scene->getRootSceneNode()->createChildSceneNode("planetSphere");
 		sphere1->attachObject(entity1);
 
+		// No need for these anymore
+		Ogre::MeshManager::getSingleton().remove("CustomMesh");
+		myOgre.Scene->destroyManualObject(manual);
+
 		/* FIXME: This is awful. "sphereTex" is done in mySphere.pushToOgre,
 		 * restructure later to something more reasonable */
 		Ogre::MaterialPtr textureMap = Ogre::MaterialManager::getSingleton()
@@ -184,8 +184,20 @@ int main(int argc, char *argv[])
 		//start Rendering
 		myOgre.Root->startRendering();
 
-		Ogre::LogManager::getSingleton().logMessage("The end is near");
+		// Clean up our mess before exiting
+		Ogre::MaterialManager::getSingleton().remove("TextureObject");
+		Ogre::TextureManager::getSingleton().remove("sphereTex");
+		myOgre.Scene->destroyEntity("CustomEntity");
+		myOgre.Scene->destroySceneNode(sphere1);
+		myOgre.Scene->destroySceneNode(CameraNode);
+		myOgre.Scene->destroyCamera(myOgre.Camera);
+		myOgre.Scene->destroyLight(light);
+		Ogre::Root::getSingleton().getRenderSystem()->destroyRenderWindow("My little planet");
+		myOgre.Scene->clearScene();
+		myOgre.Root->shutdown();
+		myOgre.Root->destroySceneManager(myOgre.Scene);
 
+		Ogre::LogManager::getSingleton().logMessage("The end is near");
 	}
 	// Let's make informative messages in case there is an error
 	catch(Ogre::Exception &error)

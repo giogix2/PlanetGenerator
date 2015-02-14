@@ -550,8 +550,6 @@ void PSphere::pushToOgre(Ogre::ManualObject *manual)
 	manual->end();
 
 	// Texture stuff
-	/* FIXME: pointers and stuff defined in here are lost after function returns.
-	 * But do we need them/is it correct? */
 	Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().createManual("sphereTex", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, TEX_WIDTH, TEX_HEIGHT, 0, Ogre::PF_R8G8B8, Ogre:: TU_DYNAMIC);
 	Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
 	pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
