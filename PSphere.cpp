@@ -41,7 +41,7 @@ void PSphere::calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourVal
 	if(vertexXYprojection.length() != 0)
 	{
 		LongitudeRef = Ogre::Vector3(1.0f, 0.0f, 0.0f);
-		u = acos( vertexXYprojection.dotProduct(LongitudeRef)
+		u = acosf( vertexXYprojection.dotProduct(LongitudeRef)
 				  /(vertexXYprojection.length()*LongitudeRef.length()) );
 		if(vertex.y < 0)
 			u = Ogre::Math::TWO_PI - u;
@@ -54,7 +54,7 @@ void PSphere::calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourVal
 
 	// -z is defined as southpole
 	LatitudeRef = Ogre::Vector3(0.0f, 0.0f, -1.0f);
-	v = acos(vertex.dotProduct(LatitudeRef)/(vertex.length()*LatitudeRef.length()));
+	v = acosf(vertex.dotProduct(LatitudeRef)/(vertex.length()*LatitudeRef.length()));
 
 	v = v/Ogre::Math::PI;
 
@@ -73,9 +73,9 @@ Ogre::Vector3 PSphere::calculateSphereCoordsFromTexCoords(Ogre::Vector2 *texCoor
 	alfa = texCoord->x * Ogre::Math::TWO_PI;
 	beta = texCoord->y * Ogre::Math::PI;
 
-	sphereCoord.x = radius * cos(alfa)*sin(beta);
-	sphereCoord.y = radius * sin(alfa)*sin(beta);
-	sphereCoord.z = radius * cos(beta);
+	sphereCoord.x = radius * cosf(alfa)*sinf(beta);
+	sphereCoord.y = radius * sinf(alfa)*sinf(beta);
+	sphereCoord.z = radius * cosf(beta);
 
 	return sphereCoord;
 }
