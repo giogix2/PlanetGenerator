@@ -149,29 +149,22 @@ int main(int argc, char *argv[])
 
 
 		// Draw a sphere
-		Ogre::ManualObject *manual = myOgre.Scene->createManualObject();
-
 		PSphere mySphere;
 		mySphere.create(15.0f, 0.6f, 100);
-		mySphere.pushToOgre(manual);
-
+		mySphere.loadToBuffers("CustomMesh", "sphereTex");
 		mySphere.destroy();
 
-		manual->convertToMesh("CustomMesh");
 		Ogre::Entity *entity1 = myOgre.Scene->createEntity("CustomEntity", "CustomMesh");
 		Ogre::SceneNode *sphere1 = myOgre.Scene->getRootSceneNode()->createChildSceneNode("planetSphere");
 		sphere1->attachObject(entity1);
 
-		// No need for these anymore
+		// No need for this anymore
 		Ogre::MeshManager::getSingleton().remove("CustomMesh");
-		myOgre.Scene->destroyManualObject(manual);
 
-		/* FIXME: This is awful. "sphereTex" is done in mySphere.pushToOgre,
-		 * restructure later to something more reasonable */
 		Ogre::MaterialPtr textureMap = Ogre::MaterialManager::getSingleton()
 				.create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 		textureMap->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex");
-		textureMap->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_COLOUR);
+		textureMap->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
 
 		// Set texture for the sphere
 		entity1->setMaterial(textureMap);

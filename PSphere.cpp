@@ -527,30 +527,76 @@ void PSphere::destroy()
 	delete[] image;
 }
 
-void PSphere::pushToOgre(Ogre::ManualObject *manual)
+void PSphere::loadToBuffers(const std::string &meshName, const std::string &textureName)
 {
 	Ogre::uint32 i, j;
 
-	/* FIXME: Should probably bang* hardware buffers directly here */
-	/* bang == use */
-	manual->begin("BaseWhite", Ogre::RenderOperation::OT_TRIANGLE_LIST);
+	// Create mesh and subMesh
+	Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton()
+			.createManual(meshName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	Ogre::SubMesh *subMesh = mesh->createSubMesh();
 
+	mesh->sharedVertexData = new Ogre::VertexData;
+
+	// Pointer to declaration of vertexData
+	Ogre::VertexDeclaration* vertexDecl = mesh->sharedVertexData->vertexDeclaration;
+
+	mesh->sharedVertexData->vertexCount = vertexCount;
+
+	// define elements position, normal and tex coordinate
+	vertexDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+	vertexDecl->addElement(0, sizeof(float)*3, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
+	vertexDecl->addElement(0, sizeof(float)*6, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
+
+	// Vertex buffer
+	Ogre::HardwareVertexBufferSharedPtr vBuf = Ogre::HardwareBufferManager::getSingleton()
+			.createVertexBuffer(8*sizeof(float), vertexCount,
+								Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
+	mesh->sharedVertexData->vertexBufferBinding->setBinding(0, vBuf);
+
+	// Lock the buffer and write vertex data to it
+	float *pVertex = static_cast<float *>(vBuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
 	for(i=0; i < vertexCount; i++)
 	{
-		manual->position(vertexes[i]);
-		manual->normal(vNorms[i]);
-		manual->colour(colours[i]);
-		manual->textureCoord(texCoords[i]);
+		pVertex[i*8+0] = vertexes[i].x;
+		pVertex[i*8+1] = vertexes[i].y;
+		pVertex[i*8+2] = vertexes[i].z;
+
+		pVertex[i*8+3] = vNorms[i].x;
+		pVertex[i*8+4] = vNorms[i].y;
+		pVertex[i*8+5] = vNorms[i].z;
+
+		pVertex[i*8+6] = texCoords[i].x;
+		pVertex[i*8+7] = texCoords[i].y;
 	}
+	vBuf->unlock();
+
+	// Index buffer
+	Ogre::HardwareIndexBufferSharedPtr iBuf = Ogre::HardwareBufferManager::getSingleton()
+			.createIndexBuffer(Ogre::HardwareIndexBuffer::IT_32BIT, indexCount,
+							   Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
+	// Lock index buffer
+	unsigned int *pIdx = static_cast<unsigned int *>(iBuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
 	for(i=0; i < indexCount; i++)
 	{
-		manual->index(indexes[i]);
+		pIdx[i] = indexes[i];
 	}
+	iBuf->unlock();
 
-	manual->end();
+	subMesh->useSharedVertices = true;
+	subMesh->indexData->indexBuffer = iBuf;
+	subMesh->indexData->indexCount = indexCount;
+	subMesh->indexData->indexStart = 0;
+
+	mesh->_setBounds(Ogre::AxisAlignedBox(-radius, -radius, -radius, radius, radius, radius));
+	mesh->_setBoundingSphereRadius(radius);
+
+	mesh->load();
 
 	// Texture stuff
-	Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().createManual("sphereTex", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, TEX_WIDTH, TEX_HEIGHT, 0, Ogre::PF_R8G8B8, Ogre:: TU_DYNAMIC);
+	Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton()
+			.createManual(textureName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+						  Ogre::TEX_TYPE_2D, TEX_WIDTH, TEX_HEIGHT, 0, Ogre::PF_R8G8B8, Ogre:: TU_DYNAMIC);
 	Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
 	pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
 

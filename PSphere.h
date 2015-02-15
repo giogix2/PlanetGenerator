@@ -8,7 +8,7 @@ public:
 
 	void destroy();
 
-	void pushToOgre(Ogre::ManualObject *manual);
+	void loadToBuffers(const std::string &meshName, const std::string &textureName);
 	PSphere();
 
 private:
