@@ -18,6 +18,10 @@
 #include "windows.h"
 #endif
 
+#ifdef OGRE_PLATFORM_LINUX
+#include <sys/stat.h>
+#endif
+
  class initOgre
  {
  public:
@@ -52,8 +56,36 @@ int initOgre::start()
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 	PluginName.append("RenderSystem_Direct3D9");
 #else
-	// Note to self: can the absolute path be avoided?
-	PluginName.append("/usr/lib/OGRE/RenderSystem_GL");
+	/* Use Posix-function stat to check existence of a file.
+	 * This is needed because Ogre makes zero effort to find its own plugins. */
+	struct stat statBuf;
+	Ogre::String PluginFile[3];
+
+	PluginFile[0].append("/usr/lib/OGRE/RenderSystem_GL.so");
+	PluginFile[1].append("/usr/lib/local/OGRE/RenderSystem_GL.so");
+	// Ubuntu
+#ifdef __x86_64__
+	PluginFile[2].append("/usr/lib/x86_64-linux-gnu/OGRE-");
+#elif __i386__
+	PluginFile[2].append("/usr/lib/i386-linux-gnu/OGRE-");
+#endif
+	PluginFile[2] += Ogre::StringConverter::toString(OGRE_VERSION_MAJOR) + ".";
+	PluginFile[2] += Ogre::StringConverter::toString(OGRE_VERSION_MINOR) + ".";
+	PluginFile[2] += Ogre::StringConverter::toString(OGRE_VERSION_PATCH);
+	PluginFile[2] += "/RenderSystem_GL.so";
+
+	int i;
+	for(i=0; i < 3; i++)
+	{
+		if( stat(PluginFile[i].c_str(), &statBuf) == 0 )
+		{
+			PluginFile[i].resize(PluginFile[i].size()-3);	// strip ".so"
+			PluginName.assign( PluginFile[i] );
+			break;											// Exit loop if file exists
+		}
+	}
+	if(PluginName == "")
+		PluginName.append("RenderSystem_GL");					// When all else fails...
 #endif
 	if(OGRE_DEBUG_MODE)
 		PluginName.append("_d");    // RenderSystem_GL_d if using Ogre debug mode
