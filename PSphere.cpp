@@ -7,18 +7,18 @@
 #define TEX_HEIGHT 512
 
 PSphere::PSphere(){
-	vertexes = NULL;
-	vNorms = NULL;
-	colours = NULL;
-	texCoords = NULL;
-	indexes = NULL;
-	image = NULL;
+	vertexes =	NULL;
+	vNorms =	NULL;
+	colours =	NULL;
+	texCoords =	NULL;
+	indexes =	NULL;
+	image =		NULL;
 }
 
 void PSphere::calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour)
 {
-	Ogre::Vector3   vertexXYprojection, LongitudeRef, LatitudeRef;
-	Ogre::Real      u, v;
+	Ogre::Vector3	vertexXYprojection, LongitudeRef, LatitudeRef;
+	Ogre::Real		u, v;
 
 	// Make vector as long as sphere radius
 	vertex = vertex * radius/vertex.length();
@@ -41,7 +41,7 @@ void PSphere::calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourVal
 	if(vertexXYprojection.length() != 0)
 	{
 		LongitudeRef = Ogre::Vector3(1.0f, 0.0f, 0.0f);
-		u = acos( vertexXYprojection.dotProduct(LongitudeRef)
+		u = acosf( vertexXYprojection.dotProduct(LongitudeRef)
 				  /(vertexXYprojection.length()*LongitudeRef.length()) );
 		if(vertex.y < 0)
 			u = Ogre::Math::TWO_PI - u;
@@ -54,7 +54,7 @@ void PSphere::calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourVal
 
 	// -z is defined as southpole
 	LatitudeRef = Ogre::Vector3(0.0f, 0.0f, -1.0f);
-	v = acos(vertex.dotProduct(LatitudeRef)/(vertex.length()*LatitudeRef.length()));
+	v = acosf(vertex.dotProduct(LatitudeRef)/(vertex.length()*LatitudeRef.length()));
 
 	v = v/Ogre::Math::PI;
 
@@ -73,9 +73,9 @@ Ogre::Vector3 PSphere::calculateSphereCoordsFromTexCoords(Ogre::Vector2 *texCoor
 	alfa = texCoord->x * Ogre::Math::TWO_PI;
 	beta = texCoord->y * Ogre::Math::PI;
 
-	sphereCoord.x = radius * cos(alfa)*sin(beta);
-	sphereCoord.y = radius * sin(alfa)*sin(beta);
-	sphereCoord.z = radius * cos(beta);
+	sphereCoord.x = radius * cosf(alfa)*sinf(beta);
+	sphereCoord.y = radius * sinf(alfa)*sinf(beta);
+	sphereCoord.z = radius * cosf(beta);
 
 	return sphereCoord;
 }
@@ -128,7 +128,7 @@ void PSphere::fixTextureSeam()
 					// Give correct u
 					texCoords[vertexCount].x += 1.0f;
 
-					// uddate index to point to the new vertex
+					// update index to point to the new vertex
 					indexes[i+j] = vertexCount;
 
 					vertexCount++;
@@ -150,10 +150,11 @@ void PSphere::fixTextureSeam()
 
 /* Example that shows procedural generation of textures */
 void PSphere::generateImage(Ogre::uint32 octaves, Ogre::Real *amplitudes, Ogre::Real *frequencys,
-						   Ogre::Real height, Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom)
+							Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom)
 {
 	Ogre::Vector3 spherePoint;
 	Ogre::Vector2 texCoords;
+	Ogre::Real height;
 	Ogre::uint32 x, y;
 	Ogre::uint8 red, green, blue, tempVal;
 
@@ -275,7 +276,7 @@ void PSphere::deform(Ogre::Real seaFraction)
 	}
 
 	// Procedurally generated image for texturing
-	generateImage(octaves, amplitudes, frequencys, height, seaHeight, top, bottom);
+	generateImage(octaves, amplitudes, frequencys, seaHeight, top, bottom);
 }
 
 void PSphere::calculateNormals()
@@ -333,7 +334,7 @@ void PSphere::create(Ogre::Real diameter, Ogre::Real seaFraction, Ogre::uint32 i
 	if(iters < 3)
 	{
 		iters = 3;
-		std::cout << "Sphere needs atleast 3 iters" <<std::endl;
+		std::cout << "Sphere needs atleast 3 iters" << std::endl;
 	}
 
 	radius = diameter/2.0f;
@@ -356,11 +357,11 @@ void PSphere::create(Ogre::Real diameter, Ogre::Real seaFraction, Ogre::uint32 i
 
 	/* +iter*8 is for texture seam fix, duplicating some vertexes.
 	 * Approximate, but should be on a safe side */
-	vertexes =  new Ogre::Vector3[iters*iters*6 + iters*8];
-	vNorms =    new Ogre::Vector3[iters*iters*6 + iters*8];
-	colours =   new Ogre::ColourValue[iters*iters*6 + iters*8];
-	texCoords = new Ogre::Vector2[iters*iters*6 + iters*8];
-	indexes =   new Ogre::uint32[(iters-1)*(iters-1)*6*6];
+	vertexes =	new Ogre::Vector3[iters*iters*6 + iters*8];
+	vNorms =	new Ogre::Vector3[iters*iters*6 + iters*8];
+	colours =	new Ogre::ColourValue[iters*iters*6 + iters*8];
+	texCoords =	new Ogre::Vector2[iters*iters*6 + iters*8];
+	indexes =	new Ogre::uint32[(iters-1)*(iters-1)*6*6];
 
 	Ogre::Vector3 *vBuf = new Ogre::Vector3[iters*iters];   // Allocate memory for the square buffer
 	indexBuf = new Ogre::uint32[(iters-1)*(iters-1)*6];     // Allocate index buffer for the square
@@ -526,32 +527,76 @@ void PSphere::destroy()
 	delete[] image;
 }
 
-void PSphere::pushToOgre(Ogre::ManualObject *manual)
+void PSphere::loadToBuffers(const std::string &meshName, const std::string &textureName)
 {
 	Ogre::uint32 i, j;
 
-	/* FIXME: Should probably bang* hardware buffers directly here */
-	/* bang == use */
-	manual->begin("BaseWhite", Ogre::RenderOperation::OT_TRIANGLE_LIST);
+	// Create mesh and subMesh
+	Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton()
+			.createManual(meshName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	Ogre::SubMesh *subMesh = mesh->createSubMesh();
 
+	mesh->sharedVertexData = new Ogre::VertexData;
+
+	// Pointer to declaration of vertexData
+	Ogre::VertexDeclaration* vertexDecl = mesh->sharedVertexData->vertexDeclaration;
+
+	mesh->sharedVertexData->vertexCount = vertexCount;
+
+	// define elements position, normal and tex coordinate
+	vertexDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+	vertexDecl->addElement(0, sizeof(float)*3, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
+	vertexDecl->addElement(0, sizeof(float)*6, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
+
+	// Vertex buffer
+	Ogre::HardwareVertexBufferSharedPtr vBuf = Ogre::HardwareBufferManager::getSingleton()
+			.createVertexBuffer(8*sizeof(float), vertexCount,
+								Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
+	mesh->sharedVertexData->vertexBufferBinding->setBinding(0, vBuf);
+
+	// Lock the buffer and write vertex data to it
+	float *pVertex = static_cast<float *>(vBuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
 	for(i=0; i < vertexCount; i++)
 	{
-		manual->position(vertexes[i]);
-		manual->normal(vNorms[i]);
-		manual->colour(colours[i]);
-		manual->textureCoord(texCoords[i]);
+		pVertex[i*8+0] = vertexes[i].x;
+		pVertex[i*8+1] = vertexes[i].y;
+		pVertex[i*8+2] = vertexes[i].z;
+
+		pVertex[i*8+3] = vNorms[i].x;
+		pVertex[i*8+4] = vNorms[i].y;
+		pVertex[i*8+5] = vNorms[i].z;
+
+		pVertex[i*8+6] = texCoords[i].x;
+		pVertex[i*8+7] = texCoords[i].y;
 	}
+	vBuf->unlock();
+
+	// Index buffer
+	Ogre::HardwareIndexBufferSharedPtr iBuf = Ogre::HardwareBufferManager::getSingleton()
+			.createIndexBuffer(Ogre::HardwareIndexBuffer::IT_32BIT, indexCount,
+							   Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
+	// Lock index buffer
+	unsigned int *pIdx = static_cast<unsigned int *>(iBuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
 	for(i=0; i < indexCount; i++)
 	{
-		manual->index(indexes[i]);
+		pIdx[i] = indexes[i];
 	}
+	iBuf->unlock();
 
-	manual->end();
+	subMesh->useSharedVertices = true;
+	subMesh->indexData->indexBuffer = iBuf;
+	subMesh->indexData->indexCount = indexCount;
+	subMesh->indexData->indexStart = 0;
+
+	mesh->_setBounds(Ogre::AxisAlignedBox(-radius, -radius, -radius, radius, radius, radius));
+	mesh->_setBoundingSphereRadius(radius);
+
+	mesh->load();
 
 	// Texture stuff
-	/* FIXME: pointers and stuff defined in here are lost after function returns.
-	 * But do we need them/is it correct? */
-	Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton().createManual("sphereTex", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::TEX_TYPE_2D, TEX_WIDTH, TEX_HEIGHT, 0, Ogre::PF_R8G8B8, Ogre:: TU_DYNAMIC);
+	Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton()
+			.createManual(textureName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+						  Ogre::TEX_TYPE_2D, TEX_WIDTH, TEX_HEIGHT, 0, Ogre::PF_R8G8B8, Ogre:: TU_DYNAMIC);
 	Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
 	pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
 

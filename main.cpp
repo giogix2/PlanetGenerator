@@ -18,6 +18,10 @@
 #include "windows.h"
 #endif
 
+#ifdef OGRE_PLATFORM_LINUX
+#include <sys/stat.h>
+#endif
+
  class initOgre
  {
  public:
@@ -43,11 +47,8 @@
 
 int initOgre::start()
 {
-	Ogre::String ConfigFileName = "";
-	Ogre::String PluginsFileName = "";
-	Ogre::String LogFileName = "OgreDemo.LOG";
 
-	Root = new Ogre::Root(ConfigFileName, PluginsFileName, LogFileName);
+	Root = new Ogre::Root("", "", "Generator.LOG");
 	OverlaySystem = new Ogre::OverlaySystem();
 
 
@@ -55,15 +56,42 @@ int initOgre::start()
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 	PluginName.append("RenderSystem_Direct3D9");
 #else
-	// Note to self: can the absolute path be avoided?
-	PluginName.append("/usr/lib/OGRE/RenderSystem_GL");
+	/* Use Posix-function stat to check existence of a file.
+	 * This is needed because Ogre makes zero effort to find its own plugins. */
+	struct stat statBuf;
+	Ogre::String PluginFile[3];
+
+	PluginFile[0].append("/usr/lib/OGRE/RenderSystem_GL.so");
+	PluginFile[1].append("/usr/lib/local/OGRE/RenderSystem_GL.so");
+	// Ubuntu
+#ifdef __x86_64__
+	PluginFile[2].append("/usr/lib/x86_64-linux-gnu/OGRE-");
+#elif __i386__
+	PluginFile[2].append("/usr/lib/i386-linux-gnu/OGRE-");
+#endif
+	PluginFile[2] += Ogre::StringConverter::toString(OGRE_VERSION_MAJOR) + ".";
+	PluginFile[2] += Ogre::StringConverter::toString(OGRE_VERSION_MINOR) + ".";
+	PluginFile[2] += Ogre::StringConverter::toString(OGRE_VERSION_PATCH);
+	PluginFile[2] += "/RenderSystem_GL.so";
+
+	int i;
+	for(i=0; i < 3; i++)
+	{
+		if( stat(PluginFile[i].c_str(), &statBuf) == 0 )
+		{
+			PluginFile[i].resize(PluginFile[i].size()-3);	// strip ".so"
+			PluginName.assign( PluginFile[i] );
+			break;											// Exit loop if file exists
+		}
+	}
+	if(PluginName == "")
+		PluginName.append("RenderSystem_GL");					// When all else fails...
 #endif
 	if(OGRE_DEBUG_MODE)
 		PluginName.append("_d");    // RenderSystem_GL_d if using Ogre debug mode
 
 	// Loads renderer plugin
 	Root->loadPlugin(PluginName);
-
 
 
 	// Check renderer availability
@@ -153,37 +181,27 @@ int main(int argc, char *argv[])
 
 
 		// Draw a sphere
-		Ogre::ManualObject *manual = myOgre.Scene->createManualObject();
-
 		PSphere mySphere;
 		mySphere.create(15.0f, 0.6f, 100);
-		mySphere.pushToOgre(manual);
-
+		mySphere.loadToBuffers("CustomMesh", "sphereTex");
 		mySphere.destroy();
 
-		manual->convertToMesh("CustomMesh");
 		Ogre::Entity *entity1 = myOgre.Scene->createEntity("CustomEntity", "CustomMesh");
 		Ogre::SceneNode *sphere1 = myOgre.Scene->getRootSceneNode()->createChildSceneNode("planetSphere");
 		sphere1->attachObject(entity1);
 
-		/* FIXME: This is awful. "sphereTex" is done in mySphere.pushToOgre,
-		 * restructure later to something more reasonable */
-		Ogre::MaterialPtr textureMap = Ogre::MaterialManager::getSingleton().create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+		// No need for this anymore
+		Ogre::MeshManager::getSingleton().remove("CustomMesh");
+
+		Ogre::MaterialPtr textureMap = Ogre::MaterialManager::getSingleton()
+				.create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 		textureMap->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex");
-		textureMap->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_COLOUR);
+		textureMap->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
 
 		// Set texture for the sphere
 		entity1->setMaterial(textureMap);
 
-
 		sphere1->setOrientation(1.3003361e-01f, -1.5604560e-01f, -7.5052901e-01f, 6.2884596e-01f);
-
-
-		// Set polygon mode
-		myOgre.Camera->setPolygonMode(Ogre::PM_SOLID);
-
-		// Clear events
-		myOgre.Root->clearEventTimes();
 
 		//createFrameListener
 		myOgre.CreateFrameListener();
@@ -191,13 +209,25 @@ int main(int argc, char *argv[])
 		//start Rendering
 		myOgre.Root->startRendering();
 
-		Ogre::LogManager::getSingleton().logMessage("The end is near");
+		// Clean up our mess before exiting
+		Ogre::MaterialManager::getSingleton().remove("TextureObject");
+		Ogre::TextureManager::getSingleton().remove("sphereTex");
+		myOgre.Scene->destroyEntity("CustomEntity");
+		myOgre.Scene->destroySceneNode(sphere1);
+		myOgre.Scene->destroySceneNode(CameraNode);
+		myOgre.Scene->destroyCamera(myOgre.Camera);
+		myOgre.Scene->destroyLight(light);
+		Ogre::Root::getSingleton().getRenderSystem()->destroyRenderWindow("My little planet");
+		myOgre.Scene->clearScene();
+		myOgre.Root->shutdown();
+		myOgre.Root->destroySceneManager(myOgre.Scene);
 
+		Ogre::LogManager::getSingleton().logMessage("The end is near");
 	}
 	// Let's make informative messages in case there is an error
 	catch(Ogre::Exception &error)
 	{
-		std::cout << "Ogre makes an exception! " <<error.what() << std::endl;
+		std::cout << "Ogre makes an exception! " << error.what() << std::endl;
 	}
 	catch(std::exception &error)
 	{

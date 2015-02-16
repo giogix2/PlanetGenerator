@@ -8,19 +8,19 @@ public:
 
 	void destroy();
 
-	void pushToOgre(Ogre::ManualObject *manual);
+	void loadToBuffers(const std::string &meshName, const std::string &textureName);
 	PSphere();
 
 private:
-	Ogre::Vector3       *vertexes;
-	Ogre::Vector3       *vNorms;
-	Ogre::ColourValue   *colours;
-	Ogre::Vector2       *texCoords;
-	Ogre::uint32        *indexes;
-	Ogre::uint32        vertexCount;
-	Ogre::uint32        indexCount;
-	Ogre::Real          radius;
-	unsigned char       *image;
+	Ogre::Vector3		*vertexes;
+	Ogre::Vector3		*vNorms;
+	Ogre::ColourValue	*colours;
+	Ogre::Vector2		*texCoords;
+	Ogre::uint32		*indexes;
+	Ogre::uint32		vertexCount;
+	Ogre::uint32		indexCount;
+	Ogre::Real			radius;
+	unsigned char		*image;
 
 	void calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour);
 
@@ -36,7 +36,7 @@ private:
 						   Ogre::Real *frequencys, Ogre::Vector3 Point);
 
 	void generateImage(Ogre::uint32 octaves, Ogre::Real *amplitudes, Ogre::Real *frequencys,
-					   Ogre::Real height, Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom);
+					   Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom);
 };
 
 #endif
