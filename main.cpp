@@ -185,6 +185,10 @@ int main(int argc, char *argv[])
 		PSphere mySphere;
 		mySphere.create(15.0f, 0.6f, 100);
 		mySphere.loadToBuffers("CustomMesh", "sphereTex");
+		Ogre::MeshPtr mesh;
+		mesh = mySphere.getMesh();
+		Ogre::MeshSerializer ser;
+		ser.exportMesh(mesh.getPointer(), "C:\\Users\\giova\\Documents\\PlanetGenerator\\planet.mesh",  Ogre::MeshSerializer::ENDIAN_NATIVE);
 		mySphere.destroy();
 
 		Ogre::Entity *entity1 = myOgre.Scene->createEntity("CustomEntity", "CustomMesh");

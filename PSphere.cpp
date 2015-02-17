@@ -13,7 +13,6 @@ PSphere::PSphere(){
 	texCoords =	NULL;
 	indexes =	NULL;
 	image =		NULL;
-	mesh =		NULL;
 }
 
 void PSphere::calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour)
