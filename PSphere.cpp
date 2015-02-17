@@ -514,17 +514,19 @@ void PSphere::create(Ogre::Real diameter, Ogre::Real seaFraction, Ogre::uint32 i
 /* Release resources allocated by Sphere class */
 void PSphere::destroy()
 {
-	/* FIXME: Should we consider failing graciously in case of incorrect use like:
-	 *
-	 * Sphere oneSphere;
-	 * oneSphere.destroy(); */
-
-	delete[] colours;
-	delete[] indexes;
-	delete[] texCoords;
-	delete[] vertexes;
-	delete[] vNorms;
-	delete[] image;
+	// Release memory only if it is allocated
+	if(colours != NULL)
+		delete[] colours;
+	if(indexes != NULL)
+		delete[] indexes;
+	if(texCoords != NULL)
+		delete[] texCoords;
+	if(vertexes != NULL)
+		delete[] vertexes;
+	if(vNorms != NULL)
+		delete[] vNorms;
+	if(image != NULL)
+		delete[] image;
 }
 
 void PSphere::loadToBuffers(const std::string &meshName, const std::string &textureName)
