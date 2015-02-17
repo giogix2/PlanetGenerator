@@ -9,6 +9,9 @@ public:
 	void destroy();
 
 	void loadToBuffers(const std::string &meshName, const std::string &textureName);
+
+	Ogre::MeshPtr getMesh();
+
 	PSphere();
 
 private:
@@ -21,6 +24,7 @@ private:
 	Ogre::uint32		indexCount;
 	Ogre::Real			radius;
 	unsigned char		*image;
+	Ogre::MeshPtr		mesh;
 
 	void calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour);
 
@@ -37,6 +41,7 @@ private:
 
 	void generateImage(Ogre::uint32 octaves, Ogre::Real *amplitudes, Ogre::Real *frequencys,
 					   Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom);
+
 };
 
 #endif

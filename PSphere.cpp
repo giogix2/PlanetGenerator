@@ -13,6 +13,7 @@ PSphere::PSphere(){
 	texCoords =	NULL;
 	indexes =	NULL;
 	image =		NULL;
+	mesh =		NULL;
 }
 
 void PSphere::calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour)
@@ -593,6 +594,8 @@ void PSphere::loadToBuffers(const std::string &meshName, const std::string &text
 
 	mesh->load();
 
+	this->mesh = mesh;
+
 	// Texture stuff
 	Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton()
 			.createManual(textureName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
@@ -619,5 +622,9 @@ void PSphere::loadToBuffers(const std::string &meshName, const std::string &text
 
 	pixelBuffer->unlock();
 
+}
+
+Ogre::MeshPtr PSphere::getMesh(){
+	return mesh;
 }
 
