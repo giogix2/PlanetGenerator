@@ -13,6 +13,14 @@ PSphere::PSphere(){
 	texCoords =	NULL;
 	indexes =	NULL;
 	image =		NULL;
+	observer =	Ogre::Vector3(0.0f, 0.0f, 0.0f);
+}
+
+/* Set position for the observer. This must be position vector in modelspace,
+ * not in worldspace. In other words, one must undo rotations. */
+void PSphere::setObserverPosition(Ogre::Vector3 position)
+{
+	observer = position;
 }
 
 void PSphere::calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour)
@@ -146,6 +154,33 @@ void PSphere::fixTextureSeam()
 			  << affectedTriangleCount << std::endl
 			  << "  number of individual vertexes duplicated "
 			  << vertexCount - vCntBeforeFix << std::endl;
+}
+
+/* Gives observer distance to the point on surface that is directly between
+ * observer and planet origo.
+ * Negative values mean that the observer is inside the planet */
+Ogre::Real PSphere::getObserverDistanceToSurface()
+{
+	Ogre::Real frequencys[2], amplitudes[2], height;
+	Ogre::Vector3 direction, surfacePos;
+	Ogre::Real distance;
+
+	// Hardcode these values for now, waiting for parameter class.
+	amplitudes[0] = 0.15f;
+	amplitudes[1] = 0.05f;
+	frequencys[0] = 3.0f;
+	frequencys[1] = 0.5f;
+
+	// normal vector that points from the origo to the observer
+	direction = observer.normalisedCopy();
+	/* Get position of the surface along the line that goes from
+	 * the planet origo to the observer */
+	height = heightNoise(2, amplitudes, frequencys, direction*radius);
+	surfacePos = direction*(height + radius);
+
+	distance = fabsf(observer.length()) - fabsf(surfacePos.length());
+
+	return distance;
 }
 
 /* Example that shows procedural generation of textures */

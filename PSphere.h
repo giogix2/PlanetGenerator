@@ -12,6 +12,10 @@ public:
 
 	Ogre::MeshPtr getMesh();
 
+	void setObserverPosition(Ogre::Vector3 position);
+
+	Ogre::Real getObserverDistanceToSurface();
+
 	PSphere();
 
 private:
@@ -25,6 +29,7 @@ private:
 	Ogre::Real			radius;
 	unsigned char		*image;
 	Ogre::MeshPtr		mesh;
+	Ogre::Vector3		observer;
 
 	void calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour);
 
