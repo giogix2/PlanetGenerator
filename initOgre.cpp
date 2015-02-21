@@ -1,8 +1,5 @@
-#include "OGRE/Ogre.h"
 #include "initOgre.h"
-#include "GeneratorFrameListener.h"
 
-#include "PSphere.h"
 #include "OgreConfigFile.h"
 #include <OgreMeshSerializer.h>
 
@@ -58,9 +55,10 @@ int initOgre::start(){
 	if(PluginName == "")
 		PluginName.append("RenderSystem_GL");				// When all else fails...
 #endif
-	if(OGRE_DEBUG_MODE)
-		PluginName.append("_d");    // RenderSystem_GL_d if using Ogre debug mode
 
+	// RenderSystem_GL_d if using Ogre debug mode
+	if(OGRE_DEBUG_MODE)
+		PluginName.append("_d");
 	// Loads renderer plugin
 	Root->loadPlugin(PluginName);
 
@@ -109,10 +107,7 @@ void initOgre::CreateFrameListener(){
 	Root->addFrameListener(FrameListener);
 }
 
-void initOgre::setSceneAndRun(){
-	//initOgre myOgre;
-
-	//myOgre.start();
+void initOgre::setSceneAndRun(PSphere *planet){
 
 	// Create camera
 	Camera = Scene->createCamera("VertCamera");
@@ -138,17 +133,13 @@ void initOgre::setSceneAndRun(){
 
 
 	// Draw a sphere
-	PSphere mySphere;
-	mySphere.create(15.0f, 0.6f, 100);
-	mySphere.loadToBuffers("CustomMesh", "sphereTex");
+	planet->loadToBuffers("CustomMesh", "sphereTex");
 
 	//Export the shape in a mesh file before destroying it
 	Ogre::MeshPtr mesh;
-	mesh = mySphere.getMesh();
+	mesh = planet->getMesh();
 	Ogre::MeshSerializer ser;
 	//ser.exportMesh(mesh.getPointer(), "C:\\Users\\giova\\Documents\\PlanetGenerator\\planet.mesh",  Ogre::MeshSerializer::ENDIAN_NATIVE);
-
-	mySphere.destroy();
 
 
 	// Attach entitys to sceneNodes

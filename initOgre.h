@@ -3,13 +3,14 @@
 
 #include "OGRE/Ogre.h"
 #include "GeneratorFrameListener.h"
+#include "PSphere.h"
 
 class initOgre{
  public:
 	initOgre();
 
 	int start();
-	void setSceneAndRun();
+	void setSceneAndRun(PSphere *planet);
 	void cleanup();
 private:
 	Ogre::Root              *Root;
