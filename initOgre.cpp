@@ -2,6 +2,14 @@
 #include "initOgre.h"
 #include "GeneratorFrameListener.h"
 
+#include "PSphere.h"
+#include "OgreConfigFile.h"
+#include <OgreMeshSerializer.h>
+
+#ifdef OGRE_PLATFORM_LINUX
+#include <sys/stat.h>
+#endif
+
 initOgre::initOgre(){
 		FrameListener = 0;
 		Root = 0;
@@ -48,7 +56,7 @@ int initOgre::start(){
 		}
 	}
 	if(PluginName == "")
-		PluginName.append("RenderSystem_GL");					// When all else fails...
+		PluginName.append("RenderSystem_GL");				// When all else fails...
 #endif
 	if(OGRE_DEBUG_MODE)
 		PluginName.append("_d");    // RenderSystem_GL_d if using Ogre debug mode
@@ -99,4 +107,92 @@ void initOgre::CreateFrameListener(){
 #endif
 	FrameListener->showDebugOverlay(true);
 	Root->addFrameListener(FrameListener);
+}
+
+void initOgre::setSceneAndRun(){
+	//initOgre myOgre;
+
+	//myOgre.start();
+
+	// Create camera
+	Camera = Scene->createCamera("VertCamera");
+
+	// Camera position
+	Camera->setPosition(Ogre::Vector3(0,0,20));
+	// Camera looks toward origo
+	Camera->lookAt(Ogre::Vector3(0,0,0));
+
+	// Create viewport
+	Ogre::Viewport *vp = Window->addViewport(Camera);
+	vp->setBackgroundColour(Ogre::ColourValue(0,0,0));
+
+	// Draw distances
+	Camera->setNearClipDistance(1.5f);
+	Camera->setFarClipDistance(3000.0f);     // note to self: do not set if using stencil shadows
+
+	// Let there be light
+	Scene->setAmbientLight(Ogre::ColourValue(0.02f, 0.02f, 0.02f));
+	Ogre::Light *light = Scene->createLight( "PointLight" );
+	light->setType(Ogre::Light::LT_POINT);
+	light->setPosition(200, 40, 150);
+
+
+	// Draw a sphere
+	PSphere mySphere;
+	mySphere.create(15.0f, 0.6f, 100);
+	mySphere.loadToBuffers("CustomMesh", "sphereTex");
+
+	//Export the shape in a mesh file before destroying it
+	Ogre::MeshPtr mesh;
+	mesh = mySphere.getMesh();
+	Ogre::MeshSerializer ser;
+	//ser.exportMesh(mesh.getPointer(), "C:\\Users\\giova\\Documents\\PlanetGenerator\\planet.mesh",  Ogre::MeshSerializer::ENDIAN_NATIVE);
+
+	mySphere.destroy();
+
+
+	// Attach entitys to sceneNodes
+	Ogre::SceneNode *CameraNode = RootSceneNode->createChildSceneNode("DefaultCameraNode");
+	CameraNode->attachObject(Camera);
+
+	Ogre::Entity *entity1 = Scene->createEntity("CustomEntity", "CustomMesh");
+	Ogre::SceneNode *sphere1 = Scene->getRootSceneNode()->createChildSceneNode("planetSphere");
+	sphere1->attachObject(entity1);
+
+	// No need for this anymore
+	Ogre::MeshManager::getSingleton().remove("CustomMesh");
+
+	Ogre::MaterialPtr textureMap = Ogre::MaterialManager::getSingleton()
+			.create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	textureMap->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex");
+	textureMap->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+
+	// Set texture for the sphere
+	entity1->setMaterial(textureMap);
+
+	sphere1->setOrientation(1.3003361e-01f, -1.5604560e-01f, -7.5052901e-01f, 6.2884596e-01f);
+
+	//createFrameListener
+	CreateFrameListener();
+
+	//start Rendering
+	Root->startRendering();
+}
+
+void initOgre::cleanup(){
+
+	// Clean up our mess before exiting
+	Ogre::MaterialManager::getSingleton().remove("TextureObject");
+	Ogre::TextureManager::getSingleton().remove("sphereTex");
+	Scene->destroyEntity("CustomEntity");
+	Scene->destroySceneNode("planetSphere");
+	Scene->destroySceneNode("DefaultCameraNode");
+	Scene->destroyCamera(Camera);
+	Scene->destroyLight("PointLight");
+	Ogre::Root::getSingleton().getRenderSystem()->destroyRenderWindow("My little planet");
+	Scene->clearScene();
+	Root->shutdown();
+	Root->destroySceneManager(Scene);
+
+	Ogre::LogManager::getSingleton().logMessage("Ogre is cleaned up");
 }

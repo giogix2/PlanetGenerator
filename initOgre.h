@@ -6,6 +6,12 @@
 
 class initOgre{
  public:
+	initOgre();
+
+	int start();
+	void setSceneAndRun();
+	void cleanup();
+private:
 	Ogre::Root              *Root;
 	Ogre::SceneManager      *Scene;
 	Ogre::SceneNode         *RootSceneNode;
@@ -14,11 +20,7 @@ class initOgre{
 	GeneratorFrameListener  *FrameListener;
 	Ogre::OverlaySystem     *OverlaySystem;
 
-	initOgre();
-
-	int start();
 	void CreateFrameListener();
-
 };
 
 #endif
