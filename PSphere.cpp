@@ -23,55 +23,6 @@ void PSphere::setObserverPosition(Ogre::Vector3 position)
 	observer = position;
 }
 
-void PSphere::calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour)
-{
-	Ogre::Vector3	vertexXYprojection, LongitudeRef, LatitudeRef;
-	Ogre::Real		u, v;
-
-	// Make vector as long as sphere radius
-	vertex = vertex * radius/vertex.length();
-
-	vertexes[vertexCount] = vertex;
-
-	colours[vertexCount] = colour;
-
-
-	/* Calculates equirectangular projection AKA plate carrée
-	 * Coordinate convention for textures:
-	 * texture(0.0 <= u <= 1.0, 0.0 <= v <= 1.0)
-	 * z-direction is polar. model(rnd, rnd, +z) => texture(rnd, >0.5)
-	 * model(+x, 0, rnd) => texture(0, rnd) and model(0, +y, rnd) => texture(0.25, rnd)
-	 * and model(0, -y, rnd) => texture(0.75, rnd) */
-
-	vertexXYprojection = Ogre::Vector3(vertex.x, vertex.y, 0.0f);   // vertex projection in xy-plane
-
-	// if x and y are both zero, result for u is nan. Guarding against it.
-	if(vertexXYprojection.length() != 0)
-	{
-		LongitudeRef = Ogre::Vector3(1.0f, 0.0f, 0.0f);
-		u = acosf( vertexXYprojection.dotProduct(LongitudeRef)
-				  /(vertexXYprojection.length()*LongitudeRef.length()) );
-		if(vertex.y < 0)
-			u = Ogre::Math::TWO_PI - u;
-		u = u/Ogre::Math::TWO_PI;
-	}
-	else
-	{
-		u = 0.0f;   // x = 0 and y = 0, set u = 0;
-	}
-
-	// -z is defined as southpole
-	LatitudeRef = Ogre::Vector3(0.0f, 0.0f, -1.0f);
-	v = acosf(vertex.dotProduct(LatitudeRef)/(vertex.length()*LatitudeRef.length()));
-
-	v = v/Ogre::Math::PI;
-
-	texCoords[vertexCount] = Ogre::Vector2(u, v);
-
-	// increase count
-	vertexCount++;
-}
-
 /* Get spherical coordinates from texture coordinate */
 Ogre::Vector3 PSphere::calculateSphereCoordsFromTexCoords(Ogre::Vector2 *texCoord)
 {
@@ -81,9 +32,9 @@ Ogre::Vector3 PSphere::calculateSphereCoordsFromTexCoords(Ogre::Vector2 *texCoor
 	alfa = texCoord->x * Ogre::Math::TWO_PI;
 	beta = texCoord->y * Ogre::Math::PI;
 
-	sphereCoord.x = radius * cosf(alfa)*sinf(beta);
-	sphereCoord.y = radius * sinf(alfa)*sinf(beta);
-	sphereCoord.z = radius * cosf(beta);
+	sphereCoord.x = cosf(alfa)*sinf(beta);
+	sphereCoord.y = sinf(alfa)*sinf(beta);
+	sphereCoord.z = cosf(beta);
 
 	return sphereCoord;
 }
@@ -166,17 +117,17 @@ Ogre::Real PSphere::getObserverDistanceToSurface()
 	Ogre::Real distance;
 
 	// Hardcode these values for now, waiting for parameter class.
-	amplitudes[0] = 0.15f;
-	amplitudes[1] = 0.05f;
-	frequencys[0] = 3.0f;
-	frequencys[1] = 0.5f;
+	amplitudes[0] = 0.02f;
+	amplitudes[1] = 0.006666f;
+	frequencys[0] = 0.4f;
+	frequencys[1] = 0.06666f;
 
 	// normal vector that points from the origo to the observer
 	direction = observer.normalisedCopy();
 	/* Get position of the surface along the line that goes from
 	 * the planet origo to the observer */
-	height = heightNoise(2, amplitudes, frequencys, direction*radius);
-	surfacePos = direction*(height + radius);
+	height = heightNoise(2, amplitudes, frequencys, direction);
+	surfacePos = direction*(height*radius + radius);
 
 	distance = fabsf(observer.length()) - fabsf(surfacePos.length());
 
@@ -184,14 +135,23 @@ Ogre::Real PSphere::getObserverDistanceToSurface()
 }
 
 /* Example that shows procedural generation of textures */
-void PSphere::generateImage(Ogre::uint32 octaves, Ogre::Real *amplitudes, Ogre::Real *frequencys,
-							Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom)
+void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom)
 {
 	Ogre::Vector3 spherePoint;
 	Ogre::Vector2 texCoords;
-	Ogre::Real height;
-	Ogre::uint32 x, y;
+	Ogre::Real height, amplitudes[2], frequencys[2];
+	Ogre::uint32 x, y, octaves;
 	Ogre::uint8 red, green, blue, tempVal;
+
+	// Variate height of a point in a sphere.
+	octaves = 2;
+	// Amplitude controls height of features
+	amplitudes[0] = 0.02f;
+	amplitudes[1] = 0.006666f;
+	/* frequency controls how wide features are. This is now actually
+	 * inverse of frequency */
+	frequencys[0] = 0.4f;
+	frequencys[1] = 0.06666f;
 
 	// Guard against multiple memory allocations to avoid memory leaks
 	if(image != NULL)
@@ -244,74 +204,33 @@ void PSphere::generateImage(Ogre::uint32 octaves, Ogre::Real *amplitudes, Ogre::
 	}
 }
 
-// Experimenting with some noise
-void PSphere::deform(Ogre::Real seaFraction)
+void PSphere::deform(HeightMap *map)
 {
-	Ogre::uint32 i, j, octaves, histogram[100] = {0}, histoTotal = 0;
-	Ogre::Real height, top, bottom, seaHeight;
-	Ogre::Vector3 vertex, unity;
+	unsigned int x, y, octaves;
+	Ogre::Vector3 spherePos;
+	Ogre::Real height;
 	Ogre::Real frequencys[2], amplitudes[2];
-	Ogre::uint32 accumulator = 0;
 
 	// Variate height of a point in a sphere.
 	octaves = 2;
 	// Amplitude controls height of features
-	amplitudes[0] = 0.15f;
-	amplitudes[1] = 0.05f;
+	amplitudes[0] = 0.02f;
+	amplitudes[1] = 0.006666f;
 	/* frequency controls how wide features are. This is now actually
 	 * inverse of frequency */
-	frequencys[0] = 3.0f;
-	frequencys[1] = 0.5f;
+	frequencys[0] = 0.4f;
+	frequencys[1] = 0.06666f;
 
-	/* highest possible feature height, assuming noise range exactly
-	 * [-1 >= noise <= 1]. */
-	top = 0.0f;
-	for(i=0; i < octaves; i++)
-		top += amplitudes[i];
-	bottom = -top;
-
-	for(i=0; i < vertexCount; i++)
+	for(x=0; x < map->getSize(); x++)
 	{
-		vertex = vertexes[i];
-
-		height = heightNoise(octaves, amplitudes, frequencys, vertex);
-
-		unity = vertex;
-		unity.normalise();  // direction vector that scalar height multiplies
-		vertexes[i] = vertex + (unity * height);
-
-		// Any better ways to create histograms?
-		j = 0;
-		while( height > (j/99.0f*(top-bottom) + bottom) )
-			j++;
-		histogram[j]++;
-
-		histoTotal++;
-	}
-
-	// Find out histogram-bracket that exceeds wanted fraction of all values
-	for(i=0; i < 100; i++)
-	{
-		accumulator += histogram[i];
-		if(Ogre::Real(accumulator) > Ogre::Real(histoTotal)*seaFraction)
-			break;
-	}
-	// Figure out offset with i
-	seaHeight = Ogre::Real(i) / 99.0f * (top-bottom) + bottom;
-
-	// Raise low elevations to sealevel
-	for(i=0; i < vertexCount; i++)
-	{
-		if( vertexes[i].length() < (seaHeight + radius) )
+		for(y=0; y < map->getSize(); y++)
 		{
-			// First make vertex unit length, then scale it by a scalar value.
-			vertexes[i].normalise();
-			vertexes[i] = vertexes[i]*(seaHeight+radius);
+			spherePos = map->projectToSphere(x, y);
+			height = heightNoise(octaves, amplitudes, frequencys, spherePos);
+			map->setHeight(x, y, height);
 		}
-	}
 
-	// Procedurally generated image for texturing
-	generateImage(octaves, amplitudes, frequencys, seaHeight, top, bottom);
+	}
 }
 
 void PSphere::calculateNormals()
@@ -358,13 +277,67 @@ void PSphere::calculateNormals()
 	}
 }
 
+void PSphere::calculateSeaLevel(float &seaLevel, float &minElev, float &maxElev, float seaFraction)
+{
+	Ogre::uint32 i, accumulator=0, histoTotal;
+
+	unsigned int histogram[100]={0};
+	float min[6], max[6];
+
+	// Assume all faces have similar height variations
+	faceYP->getHistogram(histogram);
+	faceXM->getHistogram(histogram);
+	faceYM->getHistogram(histogram);
+	faceXP->getHistogram(histogram);
+	faceZP->getHistogram(histogram);
+	faceZM->getHistogram(histogram);
+
+	faceYP->getMinMax(min[0], max[0]);
+	faceXM->getMinMax(min[1], max[1]);
+	faceYM->getMinMax(min[2], max[2]);
+	faceXP->getMinMax(min[3], max[3]);
+	faceZP->getMinMax(min[4], max[4]);
+	faceZM->getMinMax(min[5], max[5]);
+
+	minElev = min[0];
+	maxElev = max[0];
+	for(i=1; i < 6; i++)
+	{
+		if(minElev > min[i])
+			minElev = min[i];
+		if(maxElev < max[i])
+			maxElev = max[i];
+	}
+	// Find out histogram-bracket that exceeds wanted fraction of all values
+	histoTotal = faceYP->getSize();
+	histoTotal *= histoTotal*6;
+
+	for(i=0; i < 100; i++)
+	{
+		accumulator += histogram[i];
+		if(Ogre::Real(accumulator) > Ogre::Real(histoTotal)*seaFraction)
+			break;
+	}
+	// Figure out offset with i
+	faceYP->getMinMax(minElev, maxElev);
+	seaLevel = Ogre::Real(i) / 99.0f * (maxElev-minElev) + minElev;
+
+}
+
+void PSphere::smoothSeaArea(float seaHeight)
+{
+	faceYP->setToMinimumHeight(seaHeight);
+	faceXM->setToMinimumHeight(seaHeight);
+	faceYM->setToMinimumHeight(seaHeight);
+	faceXP->setToMinimumHeight(seaHeight);
+	faceZP->setToMinimumHeight(seaHeight);
+	faceZM->setToMinimumHeight(seaHeight);
+}
+
+
 // Makes a sphere out of a cube that is made of 6 squares
 void PSphere::create(Ogre::Real diameter, Ogre::Real seaFraction, Ogre::uint32 iters)
 {
-	Ogre::Vector3 vertex;
-	Ogre::uint32 i, j, idx = 0;
-	Ogre::uint32 *indexBuf;
-
 	// Iters less than 3 are pointless
 	if(iters < 3)
 	{
@@ -398,152 +371,31 @@ void PSphere::create(Ogre::Real diameter, Ogre::Real seaFraction, Ogre::uint32 i
 	texCoords =	new Ogre::Vector2[iters*iters*6 + iters*8];
 	indexes =	new Ogre::uint32[(iters-1)*(iters-1)*6*6];
 
-	Ogre::Vector3 *vBuf = new Ogre::Vector3[iters*iters];   // Allocate memory for the square buffer
-	indexBuf = new Ogre::uint32[(iters-1)*(iters-1)*6];     // Allocate index buffer for the square
+	// No rotation
+	faceYP = new HeightMap(iters, Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f));
+	// 90 degrees through z-axis
+	faceXM = new HeightMap(iters, Ogre::Matrix3(0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f));
+	// 180 degrees through z-axis
+	faceYM = new HeightMap(iters, Ogre::Matrix3(-1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f));
+	// 270 degrees through z-axis
+	faceXP = new HeightMap(iters, Ogre::Matrix3(0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f));
+	// 90 degrees through x-axis
+	faceZP = new HeightMap(iters, Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f));
+	// 270 degrees through x-axis
+	faceZM = new HeightMap(iters, Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f));
 
+	deform(faceYP);
+	deform(faceXM);
+	deform(faceYM);
+	deform(faceXP);
+	deform(faceZP);
+	deform(faceZM);
 
+	float seaHeight, min, max;
 
-
-	// Make a square in xy-plane, elevated in z-axis by diameter/2
-	vertex.z = diameter/2.0f;
-
-	for(i=0; i < iters; i++)
-	{
-		vertex.x = -diameter/2.0f + diameter * Ogre::Real(i) / Ogre::Real(iters-1);
-
-		for(j=0; j < iters; j++)
-		{
-			vertex.y = -diameter/2.0f + diameter * Ogre::Real(j) / Ogre::Real(iters-1);
-
-			vBuf[idx] = vertex;
-			idx++;
-		}
-	}
-
-	// Create indexes to build trianges. To make other side of a square visible reverse indexes.
-	idx = 0;
-	for(i=0; i < iters-1; i++)
-	{
-		for(j=0; j < iters-1; j++)
-		{
-			// Triangle 1
-			indexBuf[idx]=i*iters+j;
-			idx++;
-			indexBuf[idx]=i*iters+j+iters+1;
-			idx++;
-			indexBuf[idx]=i*iters+j+1;
-			idx++;
-
-			// Triangle 2, in other words, a quad.
-			indexBuf[idx]=i*iters+j+iters+1;
-			idx++;
-			indexBuf[idx]=i*iters+j;
-			idx++;
-			indexBuf[idx]=i*iters+j+iters;
-			idx++;
-		}
-	}
-
-
-	// Now just rotate the square to create a cube
-
-	// Red face, +z
-	for(i=0; i < iters*iters; i++)
-	{
-		calculate(vBuf[i], diameter/2.0f, Ogre::ColourValue(1.0f, 0.0f, 0.0f));
-	}
-	for(i=0; i < (iters-1)*(iters-1)*6; i++)
-	{
-		indexes[indexCount] = indexBuf[i];
-		indexCount++;
-	}
-
-	// Green face, -z
-	for(i=0; i < iters*iters; i++)
-	{
-		vertex.x =  vBuf[i].x;
-		vertex.y =  vBuf[i].y;
-		vertex.z = -vBuf[i].z;
-
-		calculate(vertex, diameter/2.0f, Ogre::ColourValue(0.0f, 1.0f, 0.0f));
-	}
-	// Reverse
-	// Iterate to 1 instead of zero to avoid unsigned number wraparound
-	for(i=(iters-1)*(iters-1)*6; i >= 1; i--)
-	{
-		indexes[indexCount] = iters*iters+indexBuf[i-1];
-		indexCount++;
-	}
-
-	// Blue face, +x
-	for(i=0; i < iters*iters; i++)
-	{
-		vertex.x =  vBuf[i].z;
-		vertex.y =  vBuf[i].x;
-		vertex.z =  vBuf[i].y;
-
-		calculate(vertex, diameter/2.0f, Ogre::ColourValue(0.0f, 0.0f, 1.0f));
-	}
-	for(i=0; i < (iters-1)*(iters-1)*6; i++)
-	{
-		indexes[indexCount] = iters*iters*2+indexBuf[i];
-		indexCount++;
-	}
-
-	// Violet face, -x
-	for(i=0; i < iters*iters; i++)
-	{
-		vertex.x = -vBuf[i].z;
-		vertex.y =  vBuf[i].x;
-		vertex.z =  vBuf[i].y;
-
-		calculate(vertex, diameter/2.0f, Ogre::ColourValue(1.0f, 0.0f, 1.0f));
-	}
-	// Reverse
-	for(i=(iters-1)*(iters-1)*6; i >= 1; i--)
-	{
-		indexes[indexCount] = iters*iters*3+indexBuf[i-1];
-		indexCount++;
-	}
-
-	// Cyan face, +y
-	for(i=0; i < iters*iters; i++)
-	{
-		vertex.x =  vBuf[i].x;
-		vertex.y =  vBuf[i].z;
-		vertex.z =  vBuf[i].y;
-
-		calculate(vertex, diameter/2.0f, Ogre::ColourValue(0.0f, 1.0f, 1.0f));
-	}
-	// Reverse
-	for(i=(iters-1)*(iters-1)*6; i >= 1; i--)
-	{
-		indexes[indexCount] = iters*iters*4+indexBuf[i-1];
-		indexCount++;
-	}
-
-	// Yellow face, -y
-	for(i=0; i < iters*iters; i++)
-	{
-		vertex.x =  vBuf[i].x;
-		vertex.y = -vBuf[i].z;
-		vertex.z =  vBuf[i].y;
-
-		calculate(vertex, diameter/2.0f, Ogre::ColourValue(1.0f, 1.0f, 0.0f));
-	}
-	for(i=0; i < (iters-1)*(iters-1)*6; i++)
-	{
-		indexes[indexCount] = iters*iters*5+indexBuf[i];
-		indexCount++;
-	}
-
-	// Release square buffers
-	delete[] vBuf;
-	delete[] indexBuf;
-
-	deform(seaFraction);
-	calculateNormals();
-	fixTextureSeam(); // Call this after calculateNormals
+	calculateSeaLevel(seaHeight, min, max, seaFraction);
+	generateImage(seaHeight, max, min);
+	smoothSeaArea(seaHeight);
 }
 
 /* Release resources allocated by Sphere class */
@@ -557,9 +409,53 @@ void PSphere::destroy()
 	delete[] image;
 }
 
+void PSphere::generateMeshData()
+{
+	unsigned int iters;
+
+	faceYP->generateMeshData(vertexes, texCoords, indexes, radius);
+	// Assuming all faces have same size
+	iters = faceYP->getSize();
+	indexCount = (iters-1)*(iters-1)*6;
+	vertexCount = iters*iters;
+	faceXM->generateMeshData(&vertexes[vertexCount], &texCoords[vertexCount],
+							 &indexes[indexCount], radius);
+	indexCount += (iters-1)*(iters-1)*6;
+	vertexCount += iters*iters;
+	faceYM->generateMeshData(&vertexes[vertexCount], &texCoords[vertexCount],
+							 &indexes[indexCount], radius);
+	indexCount += (iters-1)*(iters-1)*6;
+	vertexCount += iters*iters;
+	faceXP->generateMeshData(&vertexes[vertexCount], &texCoords[vertexCount],
+							 &indexes[indexCount], radius);
+	indexCount += (iters-1)*(iters-1)*6;
+	vertexCount += iters*iters;
+	faceZP->generateMeshData(&vertexes[vertexCount], &texCoords[vertexCount],
+							 &indexes[indexCount], radius);
+	indexCount += (iters-1)*(iters-1)*6;
+	vertexCount += iters*iters;
+	faceZM->generateMeshData(&vertexes[vertexCount], &texCoords[vertexCount],
+							 &indexes[indexCount], radius);
+	indexCount += (iters-1)*(iters-1)*6;
+	vertexCount += iters*iters;
+
+	// Modify index-values, because same vertex-array is shared between faces.
+	unsigned int faceNum, i;
+	for(i=0; i < indexCount; i++)
+	{
+		faceNum = i / ( (iters-1)*(iters-1)*6 );
+		indexes[i] += faceNum*iters*iters;
+	}
+
+	calculateNormals();
+	fixTextureSeam(); // Call this after calculateNormals
+}
+
 void PSphere::loadToBuffers(const std::string &meshName, const std::string &textureName)
 {
 	Ogre::uint32 i, j;
+
+	generateMeshData();
 
 	// Create mesh and subMesh
 	Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton()
