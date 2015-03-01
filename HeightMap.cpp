@@ -63,6 +63,8 @@ void HeightMap::setToMinimumHeight(float minimumHeight)
 		for(y=0; y < mapSize; y++)
 			if(height[y*mapSize+x] < minimumHeight)
 				height[y*mapSize+x] = minimumHeight;
+
+	minHeight = minimumHeight;
 }
 
 /* Return vector for a normalized (radius 1.0) sphere */

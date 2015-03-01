@@ -319,7 +319,6 @@ void PSphere::calculateSeaLevel(float &seaLevel, float &minElev, float &maxElev,
 			break;
 	}
 	// Figure out offset with i
-	faceYP->getMinMax(minElev, maxElev);
 	seaLevel = Ogre::Real(i) / 99.0f * (maxElev-minElev) + minElev;
 
 }
