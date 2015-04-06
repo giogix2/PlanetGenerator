@@ -29,7 +29,8 @@ D:        Step right
 #include "Ogre.h"
 #include "OgreStringConverter.h"
 #include "OgreException.h"
-#include "OgreOverlaySystem.h"
+#include "Overlay/OgreOverlaySystem.h"
+#include "CollisionTools.h"
 
 
 //Use this define to signify OIS will be used as a DLL
@@ -46,7 +47,7 @@ using namespace Ogre;
 class GeneratorFrameListener: public FrameListener, public WindowEventListener
 {
 protected:
-	virtual void updateStats(void)
+	/*virtual void updateStats(void)
 	{
 		static String currFps = "Current FPS: ";
 		static String avgFps = "Average FPS: ";
@@ -79,18 +80,23 @@ protected:
 			OverlayElement* guiDbg = OverlayManager::getSingleton().getOverlayElement("Core/DebugText");
 			guiDbg->setCaption(mDebugText);
 		}
-		catch(...) { /* ignore */ }
-	}
+		catch(...) { 
+		// ignore  }
+	}*/
 
 public:
 	Ogre::SceneNode     *RootSceneNode;//use to operate the entity
+	//Collision::CollisionTools CollisionManager;
+	//MOC::CollisionTools CollisionManager;
+	MOC::CollisionTools *CollisionManager;
+	Ogre::SceneManager		*Scene;
 
 	GeneratorFrameListener()
 	{
 	}
 
 	// Constructor takes a RenderWindow because it uses that to determine input context
-	GeneratorFrameListener(RenderWindow* win, Camera* cam, Ogre::SceneNode  *RSN=NULL,bool bufferedKeys = false, bool bufferedMouse = false,
+	GeneratorFrameListener(RenderWindow* win, Camera* cam, Ogre::SceneNode  *RSN=NULL,Ogre::SceneManager	*Sc=NULL,bool bufferedKeys = false, bool bufferedMouse = false,
 				 bool bufferedJoy = false ) :
 		mCamera(cam), mTranslateVector(Vector3::ZERO), mCurrentSpeed(0), mWindow(win), mStatsOn(true), mNumScreenShots(0),
 		mMoveScale(0.0f), mRotScale(0.0f), mTimeUntilNextToggle(0), mFiltering(TFO_BILINEAR),
@@ -98,6 +104,11 @@ public:
 		mInputManager(0), mMouse(0), mKeyboard(0), mJoy(0)
 	{
 		RootSceneNode=RSN;//NEW
+
+		Scene=Sc;
+
+		// init the collision handler
+		CollisionManager = new MOC::CollisionTools(Scene);
 
 		mDebugOverlay = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
 
@@ -125,10 +136,14 @@ public:
 		//Set initial mouse clipping size
 		windowResized(mWindow);
 
-		showDebugOverlay(true);
+		//showDebugOverlay(true);
 
 		//Register as a Window listener
-		WindowEventUtilities::addWindowEventListener(mWindow, this);		
+		WindowEventUtilities::addWindowEventListener(mWindow, this);	
+
+
+
+
 	}
 
 
@@ -239,7 +254,15 @@ public:
 			mTranslateVector.x = moveScale;	// Move camera RIGHT
 
 		if(mKeyboard->isKeyDown(OIS::KC_UP) || mKeyboard->isKeyDown(OIS::KC_W) )
-			mTranslateVector.z = -moveScale;	// Move camera forward
+		{
+			Entity *tmpE = NULL;
+			Vector3 result = Vector3::ZERO;
+			float distToColl;
+			Ogre::Vector2 *Vec=new Ogre::Vector2(mMouse->getMouseState().X.abs,mMouse->getMouseState().Y.abs);
+			if( !CollisionManager->raycastFromCamera(mWindow,mCamera,*Vec,result,tmpE,distToColl) )
+				mTranslateVector.z = -moveScale;	// Move camera forward
+		}
+			
 
 		if(mKeyboard->isKeyDown(OIS::KC_DOWN) || mKeyboard->isKeyDown(OIS::KC_S) )
 			mTranslateVector.z = moveScale;	// Move camera backward
@@ -262,7 +285,7 @@ public:
 		if( mKeyboard->isKeyDown(OIS::KC_F) && mTimeUntilNextToggle <= 0 )
 		{
 			mStatsOn = !mStatsOn;
-			showDebugOverlay(mStatsOn);
+			//showDebugOverlay(mStatsOn);
 			mTimeUntilNextToggle = 1;
 		}
 
@@ -287,7 +310,7 @@ public:
 			MaterialManager::getSingleton().setDefaultTextureFiltering(mFiltering);
 			MaterialManager::getSingleton().setDefaultAnisotropy(mAniso);
 
-			showDebugOverlay(mStatsOn);
+			//showDebugOverlay(mStatsOn);
 			mTimeUntilNextToggle = 1;
 		}
 
@@ -383,7 +406,7 @@ public:
 		mCamera->moveRelative(mTranslateVector);
 	}
 
-	virtual void showDebugOverlay(bool show)
+	/*virtual void showDebugOverlay(bool show)
 	{
 		if (mDebugOverlay)
 		{
@@ -392,10 +415,17 @@ public:
 			else
 				mDebugOverlay->hide();
 		}
-	}
+	}*/
 	virtual bool frameStarted(const FrameEvent& evt)
 	{
 		RootSceneNode->getChild("planetSphere")->roll(Ogre::Radian(0.004));
+
+		/*Collision::SCheckCollisionAnswer ret = CollisionManager.check_ray_collision(FromPos, ToPos, 0.3f, 0.5f, 
+            (QUERY_OBJECT_ENTITY | QUERY_TERRAIN_ENTITY), this->m_Entity, true);
+		if (ret.collided)
+		{
+		}*/
+
 		return true;
 	}
 	// Override frameRenderingQueued event to process that (don't care about frameEnded)
@@ -478,7 +508,7 @@ public:
 
 	bool frameEnded(const FrameEvent& evt)
 	{
-		updateStats();
+		//updateStats();
 		return true;
 	}
 
@@ -512,6 +542,8 @@ protected:
 	OIS::Mouse*    mMouse;
 	OIS::Keyboard* mKeyboard;
 	OIS::JoyStick* mJoy;
+
+	
 };
 
 #endif
