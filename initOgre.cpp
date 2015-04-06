@@ -101,9 +101,15 @@ void initOgre::CreateFrameListener(){
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS
 	FrameListener= new GeneratorFrameListener(Window, Camera, true, true, true);
 #else
+<<<<<<< HEAD
 	FrameListener= new GeneratorFrameListener(Window, Camera,RootSceneNode,Scene);
 #endif
 	//FrameListener->showDebugOverlay(true);
+=======
+	FrameListener= new GeneratorFrameListener(Window, Camera,RootSceneNode);
+#endif
+	FrameListener->showDebugOverlay(true);
+>>>>>>> 062accafceac2949391be7cd92fb89409a4a9010
 	Root->addFrameListener(FrameListener);
 }
 
@@ -165,6 +171,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
 
 	//createFrameListener
 	CreateFrameListener();
+<<<<<<< HEAD
 	//Collision
 
 	
@@ -173,6 +180,8 @@ void initOgre::setSceneAndRun(PSphere *planet){
 
 	// place the camera node on the ground
 	FrameListener->CollisionManager->calculateY(CameraNode);
+=======
+>>>>>>> 062accafceac2949391be7cd92fb89409a4a9010
 
 	//start Rendering
 	Root->startRendering();
