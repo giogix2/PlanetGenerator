@@ -101,9 +101,9 @@ void initOgre::CreateFrameListener(){
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS
 	FrameListener= new GeneratorFrameListener(Window, Camera, true, true, true);
 #else
-	FrameListener= new GeneratorFrameListener(Window, Camera,RootSceneNode);
+	FrameListener= new GeneratorFrameListener(Window, Camera,RootSceneNode,Scene);
 #endif
-	FrameListener->showDebugOverlay(true);
+	//FrameListener->showDebugOverlay(true);
 	Root->addFrameListener(FrameListener);
 }
 

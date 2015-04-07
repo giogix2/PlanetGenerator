@@ -265,7 +265,15 @@ public:
 			
 
 		if(mKeyboard->isKeyDown(OIS::KC_DOWN) || mKeyboard->isKeyDown(OIS::KC_S) )
-			mTranslateVector.z = moveScale;	// Move camera backward
+		{
+			Entity *tmpE = NULL;
+			Vector3 result = Vector3::ZERO;
+			float distToColl;
+			Ogre::Vector2 *Vec=new Ogre::Vector2(mMouse->getMouseState().X.abs,mMouse->getMouseState().Y.abs);
+			if( !CollisionManager->raycastFromCamera(mWindow,mCamera,*Vec,result,tmpE,distToColl) )
+				mTranslateVector.z = moveScale;	// Move camera backward
+		}
+			
 
 		if(mKeyboard->isKeyDown(OIS::KC_PGUP))
 			mTranslateVector.y = moveScale;	// Move camera up
