@@ -136,9 +136,9 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	planet->loadToBuffers("CustomMesh", "sphereTex");
 
 	//Export the shape in a mesh file before destroying it
-	Ogre::MeshPtr mesh;
-	mesh = planet->getMesh();
-	Ogre::MeshSerializer ser;
+	//Ogre::MeshPtr mesh;
+	//mesh = planet->getMesh();
+	//Ogre::MeshSerializer ser;
 	//ser.exportMesh(mesh.getPointer(), "C:\\Users\\giova\\Documents\\PlanetGenerator\\planet.mesh",  Ogre::MeshSerializer::ENDIAN_NATIVE);
 
 
@@ -150,8 +150,18 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	Ogre::SceneNode *sphere1 = Scene->getRootSceneNode()->createChildSceneNode("planetSphere");
 	sphere1->attachObject(entity1);
 
+
+	planet->loadMeshFile("Cube2.mesh", "LocalMesh");
+	//Ogre::Entity *entity2 = Scene->createEntity("LocalMesh_Ent", "LocalMesh");
+	//Ogre::SceneNode *cube = sphere1->createChildSceneNode("Cube", Ogre::Vector3(7.5, 0, 0));
+	//cube->attachObject(entity2);
+
+	planet->attachMesh(sphere1, Scene, "LocalMesh", 7.5, 0.0, 0.0);
+
+
+
 	// No need for this anymore
-	Ogre::MeshManager::getSingleton().remove("CustomMesh");
+	//Ogre::MeshManager::getSingleton().remove("CustomMesh");
 
 	Ogre::MaterialPtr textureMap = Ogre::MaterialManager::getSingleton()
 			.create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);

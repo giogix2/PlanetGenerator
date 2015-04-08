@@ -4,6 +4,7 @@
 #include "OGRE/Ogre.h"
 #include "GeneratorFrameListener.h"
 #include "PSphere.h"
+#include <vector>
 
 class initOgre{
  public:

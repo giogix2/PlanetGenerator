@@ -25,6 +25,19 @@ int main(int argc, char *argv[])
 
 	rendering.start();
 	rendering.setSceneAndRun(&mySphere);
+
+	//Ogre::String source;
+	//source = "C:\\Users\\giova\\Downloads\\Cube.mesh";
+	//FILE* pFile = fopen( source.c_str(), "rb" );
+	//if (!pFile)
+	//	OGRE_EXCEPT(Exception::ERR_FILE_NOT_FOUND,"File " + source + " not found.", "OgreMeshLoaded");
+	//struct stat tagStat;
+	//stat( source.c_str(), &tagStat );
+	//MemoryDataStream* memstream = new MemoryDataStream(source, tagStat.st_size, true);
+	//fread( (void*)memstream->getPtr(), tagStat.st_size, 1, pFile );
+	//fclose( pFile );
+	//MeshPtr pMesh = MeshManager::getSingleton().createManual("LocalMesh",ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+
 	rendering.cleanup();
 
 	mySphere.destroy();

@@ -1,6 +1,12 @@
+#include <iostream>
+#include <exception>
 #include "OGRE/Ogre.h"
 #include "PSphere.h"
 #include "simplexnoise1234.h"
+#include <OgreMeshSerializer.h>
+#include <OgreDataStream.h>
+#include <OgreException.h>
+#include "OgreConfigFile.h"
 
 // Let's set texture dimensions this way for a time being
 #define TEX_WIDTH 1024
@@ -546,6 +552,29 @@ void PSphere::loadToBuffers(const std::string &meshName, const std::string &text
 
 	pixelBuffer->unlock();
 
+}
+
+void PSphere::loadMeshFile(const std::string &path, const std::string &meshName) {
+	Ogre::String source;
+	source = path;
+	FILE* pFile = fopen( source.c_str(), "rb" );
+	if (!pFile)
+		OGRE_EXCEPT(Ogre::Exception::ERR_FILE_NOT_FOUND,"File " + source + " not found.", "OgreMeshLoaded");
+	struct stat tagStat;
+	stat( source.c_str(), &tagStat );
+	Ogre::MemoryDataStream* memstream = new Ogre::MemoryDataStream(source, tagStat.st_size, true);
+	fread( (void*)memstream->getPtr(), tagStat.st_size, 1, pFile );
+	fclose( pFile );
+	Ogre::MeshPtr pMesh = Ogre::MeshManager::getSingleton().createManual(meshName,Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	Ogre::MeshSerializer meshSerializer;
+	Ogre::DataStreamPtr stream(memstream);
+	meshSerializer.importMesh(stream, pMesh.getPointer());
+}
+
+void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z) {
+	Ogre::Entity *entity = scene->createEntity("LocalMesh_Ent", objectName);
+	Ogre::SceneNode *cube = node->createChildSceneNode(objectName, Ogre::Vector3(x, y, z));
+	cube->attachObject(entity);
 }
 
 Ogre::MeshPtr PSphere::getMesh(){
