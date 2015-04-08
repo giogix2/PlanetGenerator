@@ -17,6 +17,9 @@ public:
 
 	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z);
 
+
+	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude);
+
 	Ogre::MeshPtr getMesh();
 
 	void setObserverPosition(Ogre::Vector3 position);

@@ -5,6 +5,7 @@
 
 #include "initOgre.h"
 #include "PSphere.h"
+#include "Common.h"
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 #define WIN32_LEAN_AND_MEAN
@@ -18,6 +19,7 @@ INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
 int main(int argc, char *argv[])
 #endif
 {
+	Ogre::Vector3 test = convertSpephicalToCartesian(50.0, 50.0);
 	PSphere mySphere;
 	mySphere.create(15.0f, 0.6f, 100);
 

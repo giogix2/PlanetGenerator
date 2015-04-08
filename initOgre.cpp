@@ -152,11 +152,8 @@ void initOgre::setSceneAndRun(PSphere *planet){
 
 
 	planet->loadMeshFile("Cube2.mesh", "LocalMesh");
-	//Ogre::Entity *entity2 = Scene->createEntity("LocalMesh_Ent", "LocalMesh");
-	//Ogre::SceneNode *cube = sphere1->createChildSceneNode("Cube", Ogre::Vector3(7.5, 0, 0));
-	//cube->attachObject(entity2);
 
-	planet->attachMesh(sphere1, Scene, "LocalMesh", 7.5, 0.0, 0.0);
+	planet->attachMesh(sphere1, Scene, "LocalMesh", 0.0, 0.0);
 
 
 

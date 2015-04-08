@@ -7,6 +7,7 @@
 #include <OgreDataStream.h>
 #include <OgreException.h>
 #include "OgreConfigFile.h"
+#include "Common.h"
 
 // Let's set texture dimensions this way for a time being
 #define TEX_WIDTH 1024
@@ -575,6 +576,15 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 	Ogre::Entity *entity = scene->createEntity("LocalMesh_Ent", objectName);
 	Ogre::SceneNode *cube = node->createChildSceneNode(objectName, Ogre::Vector3(x, y, z));
 	cube->attachObject(entity);
+}
+
+void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude) {
+	Ogre::Vector3 cart_coord = convertSpephicalToCartesian(latitude, longitude);
+	Ogre::Real x = radius*cart_coord.x;
+	Ogre::Real y = radius*cart_coord.y;
+	Ogre::Real z = radius*cart_coord.z;
+	this->attachMesh(node, scene, objectName, x, y, z);
+
 }
 
 Ogre::MeshPtr PSphere::getMesh(){
