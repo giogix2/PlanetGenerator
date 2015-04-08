@@ -91,8 +91,7 @@ public:
 	MOC::CollisionTools *CollisionManager;
 	Ogre::SceneManager		*Scene;
 
-	GeneratorFrameListener()
-	{
+	GeneratorFrameListener() {
 	}
 
 	// Constructor takes a RenderWindow because it uses that to determine input context
