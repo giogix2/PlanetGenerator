@@ -4,7 +4,7 @@
 #include <Ogre.h>
 
 
-Ogre::Vector3 convertSpephicalToCartesian (Ogre::Real latitude, Ogre::Real longitude);
+Ogre::Vector3 convertSphericalToCartesian (Ogre::Real latitude, Ogre::Real longitude);
 
 
 #endif

@@ -30,22 +30,6 @@ void PSphere::setObserverPosition(Ogre::Vector3 position)
 	observer = position;
 }
 
-/* Get spherical coordinates from texture coordinate */
-Ogre::Vector3 PSphere::calculateSphereCoordsFromTexCoords(Ogre::Vector2 *texCoord)
-{
-	Ogre::Vector3 sphereCoord;
-	Ogre::Real alfa, beta;
-
-	alfa = texCoord->x * Ogre::Math::TWO_PI;
-	beta = texCoord->y * Ogre::Math::PI;
-
-	sphereCoord.x = cosf(alfa)*sinf(beta);
-	sphereCoord.y = sinf(alfa)*sinf(beta);
-	sphereCoord.z = cosf(beta);
-
-	return sphereCoord;
-}
-
 Ogre::Real PSphere::heightNoise(Ogre::uint32 octaves, Ogre::Real *amplitudes,
 							   Ogre::Real *frequencys, Ogre::Vector3 Point)
 {
@@ -145,7 +129,7 @@ Ogre::Real PSphere::getObserverDistanceToSurface()
 void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom)
 {
 	Ogre::Vector3 spherePoint;
-	Ogre::Vector2 texCoords;
+	Ogre::Real latitude, longitude;
 	Ogre::Real height, amplitudes[2], frequencys[2];
 	Ogre::uint32 x, y, octaves;
 	Ogre::uint8 red, green, blue, tempVal;
@@ -169,11 +153,11 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 	{
 		for(x=0; x < TEX_WIDTH; x++)
 		{
-			texCoords.x = (Ogre::Real(x)+0.5f)/TEX_WIDTH;
-			texCoords.y = (Ogre::Real(y)+0.5f)/TEX_HEIGHT;
+			longitude = (Ogre::Real(x)+0.5f)/TEX_WIDTH*360.0f;
+			latitude = (90.0f-0.5f/TEX_HEIGHT) - (Ogre::Real(y)+0.5f)/TEX_HEIGHT*180.0f;
 
 			// Get a point that corresponds to a given pixel
-			spherePoint = calculateSphereCoordsFromTexCoords(&texCoords);
+			spherePoint = convertSphericalToCartesian(latitude, longitude);
 
 			// Get height of a point
 			height = heightNoise(octaves, amplitudes, frequencys, spherePoint);
@@ -579,7 +563,7 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 }
 
 void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude) {
-	Ogre::Vector3 cart_coord = convertSpephicalToCartesian(latitude, longitude);
+	Ogre::Vector3 cart_coord = convertSphericalToCartesian(latitude, longitude);
 	Ogre::Real x = radius*cart_coord.x;
 	Ogre::Real y = radius*cart_coord.y;
 	Ogre::Real z = radius*cart_coord.z;
