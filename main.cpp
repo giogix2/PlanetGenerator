@@ -6,7 +6,6 @@
 #include "initOgre.h"
 #include "PSphere.h"
 #include "Common.h"
-#include "gameEnv.h"
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 #define WIN32_LEAN_AND_MEAN
