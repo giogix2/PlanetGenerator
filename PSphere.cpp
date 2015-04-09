@@ -276,12 +276,12 @@ void PSphere::calculateSeaLevel(float &seaLevel, float &minElev, float &maxElev,
 	float min[6], max[6];
 
 	// Assume all faces have similar height variations
-	faceYP->getHistogram(histogram);
-	faceXM->getHistogram(histogram);
-	faceYM->getHistogram(histogram);
-	faceXP->getHistogram(histogram);
-	faceZP->getHistogram(histogram);
-	faceZM->getHistogram(histogram);
+	faceYP->getHistogram(histogram, 100);
+	faceXM->getHistogram(histogram, 100);
+	faceYM->getHistogram(histogram, 100);
+	faceXP->getHistogram(histogram, 100);
+	faceZP->getHistogram(histogram, 100);
+	faceZM->getHistogram(histogram, 100);
 
 	faceYP->getMinMax(min[0], max[0]);
 	faceXM->getMinMax(min[1], max[1]);
