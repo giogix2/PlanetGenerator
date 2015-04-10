@@ -38,13 +38,13 @@ D:        Step right
 #define OIS_DYNAMIC_LIB
 #include <OIS/OIS.h>
 
-using namespace Ogre;
+//using namespace Ogre;
 
 #ifdef INCLUDE_RTSHADER_SYSTEM
 #include "OgreRTShaderSystem.h"
 #endif
 
-class GeneratorFrameListener: public FrameListener, public WindowEventListener
+class GeneratorFrameListener: public Ogre::FrameListener, public Ogre::WindowEventListener
 {
 protected:
 	/*virtual void updateStats(void)
@@ -95,10 +95,10 @@ public:
 	}
 
 	// Constructor takes a RenderWindow because it uses that to determine input context
-	GeneratorFrameListener(RenderWindow* win, Camera* cam, Ogre::SceneNode  *RSN=NULL,Ogre::SceneManager	*Sc=NULL,bool bufferedKeys = false, bool bufferedMouse = false,
+	GeneratorFrameListener(Ogre::RenderWindow* win, Ogre::Camera* cam, Ogre::SceneNode  *RSN=NULL,Ogre::SceneManager	*Sc=NULL,bool bufferedKeys = false, bool bufferedMouse = false,
 				 bool bufferedJoy = false ) :
-		mCamera(cam), mTranslateVector(Vector3::ZERO), mCurrentSpeed(0), mWindow(win), mStatsOn(true), mNumScreenShots(0),
-		mMoveScale(0.0f), mRotScale(0.0f), mTimeUntilNextToggle(0), mFiltering(TFO_BILINEAR),
+		mCamera(cam), mTranslateVector(Ogre::Vector3::ZERO), mCurrentSpeed(0), mWindow(win), mStatsOn(true), mNumScreenShots(0),
+		mMoveScale(0.0f), mRotScale(0.0f), mTimeUntilNextToggle(0), mFiltering(Ogre::TFO_BILINEAR),
 		mAniso(1), mSceneDetailIndex(0), mMoveSpeed(100), mRotateSpeed(36), mDebugOverlay(0),
 		mInputManager(0), mMouse(0), mKeyboard(0), mJoy(0)
 	{
@@ -109,9 +109,9 @@ public:
 		// init the collision handler
 		CollisionManager = new MOC::CollisionTools(Scene);
 
-		mDebugOverlay = OverlayManager::getSingleton().getByName("Core/DebugOverlay");
+		mDebugOverlay = Ogre::OverlayManager::getSingleton().getByName("Core/DebugOverlay");
 
-		LogManager::getSingletonPtr()->logMessage("*** Initializing OIS ***");
+		Ogre::LogManager::getSingletonPtr()->logMessage("*** Initializing OIS ***");
 		OIS::ParamList pl;
 		size_t windowHnd = 0;
 		std::ostringstream windowHndStr;
@@ -138,7 +138,7 @@ public:
 		//showDebugOverlay(true);
 
 		//Register as a Window listener
-		WindowEventUtilities::addWindowEventListener(mWindow, this);	
+		Ogre::WindowEventUtilities::addWindowEventListener(mWindow, this);	
 
 
 
@@ -202,7 +202,7 @@ public:
 #endif
 
 	//Adjust mouse clipping area
-	virtual void windowResized(RenderWindow* rw)
+	virtual void windowResized(Ogre::RenderWindow* rw)
 	{
 		unsigned int width, height, depth;
 		int left, top;
@@ -214,7 +214,7 @@ public:
 	}
 
 	//Unattach OIS before window shutdown (very important under Linux)
-	virtual void windowClosed(RenderWindow* rw)
+	virtual void windowClosed(Ogre::RenderWindow* rw)
 	{
 		//Only close for window that created OIS (the main window in these demos)
 		if( rw == mWindow )
@@ -234,13 +234,13 @@ public:
 	virtual ~GeneratorFrameListener()
 	{		
 		//Remove ourself as a Window listener
-		WindowEventUtilities::removeWindowEventListener(mWindow, this);
+		Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, this);
 		windowClosed(mWindow);
 	}
 
-	virtual bool processUnbufferedKeyInput(const FrameEvent& evt)
+	virtual bool processUnbufferedKeyInput(const Ogre::FrameEvent& evt)
 	{
-		Real moveScale = mMoveScale;
+		Ogre::Real moveScale = mMoveScale;
 		if(mKeyboard->isKeyDown(OIS::KC_LSHIFT))
 			moveScale *= 10;
 		if(mKeyboard->isKeyDown(OIS::KC_RSHIFT))
@@ -254,8 +254,8 @@ public:
 
 		if(mKeyboard->isKeyDown(OIS::KC_UP) || mKeyboard->isKeyDown(OIS::KC_W) )
 		{
-			Entity *tmpE = NULL;
-			Vector3 result = Vector3::ZERO;
+			Ogre::Entity *tmpE = NULL;
+			Ogre::Vector3 result = Ogre::Vector3::ZERO;
 			float distToColl;
 			Ogre::Vector2 *Vec=new Ogre::Vector2(mMouse->getMouseState().X.abs,mMouse->getMouseState().Y.abs);
 			if( !CollisionManager->raycastFromCamera(mWindow,mCamera,*Vec,result,tmpE,distToColl) )
@@ -265,8 +265,8 @@ public:
 
 		if(mKeyboard->isKeyDown(OIS::KC_DOWN) || mKeyboard->isKeyDown(OIS::KC_S) )
 		{
-			Entity *tmpE = NULL;
-			Vector3 result = Vector3::ZERO;
+			Ogre::Entity *tmpE = NULL;
+			Ogre::Vector3 result = Ogre::Vector3::ZERO;
 			float distToColl;
 			Ogre::Vector2 *Vec=new Ogre::Vector2(mMouse->getMouseState().X.abs,mMouse->getMouseState().Y.abs);
 			if( !CollisionManager->raycastFromCamera(mWindow,mCamera,*Vec,result,tmpE,distToColl) )
@@ -300,22 +300,22 @@ public:
 		{
 			switch(mFiltering)
 			{
-			case TFO_BILINEAR:
-				mFiltering = TFO_TRILINEAR;
+			case Ogre::TFO_BILINEAR:
+				mFiltering = Ogre::TFO_TRILINEAR;
 				mAniso = 1;
 				break;
-			case TFO_TRILINEAR:
-				mFiltering = TFO_ANISOTROPIC;
+			case Ogre::TFO_TRILINEAR:
+				mFiltering = Ogre::TFO_ANISOTROPIC;
 				mAniso = 8;
 				break;
-			case TFO_ANISOTROPIC:
-				mFiltering = TFO_BILINEAR;
+			case Ogre::TFO_ANISOTROPIC:
+				mFiltering =Ogre::TFO_BILINEAR;
 				mAniso = 1;
 				break;
 			default: break;
 			}
-			MaterialManager::getSingleton().setDefaultTextureFiltering(mFiltering);
-			MaterialManager::getSingleton().setDefaultAnisotropy(mAniso);
+			Ogre::MaterialManager::getSingleton().setDefaultTextureFiltering(mFiltering);
+			Ogre::MaterialManager::getSingleton().setDefaultAnisotropy(mAniso);
 
 			//showDebugOverlay(mStatsOn);
 			mTimeUntilNextToggle = 1;
@@ -334,9 +334,9 @@ public:
 		{
 			mSceneDetailIndex = (mSceneDetailIndex+1)%3 ;
 			switch(mSceneDetailIndex) {
-				case 0 : mCamera->setPolygonMode(PM_SOLID); break;
-				case 1 : mCamera->setPolygonMode(PM_WIREFRAME); break;
-				case 2 : mCamera->setPolygonMode(PM_POINTS); break;
+				case 0 : mCamera->setPolygonMode(Ogre::PM_SOLID); break;
+				case 1 : mCamera->setPolygonMode(Ogre::PM_WIREFRAME); break;
+				case 2 : mCamera->setPolygonMode(Ogre::PM_POINTS); break;
 			}
 			mTimeUntilNextToggle = 0.5;
 		}
@@ -352,14 +352,14 @@ public:
 
 		// Print camera details
 		if(displayCameraDetails)
-			mDebugText = "P: " + StringConverter::toString(mCamera->getDerivedPosition()) +
-						 " " + "O: " + StringConverter::toString(mCamera->getDerivedOrientation());
+			mDebugText = "P: " + Ogre::StringConverter::toString(mCamera->getDerivedPosition()) +
+						 " " + "O: " +Ogre::StringConverter::toString(mCamera->getDerivedOrientation());
 
 		// Return true to continue rendering
 		return true;
 	}
 
-	virtual bool processUnbufferedMouseInput(const FrameEvent& evt)
+	virtual bool processUnbufferedMouseInput(const Ogre::FrameEvent& evt)
 	{
 
 		// Rotation factors, may not be used if the second mouse button is pressed
@@ -372,8 +372,8 @@ public:
 		}
 		else
 		{
-			mRotX = Degree(-ms.X.rel * 0.13);
-			mRotY = Degree(-ms.Y.rel * 0.13);
+			mRotX = Ogre::Degree(-ms.X.rel * 0.13);
+			mRotY = Ogre::Degree(-ms.Y.rel * 0.13);
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS
 			// Adjust the input depending upon viewport orientation
 			Radian origRotY, origRotX;
@@ -423,7 +423,7 @@ public:
 				mDebugOverlay->hide();
 		}
 	}*/
-	virtual bool frameStarted(const FrameEvent& evt)
+	virtual bool frameStarted(const Ogre::FrameEvent& evt)
 	{
 		RootSceneNode->getChild("planetSphere")->roll(Ogre::Radian(0.004));
 
@@ -436,7 +436,7 @@ public:
 		return true;
 	}
 	// Override frameRenderingQueued event to process that (don't care about frameEnded)
-	bool frameRenderingQueued(const FrameEvent& evt)
+	bool frameRenderingQueued(const Ogre::FrameEvent& evt)
 	{
 
 		if(mWindow->isClosed())	return false;
@@ -513,36 +513,36 @@ public:
 		return true;
 	}
 
-	bool frameEnded(const FrameEvent& evt)
+	bool frameEnded(const Ogre::FrameEvent& evt)
 	{
 		//updateStats();
 		return true;
 	}
 
 protected:
-	Camera* mCamera;
+	Ogre::Camera* mCamera;
 
-	Vector3 mTranslateVector;
-	Real mCurrentSpeed;
-	RenderWindow* mWindow;
+	Ogre::Vector3 mTranslateVector;
+	Ogre::Real mCurrentSpeed;
+	Ogre::RenderWindow* mWindow;
 	bool mStatsOn;
 
-	String mDebugText;
+	Ogre::String mDebugText;
 
 	unsigned int mNumScreenShots;
 	float mMoveScale;
 	float mSpeedLimit;
-	Degree mRotScale;
+	Ogre::Degree mRotScale;
 	// just to stop toggles flipping too fast
-	Real mTimeUntilNextToggle ;
-	Radian mRotX, mRotY;
-	TextureFilterOptions mFiltering;
+	Ogre::Real mTimeUntilNextToggle ;
+	Ogre::Radian mRotX, mRotY;
+	Ogre::TextureFilterOptions mFiltering;
 	int mAniso;
 
 	int mSceneDetailIndex ;
-	Real mMoveSpeed;
-	Degree mRotateSpeed;
-	Overlay* mDebugOverlay;
+	Ogre::Real mMoveSpeed;
+	Ogre::Degree mRotateSpeed;
+	Ogre::Overlay* mDebugOverlay;
 
 	//OIS Input devices
 	OIS::InputManager* mInputManager;
