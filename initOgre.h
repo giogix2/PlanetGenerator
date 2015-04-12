@@ -4,7 +4,6 @@
 #include "OGRE/Ogre.h"
 #include "GeneratorFrameListener.h"
 #include "PSphere.h"
-#include <vector>
 
 class initOgre{
  public:
@@ -21,6 +20,8 @@ private:
 	Ogre::Camera            *Camera;
 	GeneratorFrameListener  *FrameListener;
 	Ogre::OverlaySystem     *OverlaySystem;
+	String					mResourcesCfg;
+    String					mPluginsCfg;
 
 	void CreateFrameListener();
 };

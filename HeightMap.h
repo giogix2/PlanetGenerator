@@ -13,7 +13,7 @@ public:
 	unsigned int getSize();
 	void setHeight(unsigned int x, unsigned int y, float elevation);
 	void setToMinimumHeight(float minimumHeight);
-	void getHistogram(unsigned int histogram[], unsigned short brackets);
+	void getHistogram(unsigned int histogram[100]);
 	void getMinMax(float &min, float &max);
 	Ogre::Vector3 projectToSphere(unsigned int x, unsigned int y);
 	void generateMeshData(Ogre::Vector3 *vArray, Ogre::Vector2 *texArray,

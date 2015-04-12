@@ -67,9 +67,9 @@ public:
 	// convenience wrapper with Ogre::Entity to it:
 	bool raycastFromPoint(const Ogre::Vector3 &point, const Ogre::Vector3 &normal, Ogre::Vector3 &result,Ogre::Entity* &target,float &closest_distance, const Ogre::uint32 queryMask = 0xFFFFFFFF);
 	
-	bool raycast(const Ogre::Ray &ray, Ogre::Vector3 &result, Ogre::MovableObject* &target,float &closest_distance, const Ogre::uint32 queryMask = 0xFFFFFFFF);
+	bool raycast(const Ogre::Ray &ray, Ogre::Vector3 &result, Ogre::MovableObject* &target,	float &closest_distance, const Ogre::uint32 queryMask = 0xFFFFFFFF);
 	// convenience wrapper with Ogre::Entity to it:
-	bool raycast(const Ogre::Ray &ray, Ogre::Vector3 &result, Ogre::Entity* &target,float &closest_distance, const Ogre::uint32 queryMask = 0xFFFFFFFF);
+	bool raycast(const Ogre::Ray &ray, Ogre::Vector3 &result, Ogre::Entity* &target,		float &closest_distance, const Ogre::uint32 queryMask = 0xFFFFFFFF);
 
 	void setHeightAdjust(const float heightadjust);
 	float getHeightAdjust(void);

@@ -3,7 +3,6 @@
 
 #include "HeightMap.h"
 
-
 class PSphere
 {
 public:
@@ -12,13 +11,6 @@ public:
 	void destroy();
 
 	void loadToBuffers(const std::string &meshName, const std::string &textureName);
-
-	void loadMeshFile(const std::string &path, const std::string &meshName);
-
-	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z);
-
-
-	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude);
 
 	Ogre::MeshPtr getMesh();
 

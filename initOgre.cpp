@@ -3,6 +3,8 @@
 #include "OgreConfigFile.h"
 #include <OgreMeshSerializer.h>
 
+
+
 #ifdef OGRE_PLATFORM_LINUX
 #include <sys/stat.h>
 #endif
@@ -16,8 +18,42 @@ initOgre::initOgre(){
 
 int initOgre::start(){
 
+#ifdef _DEBUG
+    mResourcesCfg = "resources_d.cfg";
+    mPluginsCfg = "plugins_d.cfg";
+#else
+    mResourcesCfg = "resources.cfg";
+    mPluginsCfg = "plugins.cfg";
+#endif
+
 	Root = new Ogre::Root("", "", "Generator.LOG");
 	OverlaySystem = new Ogre::OverlaySystem();
+
+	//-------------------------------------------------------------------------------------
+    // setup resources
+    // Load resource paths from config file
+    Ogre::ConfigFile cf;
+    cf.load(mResourcesCfg);
+ 
+    // Go through all sections & settings in the file
+    Ogre::ConfigFile::SectionIterator seci = cf.getSectionIterator();
+ 
+    Ogre::String secName, typeName, archName;
+    while (seci.hasMoreElements())
+    {
+        secName = seci.peekNextKey();
+        Ogre::ConfigFile::SettingsMultiMap *settings = seci.getNext();
+        Ogre::ConfigFile::SettingsMultiMap::iterator i;
+        for (i = settings->begin(); i != settings->end(); ++i)
+        {
+            typeName = i->first;
+            archName = i->second;
+            Ogre::ResourceGroupManager::getSingleton().addResourceLocation(
+                archName, typeName, secName);
+        }
+    }
+
+
 
 
 	Ogre::String PluginName;
@@ -113,7 +149,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	Camera = Scene->createCamera("VertCamera");
 
 	// Camera position
-	Camera->setPosition(Ogre::Vector3(0,0,20));
+	Camera->setPosition(Ogre::Vector3(0,0,25));
 	// Camera looks toward origo
 	Camera->lookAt(Ogre::Vector3(0,0,0));
 
@@ -136,9 +172,9 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	planet->loadToBuffers("CustomMesh", "sphereTex");
 
 	//Export the shape in a mesh file before destroying it
-	//Ogre::MeshPtr mesh;
-	//mesh = planet->getMesh();
-	//Ogre::MeshSerializer ser;
+	Ogre::MeshPtr mesh;
+	mesh = planet->getMesh();
+	Ogre::MeshSerializer ser;
 	//ser.exportMesh(mesh.getPointer(), "C:\\Users\\giova\\Documents\\PlanetGenerator\\planet.mesh",  Ogre::MeshSerializer::ENDIAN_NATIVE);
 
 
@@ -150,15 +186,15 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	Ogre::SceneNode *sphere1 = Scene->getRootSceneNode()->createChildSceneNode("planetSphere");
 	sphere1->attachObject(entity1);
 
+	//test
 
-	planet->loadMeshFile("Cube2.mesh", "LocalMesh");
-
-	planet->attachMesh(sphere1, Scene, "LocalMesh", 0.0, 0.0);
-
-
+	Ogre::Entity *entity2 = Scene->createEntity("Head", "ogrehead.mesh");
+	Ogre::SceneNode *cat = sphere1->createChildSceneNode("cat",Ogre::Vector3(6.5, 6.5, 6.5));
+	cat->setScale(0.01,0.01,0.01);
+	cat->attachObject(entity2);
 
 	// No need for this anymore
-	//Ogre::MeshManager::getSingleton().remove("CustomMesh");
+	Ogre::MeshManager::getSingleton().remove("CustomMesh");
 
 	Ogre::MaterialPtr textureMap = Ogre::MaterialManager::getSingleton()
 			.create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
@@ -168,7 +204,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	// Set texture for the sphere
 	entity1->setMaterial(textureMap);
 
-	sphere1->setOrientation(1.3003361e-01f, -1.5604560e-01f, -7.5052901e-01f, 6.2884596e-01f);
+	//sphere1->setOrientation(1.3003361e-01f, -1.5604560e-01f, -7.5052901e-01f, 6.2884596e-01f);
 
 	//createFrameListener
 	CreateFrameListener();
