@@ -6,8 +6,8 @@
 #include "initOgre.h"
 #include "PSphere.h"
 #include "Common.h"
-//#include "mainwindow.h"
-//#include <QtWidgets\QApplication>
+#include "testui2/mainwindow.h"
+#include <QtWidgets\QApplication>
 
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
@@ -22,9 +22,9 @@
 int main(int argc, char *argv[])
 //#endif
 {
-    //QApplication a(argc, argv);
-    //MainWindow w;
-    //w.show();
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
 	Ogre::Vector3 test = convertSphericalToCartesian(50.0, 50.0);
 	PSphere mySphere;
 	mySphere.create(15.0f, 0.6f, 100);
