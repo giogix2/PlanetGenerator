@@ -1,6 +1,9 @@
 #ifndef _PSphere_H_
 #define _PSphere_H_
 
+#include "HeightMap.h"
+
+
 class PSphere
 {
 public:
@@ -10,7 +13,18 @@ public:
 
 	void loadToBuffers(const std::string &meshName, const std::string &textureName);
 
+	void loadMeshFile(const std::string &path, const std::string &meshName);
+
+	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z);
+
+
+	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude);
+
 	Ogre::MeshPtr getMesh();
+
+	void setObserverPosition(Ogre::Vector3 position);
+
+	Ogre::Real getObserverDistanceToSurface();
 
 	PSphere();
 
@@ -25,12 +39,23 @@ private:
 	Ogre::Real			radius;
 	unsigned char		*image;
 	Ogre::MeshPtr		mesh;
+	Ogre::Vector3		observer;
+	HeightMap			*faceYP;
+	HeightMap			*faceXM;
+	HeightMap			*faceYM;
+	HeightMap			*faceXP;
+	HeightMap			*faceZP;
+	HeightMap			*faceZM;
 
 	void calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour);
 
 	void fixTextureSeam();
 
-	void deform(Ogre::Real seaFraction);
+	void calculateSeaLevel(float &seaLevel, float &minElev, float &maxElev, float seaFraction);
+
+	void smoothSeaArea(float seaHeight);
+
+	void deform(HeightMap *map);
 
 	void calculateNormals();
 
@@ -39,8 +64,9 @@ private:
 	Ogre::Real heightNoise(Ogre::uint32 octaves, Ogre::Real *amplitudes,
 						   Ogre::Real *frequencys, Ogre::Vector3 Point);
 
-	void generateImage(Ogre::uint32 octaves, Ogre::Real *amplitudes, Ogre::Real *frequencys,
-					   Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom);
+	void generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom);
+
+	void generateMeshData();
 
 };
 
