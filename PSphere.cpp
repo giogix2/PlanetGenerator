@@ -8,6 +8,8 @@
 #include <OgreException.h>
 #include "OgreConfigFile.h"
 #include "Common.h"
+#include "ResourceParameter.h"
+using namespace std;
 
 // Let's set texture dimensions this way for a time being
 #define TEX_WIDTH 1024
@@ -108,10 +110,12 @@ Ogre::Real PSphere::getObserverDistanceToSurface()
 	Ogre::Real distance;
 
 	// Hardcode these values for now, waiting for parameter class.
-	amplitudes[0] = 0.02f;
-	amplitudes[1] = 0.006666f;
-	frequencys[0] = 0.4f;
-	frequencys[1] = 0.06666f;
+	vector <float> frequency = RParameter.getFrequency();
+	vector <float> amplitude = RParameter.getAmplitude();
+	amplitudes[0] = amplitude[0];
+	amplitudes[1] = amplitude[1];
+	frequencys[0] = frequency[0];
+	frequencys[1] = frequency[1];
 
 	// normal vector that points from the origo to the observer
 	direction = observer.normalisedCopy();
@@ -133,16 +137,27 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 	Ogre::Real height, amplitudes[2], frequencys[2];
 	Ogre::uint32 x, y, octaves;
 	Ogre::uint8 red, green, blue, tempVal;
+	vector <float> frequency = RParameter.getFrequency();
+	vector <float> amplitude = RParameter.getAmplitude();
+
+	unsigned char waterFirstColorblue = (unsigned char)"";
+	unsigned char waterFirstColorgreen = (unsigned char)"";
+	unsigned char waterFirstColorred = (unsigned char)"";
+	unsigned char waterSecondColorblue = (unsigned char)"";
+	unsigned char waterSecondColorgreen = (unsigned char)"";
+	unsigned char waterSecondColorred = (unsigned char)"";
+	RParameter.getWaterFirstColor(waterFirstColorred,waterFirstColorgreen,waterFirstColorblue);
+	RParameter.getWaterFirstColor(waterSecondColorblue,waterSecondColorgreen,waterSecondColorblue);
 
 	// Variate height of a point in a sphere.
 	octaves = 2;
 	// Amplitude controls height of features
-	amplitudes[0] = 0.02f;
-	amplitudes[1] = 0.006666f;
+	amplitudes[0] = amplitude[0];
+	amplitudes[1] = amplitude[1];
 	/* frequency controls how wide features are. This is now actually
 	 * inverse of frequency */
-	frequencys[0] = 0.4f;
-	frequencys[1] = 0.06666f;
+	frequencys[0] = frequency[0];
+	frequencys[1] = frequency[1];
 
 	// Guard against multiple memory allocations to avoid memory leaks
 	if(image != NULL)
@@ -167,7 +182,7 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 			{
 				red = 100-Ogre::uchar((seaHeight-height)/(seaHeight-bottom)*50.0f);
 				green = 255-Ogre::uchar((seaHeight-height)/(seaHeight-bottom)*50.0f);
-				blue = 255;
+				blue = waterFirstColorblue;
 			}
 			else
 			{
@@ -183,7 +198,7 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 						tempVal = 75;
 					red = 180+tempVal;
 					green = 180+tempVal;
-					blue = 180+tempVal;
+					blue = 180+waterSecondColorblue;
 				}
 			}
 
@@ -202,15 +217,18 @@ void PSphere::deform(HeightMap *map)
 	Ogre::Real height;
 	Ogre::Real frequencys[2], amplitudes[2];
 
+	vector <float> frequency = RParameter.getFrequency();
+	vector <float> amplitude = RParameter.getAmplitude();
+
 	// Variate height of a point in a sphere.
 	octaves = 2;
 	// Amplitude controls height of features
-	amplitudes[0] = 0.02f;
-	amplitudes[1] = 0.006666f;
+	amplitudes[0] = amplitude[0];
+	amplitudes[1] = amplitude[1];
 	/* frequency controls how wide features are. This is now actually
 	 * inverse of frequency */
-	frequencys[0] = 0.4f;
-	frequencys[1] = 0.06666f;
+	frequencys[0] = frequency[0];
+	frequencys[1] = frequency[1];
 
 	for(x=0; x < map->getSize(); x++)
 	{
@@ -326,8 +344,9 @@ void PSphere::smoothSeaArea(float seaHeight)
 
 
 // Makes a sphere out of a cube that is made of 6 squares
-void PSphere::create(Ogre::Real diameter, Ogre::Real seaFraction, Ogre::uint32 iters)
+void PSphere::create(Ogre::Real diameter, Ogre::Real seaFraction, Ogre::uint32 iters, ResourceParameter resourceParameter)
 {
+	RParameter = resourceParameter;
 	// Iters less than 3 are pointless
 	if(iters < 3)
 	{

@@ -151,7 +151,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	sphere1->attachObject(entity1);
 
 
-	planet->loadMeshFile("Cube2.mesh", "LocalMesh");
+	planet->loadMeshFile("F:\\Software Project\\PlanetGenerator\\PlanetGenerator\\PlanetGenerator\\Debug\\Cube2.mesh", "LocalMesh");
 
 	planet->attachMesh(sphere1, Scene, "LocalMesh", 0.0, 0.0);
 

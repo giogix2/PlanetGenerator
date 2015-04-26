@@ -2,12 +2,14 @@
 #define _PSphere_H_
 
 #include "HeightMap.h"
+#include "ResourceParameter.h"
+using namespace std;
 
 
 class PSphere
 {
 public:
-	void create(Ogre::Real diameter, Ogre::Real seaFraction, Ogre::uint32 iters);
+	void create(Ogre::Real diameter, Ogre::Real seaFractsion, Ogre::uint32 iters, ResourceParameter resourceParameter);
 
 	void destroy();
 
@@ -46,6 +48,7 @@ private:
 	HeightMap			*faceXP;
 	HeightMap			*faceZP;
 	HeightMap			*faceZM;
+	ResourceParameter	RParameter;
 
 	void calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour);
 

@@ -9,8 +9,8 @@ namespace std
 	{
 	public:
 		ResourceParameter(void);
-		ResourceParameter(unsigned char terrainFirstColor,unsigned char terrainSecondColor, unsigned char waterFirstColor
-			, unsigned char waterSecondColor, unsigned char mountainFirstColor, unsigned char mountainSecondColor
+		ResourceParameter(string terrainFirstColor,string terrainSecondColor, string waterFirstColor
+			, string waterSecondColor, string mountainFirstColor, string mountainSecondColor
 			, float waterFraction, float radius, int seed, vector <float> frequency, vector <float> amplitude);
 		~ResourceParameter(void);
 		void getTerrainFirstColor(unsigned char &red, unsigned char &green, unsigned char &blue);

@@ -6,8 +6,10 @@
 #include "initOgre.h"
 #include "PSphere.h"
 #include "Common.h"
-//#include "mainwindow.h"
-//#include <QtWidgets\QApplication>
+#include "testui2/mainwindow.h"
+#include <QApplication>
+#include "ResourceParameter.h"
+using namespace std;
 
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
@@ -16,19 +18,26 @@
 #endif
 
 
-//#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-//INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
-//#else
+/*#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+INT WINAPI WinMain( HINSTANCE hInst, HINSTANCE, LPSTR strCmdLine, INT )
+#else*/
 int main(int argc, char *argv[])
 //#endif
 {
-    //QApplication a(argc, argv);
-    //MainWindow w;
-    //w.show();
+    QApplication a(argc, argv);
+    MainWindow w;
+    w.show();
+	vector<float> frequency;
+	frequency.push_back(0.4f);
+	frequency.push_back(0.06666f);
+	vector <float> amplitude;
+	amplitude.push_back(0.02f);
+	amplitude.push_back(0.006666f);
 	Ogre::Vector3 test = convertSphericalToCartesian(50.0, 50.0);
+	ResourceParameter resourceParameter = ResourceParameter((string)"#ffea00",(string)"#16e04f",(string)"#c116e0"
+		,(string)"#e03c16",(string)"#177b73",(string)"#e50621",1.2f,2.2f,50,frequency,amplitude);
 	PSphere mySphere;
-	mySphere.create(15.0f, 0.6f, 100);
-
+	mySphere.create(15.0f, 0.6f, 100, resourceParameter);
 	initOgre rendering;
 
 	rendering.start();
