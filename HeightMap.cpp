@@ -1,3 +1,5 @@
+#include <assert.h>
+
 #include "HeightMap.h"
 
 HeightMap::HeightMap(unsigned int size, const Ogre::Matrix3 face)
@@ -22,20 +24,25 @@ unsigned int HeightMap::getSize()
 	return mapSize;
 }
 
-void HeightMap::getHistogram(unsigned int histogram[100])
+void HeightMap::getHistogram(unsigned int histogram[], unsigned short brackets)
 {
 	unsigned int x, y, i;
+	/* Subtract brackets with 1.5 to make sure iterator can't go over 99.
+	 * Add assert to catch possible overflows in the future. */
+	float divider = static_cast<float>(brackets) - 1.5f;
 
-   for(x=0; x < mapSize; x++)
-   {
-	   for(y=0; y < mapSize; y++)
-	   {
-		   // Any better ways to create histograms?
-		   i = 0;
-		   while(height[y*mapSize+x] > (i/99.0f*(maxHeight-minHeight) + minHeight))
-			   i++;
-		   histogram[i] += 1;
-	   }
+	for(x=0; x < mapSize; x++)
+	{
+		for(y=0; y < mapSize; y++)
+		{
+			// Any better ways to create histograms?
+			i = 0;
+			while(height[y*mapSize+x] > (i/divider*(maxHeight-minHeight) + minHeight))
+				i++;
+			// Check overflow with assert
+			assert(i < brackets);
+			histogram[i] += 1;
+		}
    }
 }
 

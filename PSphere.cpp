@@ -1,6 +1,13 @@
+#include <iostream>
+#include <exception>
 #include "OGRE/Ogre.h"
 #include "PSphere.h"
 #include "simplexnoise1234.h"
+#include <OgreMeshSerializer.h>
+#include <OgreDataStream.h>
+#include <OgreException.h>
+#include "OgreConfigFile.h"
+#include "Common.h"
 
 // Let's set texture dimensions this way for a time being
 #define TEX_WIDTH 1024
@@ -21,22 +28,6 @@ PSphere::PSphere(){
 void PSphere::setObserverPosition(Ogre::Vector3 position)
 {
 	observer = position;
-}
-
-/* Get spherical coordinates from texture coordinate */
-Ogre::Vector3 PSphere::calculateSphereCoordsFromTexCoords(Ogre::Vector2 *texCoord)
-{
-	Ogre::Vector3 sphereCoord;
-	Ogre::Real alfa, beta;
-
-	alfa = texCoord->x * Ogre::Math::TWO_PI;
-	beta = texCoord->y * Ogre::Math::PI;
-
-	sphereCoord.x = cosf(alfa)*sinf(beta);
-	sphereCoord.y = sinf(alfa)*sinf(beta);
-	sphereCoord.z = cosf(beta);
-
-	return sphereCoord;
 }
 
 Ogre::Real PSphere::heightNoise(Ogre::uint32 octaves, Ogre::Real *amplitudes,
@@ -138,7 +129,7 @@ Ogre::Real PSphere::getObserverDistanceToSurface()
 void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom)
 {
 	Ogre::Vector3 spherePoint;
-	Ogre::Vector2 texCoords;
+	Ogre::Real latitude, longitude;
 	Ogre::Real height, amplitudes[2], frequencys[2];
 	Ogre::uint32 x, y, octaves;
 	Ogre::uint8 red, green, blue, tempVal;
@@ -162,11 +153,11 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 	{
 		for(x=0; x < TEX_WIDTH; x++)
 		{
-			texCoords.x = (Ogre::Real(x)+0.5f)/TEX_WIDTH;
-			texCoords.y = (Ogre::Real(y)+0.5f)/TEX_HEIGHT;
+			longitude = (Ogre::Real(x)+0.5f)/TEX_WIDTH*360.0f;
+			latitude = (90.0f-0.5f/TEX_HEIGHT) - (Ogre::Real(y)+0.5f)/TEX_HEIGHT*180.0f;
 
 			// Get a point that corresponds to a given pixel
-			spherePoint = calculateSphereCoordsFromTexCoords(&texCoords);
+			spherePoint = convertSphericalToCartesian(latitude, longitude);
 
 			// Get height of a point
 			height = heightNoise(octaves, amplitudes, frequencys, spherePoint);
@@ -285,12 +276,12 @@ void PSphere::calculateSeaLevel(float &seaLevel, float &minElev, float &maxElev,
 	float min[6], max[6];
 
 	// Assume all faces have similar height variations
-	faceYP->getHistogram(histogram);
-	faceXM->getHistogram(histogram);
-	faceYM->getHistogram(histogram);
-	faceXP->getHistogram(histogram);
-	faceZP->getHistogram(histogram);
-	faceZM->getHistogram(histogram);
+	faceYP->getHistogram(histogram, 100);
+	faceXM->getHistogram(histogram, 100);
+	faceYM->getHistogram(histogram, 100);
+	faceXP->getHistogram(histogram, 100);
+	faceZP->getHistogram(histogram, 100);
+	faceZM->getHistogram(histogram, 100);
 
 	faceYP->getMinMax(min[0], max[0]);
 	faceXM->getMinMax(min[1], max[1]);
@@ -545,6 +536,39 @@ void PSphere::loadToBuffers(const std::string &meshName, const std::string &text
 	}
 
 	pixelBuffer->unlock();
+
+}
+
+void PSphere::loadMeshFile(const std::string &path, const std::string &meshName) {
+	Ogre::String source;
+	source = path;
+	FILE* pFile = fopen( source.c_str(), "rb" );
+	if (!pFile)
+		OGRE_EXCEPT(Ogre::Exception::ERR_FILE_NOT_FOUND,"File " + source + " not found.", "OgreMeshLoaded");
+	struct stat tagStat;
+	stat( source.c_str(), &tagStat );
+	Ogre::MemoryDataStream* memstream = new Ogre::MemoryDataStream(source, tagStat.st_size, true);
+	fread( (void*)memstream->getPtr(), tagStat.st_size, 1, pFile );
+	fclose( pFile );
+	Ogre::MeshPtr pMesh = Ogre::MeshManager::getSingleton().createManual(meshName,Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	Ogre::MeshSerializer meshSerializer;
+	Ogre::DataStreamPtr stream(memstream);
+	meshSerializer.importMesh(stream, pMesh.getPointer());
+}
+
+void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z) {
+	//Ogre::Entity *entity = scene->createEntity("LocalMesh_Ent", objectName);
+	Ogre::Entity *entity = scene->createEntity("LocalMesh_Ent", "ram.mesh");
+	Ogre::SceneNode *cube = node->createChildSceneNode(objectName, Ogre::Vector3(x, y, z));
+	cube->attachObject(entity);
+}
+
+void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude) {
+	Ogre::Vector3 cart_coord = convertSphericalToCartesian(latitude, longitude);
+	Ogre::Real x = radius*1.1*cart_coord.x;
+	Ogre::Real y = radius*1.1*cart_coord.y;
+	Ogre::Real z = radius*1.1*cart_coord.z;
+	this->attachMesh(node, scene, objectName, x, y, z);
 
 }
 
