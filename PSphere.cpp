@@ -583,9 +583,9 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 
 void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude) {
 	Ogre::Vector3 cart_coord = convertSphericalToCartesian(latitude, longitude);
-	Ogre::Real x = radius*cart_coord.x;
-	Ogre::Real y = radius*cart_coord.y;
-	Ogre::Real z = radius*cart_coord.z;
+	Ogre::Real x = radius*1.2*cart_coord.x;
+	Ogre::Real y = radius*1.2*cart_coord.y;
+	Ogre::Real z = radius*1.2*cart_coord.z;
 	this->attachMesh(node, scene, objectName, x, y, z);
 
 }

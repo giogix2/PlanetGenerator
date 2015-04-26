@@ -1,4 +1,5 @@
 #include "ResourceParameter.h"
+<<<<<<< HEAD
 #include <algorithm>
 #include <string>
 #include <vector>
@@ -190,4 +191,15 @@ namespace std
 		tempVector.push_back(pair);
 		}
 	}
+=======
+
+
+std::ResourceParameter::ResourceParameter(void)
+{
+}
+
+
+std::ResourceParameter::~ResourceParameter(void)
+{
+>>>>>>> origin/master
 }

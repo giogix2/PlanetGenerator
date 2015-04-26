@@ -7,9 +7,13 @@
 #include "PSphere.h"
 #include "Common.h"
 #include "testui2/mainwindow.h"
+<<<<<<< HEAD
 #include <QApplication>
 #include "ResourceParameter.h"
 using namespace std;
+=======
+#include <QtWidgets\QApplication>
+>>>>>>> origin/master
 
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
@@ -27,12 +31,15 @@ int main(int argc, char *argv[])
     QApplication a(argc, argv);
     MainWindow w;
     w.show();
+<<<<<<< HEAD
 	vector<float> frequency;
 	frequency.push_back(0.4f);
 	frequency.push_back(0.06666f);
 	vector <float> amplitude;
 	amplitude.push_back(0.02f);
 	amplitude.push_back(0.006666f);
+=======
+>>>>>>> origin/master
 	Ogre::Vector3 test = convertSphericalToCartesian(50.0, 50.0);
 	ResourceParameter resourceParameter = ResourceParameter((string)"#ffea00",(string)"#16e04f",(string)"#c116e0"
 		,(string)"#e03c16",(string)"#177b73",(string)"#e50621",1.2f,2.2f,50,frequency,amplitude);

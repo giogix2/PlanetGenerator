@@ -155,6 +155,13 @@ void initOgre::setSceneAndRun(PSphere *planet){
 
 	planet->attachMesh(sphere1, Scene, "LocalMesh", 0.0, 0.0);
 
+	//cat head just for testing the movement
+	
+	//Ogre::Entity *entity2 = Scene->createEntity("Head", "ogrehead.mesh");
+	//Ogre::SceneNode *cat = sphere1->createChildSceneNode("cat",Ogre::Vector3(6.4, 6.4, 6.4));
+	//cat->setScale(0.01,0.01,0.01);
+	//cat->attachObject(entity2);
+
 
 
 	// No need for this anymore
