@@ -16,11 +16,14 @@ initOgre::initOgre(){
 
 int initOgre::start(){
 
-	Root = new Ogre::Root("", "", "Generator.LOG");
+	Ogre::String PluginName;
+	Ogre::String mResourcesCfg;
+	mResourcesCfg = "resources.cfg";
+
+	Root = new Ogre::Root("", mResourcesCfg, "Generator.LOG");
 	OverlaySystem = new Ogre::OverlaySystem();
 
 
-	Ogre::String PluginName;
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 	PluginName.append("RenderSystem_Direct3D9");
 #else
@@ -62,6 +65,33 @@ int initOgre::start(){
 	// Loads renderer plugin
 	Root->loadPlugin(PluginName);
 
+	//Load information from resource.cfg file
+	Ogre::ConfigFile cf;
+	cf.load(mResourcesCfg);
+	Ogre::String name, locType;
+	Ogre::ConfigFile::SectionIterator secIt = cf.getSectionIterator();
+	while (secIt.hasMoreElements()) {
+		Ogre::ConfigFile::SettingsMultiMap* settings = secIt.getNext();
+		Ogre::ConfigFile::SettingsMultiMap::iterator it;
+		for (it = settings->begin(); it != settings->end(); ++it) {
+			locType = it->first;
+			name = it->second;
+			Ogre::ResourceGroupManager::getSingleton().addResourceLocation(name, locType, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+		}
+
+	}
+
+	Ogre::ResourceGroupManager::getSingleton().declareResource("ram.mesh", "Mesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_col.png", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	//Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_nor.png", "Texture", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_eyelids.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_eyes.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_horns.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+
+	//Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(5);
+	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+	//Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
 	// Check renderer availability
 	const Ogre::RenderSystemList& RenderSystemList = Root->getAvailableRenderers();
@@ -151,16 +181,12 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	sphere1->attachObject(entity1);
 
 
-	planet->loadMeshFile("Cube2.mesh", "LocalMesh");
+	//planet->loadMeshFile("ram1.mesh", "LocalMesh");
 
-	planet->attachMesh(sphere1, Scene, "LocalMesh", 0.0, 0.0);
+	planet->attachMesh(sphere1, Scene, "ram.mesh", 0.0, 0.0);
 
-	//cat head just for testing the movement
-	
-	//Ogre::Entity *entity2 = Scene->createEntity("Head", "ogrehead.mesh");
-	//Ogre::SceneNode *cat = sphere1->createChildSceneNode("cat",Ogre::Vector3(6.4, 6.4, 6.4));
-	//cat->setScale(0.01,0.01,0.01);
-	//cat->attachObject(entity2);
+	Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create("PlaneMat", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	//Ogre::TextureUnitState* tuisTexture = mat->getTechnique(0)->getPass(0)->createTextureUnitState("grass_1024.jpg");
 
 
 
