@@ -140,12 +140,12 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 	vector <float> frequency = RParameter.getFrequency();
 	vector <float> amplitude = RParameter.getAmplitude();
 
-    unsigned char waterFirstColorblue = 0;
-    unsigned char waterFirstColorgreen = 0;
-    unsigned char waterFirstColorred = 0;
-    unsigned char waterSecondColorblue = 0;
-    unsigned char waterSecondColorgreen = 0;
-    unsigned char waterSecondColorred = 0;
+	unsigned char waterFirstColorblue = 0;
+	unsigned char waterFirstColorgreen = 0;
+	unsigned char waterFirstColorred = 0;
+	unsigned char waterSecondColorblue = 0;
+	unsigned char waterSecondColorgreen = 0;
+	unsigned char waterSecondColorred = 0;
 	RParameter.getWaterFirstColor(waterFirstColorred,waterFirstColorgreen,waterFirstColorblue);
 	RParameter.getWaterFirstColor(waterSecondColorblue,waterSecondColorgreen,waterSecondColorblue);
 

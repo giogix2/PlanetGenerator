@@ -27,7 +27,7 @@ namespace std
 		int getSeed(void);
 		vector <float> getFrequency(void);
 		vector <float> getAmplitude(void);
-        vector<pair <float, float> > getFrequencyAmplitude(void);
+		vector<pair <float, float> > getFrequencyAmplitude(void);
 		void setTerrainFirstColor(string);
 		void setTerrainSecondColor(string);
 		void setWaterFirstColor(string);
@@ -52,9 +52,9 @@ namespace std
 		int seed;
 		vector <float> frequency;
 		vector <float> amplitude;
-        vector <pair <float, float> > frequencyAmplitude;
+		vector <pair <float, float> > frequencyAmplitude;
 		unsigned char hexToBinary(const string& hexNumber);
-        void splitToFrequencyAmplitude(const string& stringToSplit, char delimiter, vector<pair <float, float> >& tempVector);
+		void splitToFrequencyAmplitude(const string& stringToSplit, char delimiter, vector<pair <float, float> >& tempVector);
 	};
 }
 #endif
