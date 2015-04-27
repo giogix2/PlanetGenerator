@@ -22,12 +22,18 @@ namespace std
 		void getWaterSecondColor(unsigned char &red, unsigned char &green, unsigned char &blue);
 		void getMountainFirstColor(unsigned char &red, unsigned char &green, unsigned char &blue);
 		void getMountainSecondColor(unsigned char &red, unsigned char &green, unsigned char &blue);
+		string getTerrainFirstColor(void);
+		string getTerrainSecondColor(void);
+		string getWaterFirstColor(void);
+		string getWaterSecondColor(void);
+		string getMountainFirstColor(void);
+		string getMountainSecondColor(void);
 		float getWaterFraction(void);
 		float getRadius(void);
 		int getSeed(void);
 		vector <float> getFrequency(void);
 		vector <float> getAmplitude(void);
-		vector<pair <float, float> > getFrequencyAmplitude(void);
+		vector<pair <float, float> >& getFrequencyAmplitude(void);
 		void setTerrainFirstColor(string);
 		void setTerrainSecondColor(string);
 		void setWaterFirstColor(string);
@@ -40,6 +46,7 @@ namespace std
 		void setFrequency(float);
 		void setAmplitude(float);
 		void setFrequencyAmplitude(string NewfrequencyAmplitude, char delimiter);
+		void setFrequencyAmplitude(float p_frequency, float p_amplitude);
 	private:
 		string terrainFirstColor;
 		string terrainSecondColor;

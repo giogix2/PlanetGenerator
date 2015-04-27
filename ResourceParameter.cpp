@@ -71,6 +71,30 @@ namespace std
 		blue = hexToBinary(mountainSecondColor.substr (2,2));
 		green = hexToBinary(mountainSecondColor.substr (4,2));
 	}
+	string ResourceParameter::getTerrainFirstColor(void)
+	{
+		return terrainFirstColor;
+	}
+	string ResourceParameter::getTerrainSecondColor(void)
+	{
+		return terrainSecondColor;
+	}
+	string ResourceParameter::getWaterFirstColor(void)
+	{
+		return waterFirstColor;
+	}
+	string ResourceParameter::getWaterSecondColor(void)
+	{
+		return waterSecondColor;
+	}
+	string ResourceParameter::getMountainFirstColor(void)
+	{
+		return mountainFirstColor;
+	}
+	string ResourceParameter::getMountainSecondColor(void)
+	{
+		return mountainSecondColor;
+	}
 	float ResourceParameter::getWaterFraction(void)
 	{
 		return waterFraction;
@@ -91,7 +115,7 @@ namespace std
 	{
 		return amplitude;
 	}
-	vector<pair <float, float>> ResourceParameter::getFrequencyAmplitude(void)
+	vector<pair <float, float>>& ResourceParameter::getFrequencyAmplitude(void)
 	{
 		return frequencyAmplitude;
 	}
@@ -144,6 +168,10 @@ namespace std
 	void ResourceParameter::setFrequencyAmplitude(string NewfrequencyAmplitude, char delimiter)
 	{
 		splitToFrequencyAmplitude(NewfrequencyAmplitude, delimiter, frequencyAmplitude);
+	}
+	void ResourceParameter::setFrequencyAmplitude(float p_frequency, float p_amplitude)
+	{
+		frequencyAmplitude.push_back(make_pair(p_frequency, p_amplitude));
 	}
 	unsigned char ResourceParameter::hexToBinary(const string& hexNumber)
 	{
