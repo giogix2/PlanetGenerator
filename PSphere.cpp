@@ -557,8 +557,8 @@ void PSphere::loadMeshFile(const std::string &path, const std::string &meshName)
 }
 
 void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z) {
-	//Ogre::Entity *entity = scene->createEntity("LocalMesh_Ent", objectName);
-	Ogre::Entity *entity = scene->createEntity("LocalMesh_Ent", "ram.mesh");
+	Ogre::Entity *entity = scene->createEntity("LocalMesh_Ent", objectName);
+	//Ogre::Entity *entity = scene->createEntity("LocalMesh_Ent", "ram.mesh");
 	Ogre::SceneNode *cube = node->createChildSceneNode(objectName, Ogre::Vector3(x, y, z));
 	cube->attachObject(entity);
 }

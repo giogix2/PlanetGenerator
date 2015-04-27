@@ -83,6 +83,7 @@ int initOgre::start(){
 
 	Ogre::ResourceGroupManager::getSingleton().declareResource("ram.mesh", "Mesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 	Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_col.png", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	//Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_nor.png", "Texture", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_eyelids.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_eyes.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
@@ -182,7 +183,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
 
 	//planet->loadMeshFile("ram1.mesh", "LocalMesh");
 
-	planet->attachMesh(sphere1, Scene, "LocalMesh", 0.0, 0.0);
+	planet->attachMesh(sphere1, Scene, "ram.mesh", 0.0, 0.0);
 
 	Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create("PlaneMat", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 	//Ogre::TextureUnitState* tuisTexture = mat->getTechnique(0)->getPass(0)->createTextureUnitState("grass_1024.jpg");
