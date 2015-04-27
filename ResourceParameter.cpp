@@ -1,7 +1,5 @@
 #include "ResourceParameter.h"
-//<<<<<<< HEAD
 #include <algorithm>
-#include <string>
 #include <vector>
 #include <sstream>
 namespace std
