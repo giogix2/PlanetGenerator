@@ -30,8 +30,8 @@ int main(int argc, char *argv[])
 	amplitude.push_back(0.02f);
 	amplitude.push_back(0.006666f);
 
-	ResourceParameter resourceParameter = ResourceParameter((string)"#ffea00",(string)"#16e04f",(string)"#c116e0"
-		,(string)"#e03c16",(string)"#177b73",(string)"#e50621",1.2f,2.2f,50,frequency,amplitude);
+	ResourceParameter resourceParameter = ResourceParameter((string)"#00FF00",(string)"#FACD00",(string)"#32CDFF"
+		,(string)"#64FFFF",(string)"#B4B4B4",(string)"#FFFFFF",1.2f,2.2f,50,frequency,amplitude);
 	PSphere mySphere;
 	initOgre rendering;
 

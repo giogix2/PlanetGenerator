@@ -139,6 +139,7 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 	Ogre::uint8 red, green, blue, tempVal;
 	vector <float> frequency = RParameter.getFrequency();
 	vector <float> amplitude = RParameter.getAmplitude();
+	float const multiplyer = 0.6;
 
 	unsigned char waterFirstColorblue = 0;
 	unsigned char waterFirstColorgreen = 0;
@@ -147,7 +148,25 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 	unsigned char waterSecondColorgreen = 0;
 	unsigned char waterSecondColorred = 0;
 	RParameter.getWaterFirstColor(waterFirstColorred,waterFirstColorgreen,waterFirstColorblue);
-	RParameter.getWaterFirstColor(waterSecondColorblue,waterSecondColorgreen,waterSecondColorblue);
+	RParameter.getWaterSecondColor(waterSecondColorred,waterSecondColorgreen,waterSecondColorblue);
+
+	unsigned char terrainFirstColorblue = 0;
+	unsigned char terrainFirstColorgreen = 0;
+	unsigned char terrainFirstColorred = 0;
+	unsigned char terrainSecondColorblue = 0;
+	unsigned char terrainSecondColorgreen = 0;
+	unsigned char terrainSecondColorred = 0;
+	RParameter.getTerrainFirstColor(terrainFirstColorred,terrainFirstColorgreen,terrainFirstColorblue);
+	RParameter.getTerrainSecondColor(terrainSecondColorred,terrainSecondColorgreen,terrainSecondColorblue);
+
+	unsigned char mountainFirstColorblue = 0;
+	unsigned char mountainFirstColorgreen = 0;
+	unsigned char mountainFirstColorred = 0;
+	unsigned char mountainSecondColorblue = 0;
+	unsigned char mountainSecondColorgreen = 0;
+	unsigned char mountainSecondColorred = 0;
+	RParameter.getMountainFirstColor(mountainFirstColorred,mountainFirstColorgreen,mountainFirstColorblue);
+	RParameter.getMountainSecondColor(mountainSecondColorred,mountainSecondColorgreen,mountainSecondColorblue);
 
 	// Variate height of a point in a sphere.
 	octaves = 2;
@@ -180,25 +199,22 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 			// Set sea-colors, deeper part is slighly deeper blue.
 			if(height < seaHeight)
 			{
-				red = 100-Ogre::uchar((seaHeight-height)/(seaHeight-bottom)*50.0f);
-				green = 255-Ogre::uchar((seaHeight-height)/(seaHeight-bottom)*50.0f);
-				blue = waterFirstColorblue;
+				red =  waterFirstColorred + (waterSecondColorred-waterFirstColorred)*(height-bottom)/(seaHeight-bottom);
+				green =  waterFirstColorgreen + (waterSecondColorgreen-waterFirstColorgreen)*(height-bottom)/(seaHeight-bottom);
+				blue =  waterFirstColorblue + (waterSecondColorblue-waterFirstColorblue)*(height-bottom)/(seaHeight-bottom);
 			}
 			else
 			{
 				// Set low elevations green and higher brown
-				red = 0+Ogre::uchar((height-seaHeight)/(top-seaHeight)*250.0f);
-				green = 255-Ogre::uchar((height-seaHeight)/(top-seaHeight)*250.0f);
-				blue = 0;
+				red =  terrainFirstColorred + (terrainSecondColorred-terrainFirstColorred)*(height-seaHeight)/(top*multiplyer-seaHeight);
+				green =  terrainFirstColorgreen + (terrainSecondColorgreen-terrainFirstColorgreen)*(height-seaHeight)/(top*multiplyer-seaHeight);
+				blue =  terrainFirstColorblue + (terrainSecondColorblue-terrainFirstColorblue)*(height-seaHeight)/(top*multiplyer-seaHeight);
 				// Highest elevations are bright grey and go toward white
-				if(Ogre::uchar((height-seaHeight)/(top-seaHeight)*250.0f) > 150)
+				if(height > top * multiplyer)
 				{
-					tempVal = Ogre::uchar((height-seaHeight)/(top-seaHeight)*250.0f)-150;
-					if(tempVal > 75)
-						tempVal = 75;
-					red = 180+tempVal;
-					green = 180+tempVal;
-					blue = 180+waterSecondColorblue;
+					red =  mountainFirstColorred + (mountainSecondColorred-mountainFirstColorred)*(height-top*multiplyer)/(top-top*multiplyer);
+					green =  mountainFirstColorgreen + (mountainSecondColorgreen-mountainFirstColorgreen)*(height-top*multiplyer)/(top-top*multiplyer);
+					blue =  mountainFirstColorblue + (mountainSecondColorblue-mountainFirstColorblue)*(height-top*multiplyer)/(top-top*multiplyer);
 				}
 			}
 

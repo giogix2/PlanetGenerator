@@ -33,43 +33,43 @@ namespace std
 	{
 		terrainFirstColor.erase(remove(terrainFirstColor.begin(), terrainFirstColor.end(), '#'), terrainFirstColor.end());
 		red = hexToBinary(terrainFirstColor.substr (0,2));
-		blue = hexToBinary(terrainFirstColor.substr (2,2));
-		green = hexToBinary(terrainFirstColor.substr (4,2));
+		green = hexToBinary(terrainFirstColor.substr (2,2));
+		blue = hexToBinary(terrainFirstColor.substr (4,2));
 	}
 	void ResourceParameter::getTerrainSecondColor(unsigned char &red, unsigned char &green, unsigned char &blue)
 	{
 		terrainSecondColor.erase(remove(terrainSecondColor.begin(), terrainSecondColor.end(), '#'), terrainSecondColor.end());
 		red = hexToBinary(terrainSecondColor.substr (0,2));
-		blue = hexToBinary(terrainSecondColor.substr (2,2));
-		green = hexToBinary(terrainSecondColor.substr (4,2));
+		green = hexToBinary(terrainSecondColor.substr (2,2));
+		blue = hexToBinary(terrainSecondColor.substr (4,2));
 	}
 	void ResourceParameter::getWaterFirstColor(unsigned char &red, unsigned char &green, unsigned char &blue)
 	{
 		waterFirstColor.erase(remove(waterFirstColor.begin(), waterFirstColor.end(), '#'), waterFirstColor.end());
 		red = hexToBinary(waterFirstColor.substr (0,2));
-		blue = hexToBinary(waterFirstColor.substr (2,2));
-		green = hexToBinary(waterFirstColor.substr (4,2));
+		green = hexToBinary(waterFirstColor.substr (2,2));
+		blue = hexToBinary(waterFirstColor.substr (4,2));
 	}
 	void ResourceParameter::getWaterSecondColor(unsigned char &red, unsigned char &green, unsigned char &blue)
 	{
 		waterSecondColor.erase(remove(waterSecondColor.begin(), waterSecondColor.end(), '#'), waterSecondColor.end());
 		red = hexToBinary(waterSecondColor.substr (0,2));
-		blue = hexToBinary(waterSecondColor.substr (2,2));
-		green = hexToBinary(waterSecondColor.substr (4,2));
+		green = hexToBinary(waterSecondColor.substr (2,2));
+		blue = hexToBinary(waterSecondColor.substr (4,2));
 	}
 	void ResourceParameter::getMountainFirstColor(unsigned char &red, unsigned char &green, unsigned char &blue)
 	{
 		mountainFirstColor.erase(remove(mountainFirstColor.begin(), mountainFirstColor.end(), '#'), mountainFirstColor.end());
 		red = hexToBinary(mountainFirstColor.substr (0,2));
-		blue = hexToBinary(mountainFirstColor.substr (2,2));
-		green = hexToBinary(mountainFirstColor.substr (4,2));
+		green = hexToBinary(mountainFirstColor.substr (2,2));
+		blue = hexToBinary(mountainFirstColor.substr (4,2));
 	}
 	void ResourceParameter::getMountainSecondColor(unsigned char &red, unsigned char &green, unsigned char &blue)
 	{
 		mountainSecondColor.erase(remove(mountainSecondColor.begin(), mountainSecondColor.end(), '#'), mountainSecondColor.end());
 		red = hexToBinary(mountainSecondColor.substr (0,2));
-		blue = hexToBinary(mountainSecondColor.substr (2,2));
-		green = hexToBinary(mountainSecondColor.substr (4,2));
+		green = hexToBinary(mountainSecondColor.substr (2,2));
+		blue = hexToBinary(mountainSecondColor.substr (4,2));
 	}
 	string ResourceParameter::getTerrainFirstColor(void)
 	{
