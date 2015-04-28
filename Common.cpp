@@ -4,7 +4,6 @@
 
 Ogre::Vector3 convertSphericalToCartesian (Ogre::Real latitude, Ogre::Real longitude)   {
 	Ogre::Vector3 sphereCoord;
-	Ogre::Real alfa, beta;
 
 	Ogre::Real lat_radian;
 	Ogre::Real long_radian;
