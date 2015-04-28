@@ -64,8 +64,8 @@ private:
 
 	Ogre::Vector3 calculateSphereCoordsFromTexCoords(Ogre::Vector2 *texCoord);
 
-	Ogre::Real heightNoise(Ogre::uint32 octaves, Ogre::Real *amplitudes,
-						   Ogre::Real *frequencys, Ogre::Vector3 Point);
+	Ogre::Real heightNoise(vector<float> amplitude,
+						   vector<float> frequency, Ogre::Vector3 Point);
 
 	void generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom);
 

@@ -32,18 +32,18 @@ void PSphere::setObserverPosition(Ogre::Vector3 position)
 	observer = position;
 }
 
-Ogre::Real PSphere::heightNoise(Ogre::uint32 octaves, Ogre::Real *amplitudes,
-							   Ogre::Real *frequencys, Ogre::Vector3 Point)
+Ogre::Real PSphere::heightNoise(vector<float> amplitude,
+							   vector<float> frequency, Ogre::Vector3 Point)
 {
 	Ogre::uint32 i;
 	Ogre::Real height = 0.0f;
 
-	// Run through the octaves
-	for(i=0; i < octaves; i++)
+	// Run through the amplitude.size
+	for(i=0; i < amplitude.size(); i++)
 	{
-		height += amplitudes[i] * SimplexNoise1234::noise(Point.x/frequencys[i],
-														  Point.y/frequencys[i],
-														  Point.z/frequencys[i]);
+		height += amplitude[i] * SimplexNoise1234::noise(Point.x/frequency[i],
+														  Point.y/frequency[i],
+														  Point.z/frequency[i]);
 	}
 
 	return height;
@@ -105,23 +105,19 @@ void PSphere::fixTextureSeam()
  * Negative values mean that the observer is inside the planet */
 Ogre::Real PSphere::getObserverDistanceToSurface()
 {
-	Ogre::Real frequencys[2], amplitudes[2], height;
+	Ogre::Real height;
 	Ogre::Vector3 direction, surfacePos;
 	Ogre::Real distance;
 
 	// Hardcode these values for now, waiting for parameter class.
 	vector <float> frequency = RParameter.getFrequency();
 	vector <float> amplitude = RParameter.getAmplitude();
-	amplitudes[0] = amplitude[0];
-	amplitudes[1] = amplitude[1];
-	frequencys[0] = frequency[0];
-	frequencys[1] = frequency[1];
 
 	// normal vector that points from the origo to the observer
 	direction = observer.normalisedCopy();
 	/* Get position of the surface along the line that goes from
 	 * the planet origo to the observer */
-	height = heightNoise(2, amplitudes, frequencys, direction);
+	height = heightNoise(amplitude, frequency, direction);
 	surfacePos = direction*(height*radius + radius);
 
 	distance = fabsf(observer.length()) - fabsf(surfacePos.length());
@@ -134,7 +130,7 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 {
 	Ogre::Vector3 spherePoint;
 	Ogre::Real latitude, longitude;
-	Ogre::Real height, amplitudes[2], frequencys[2];
+	Ogre::Real height;
 	Ogre::uint32 x, y, octaves;
 	Ogre::uint8 red, green, blue, tempVal;
 	vector <float> frequency = RParameter.getFrequency();
@@ -168,16 +164,6 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 	RParameter.getMountainFirstColor(mountainFirstColorred,mountainFirstColorgreen,mountainFirstColorblue);
 	RParameter.getMountainSecondColor(mountainSecondColorred,mountainSecondColorgreen,mountainSecondColorblue);
 
-	// Variate height of a point in a sphere.
-	octaves = 2;
-	// Amplitude controls height of features
-	amplitudes[0] = amplitude[0];
-	amplitudes[1] = amplitude[1];
-	/* frequency controls how wide features are. This is now actually
-	 * inverse of frequency */
-	frequencys[0] = frequency[0];
-	frequencys[1] = frequency[1];
-
 	// Guard against multiple memory allocations to avoid memory leaks
 	if(image != NULL)
 		delete[] image;
@@ -194,7 +180,7 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 			spherePoint = convertSphericalToCartesian(latitude, longitude);
 
 			// Get height of a point
-			height = heightNoise(octaves, amplitudes, frequencys, spherePoint);
+			height = heightNoise(amplitude, frequency, spherePoint);
 
 			// Set sea-colors, deeper part is slighly deeper blue.
 			if(height < seaHeight)
@@ -236,22 +222,12 @@ void PSphere::deform(HeightMap *map)
 	vector <float> frequency = RParameter.getFrequency();
 	vector <float> amplitude = RParameter.getAmplitude();
 
-	// Variate height of a point in a sphere.
-	octaves = 2;
-	// Amplitude controls height of features
-	amplitudes[0] = amplitude[0];
-	amplitudes[1] = amplitude[1];
-	/* frequency controls how wide features are. This is now actually
-	 * inverse of frequency */
-	frequencys[0] = frequency[0];
-	frequencys[1] = frequency[1];
-
 	for(x=0; x < map->getSize(); x++)
 	{
 		for(y=0; y < map->getSize(); y++)
 		{
 			spherePos = map->projectToSphere(x, y);
-			height = heightNoise(octaves, amplitudes, frequencys, spherePos);
+			height = heightNoise(amplitude, frequency, spherePos);
 			map->setHeight(x, y, height);
 		}
 
