@@ -336,9 +336,10 @@ void PSphere::smoothSeaArea(float seaHeight)
 
 
 // Makes a sphere out of a cube that is made of 6 squares
-void PSphere::create(Ogre::Real diameter, Ogre::Real seaFraction, Ogre::uint32 iters, ResourceParameter resourceParameter)
+void PSphere::create(Ogre::uint32 iters, ResourceParameter resourceParameter)
 {
 	RParameter = resourceParameter;
+	float waterFraction = resourceParameter.getWaterFraction();
 	// Iters less than 3 are pointless
 	if(iters < 3)
 	{
@@ -346,7 +347,7 @@ void PSphere::create(Ogre::Real diameter, Ogre::Real seaFraction, Ogre::uint32 i
 		std::cout << "Sphere needs atleast 3 iters" << std::endl;
 	}
 
-	radius = diameter/2.0f;
+	radius = resourceParameter.getRadius();
 
 	vertexCount = 0;
 	indexCount = 0;
@@ -394,7 +395,7 @@ void PSphere::create(Ogre::Real diameter, Ogre::Real seaFraction, Ogre::uint32 i
 
 	float seaHeight, min, max;
 
-	calculateSeaLevel(seaHeight, min, max, seaFraction);
+	calculateSeaLevel(seaHeight, min, max, waterFraction);
 	generateImage(seaHeight, max, min);
 	smoothSeaArea(seaHeight);
 }

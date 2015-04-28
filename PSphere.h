@@ -9,7 +9,7 @@ using namespace std;
 class PSphere
 {
 public:
-	void create(Ogre::Real diameter, Ogre::Real seaFractsion, Ogre::uint32 iters, ResourceParameter resourceParameter);
+	void create(Ogre::uint32 iters, ResourceParameter resourceParameter);
 
 	void destroy();
 
