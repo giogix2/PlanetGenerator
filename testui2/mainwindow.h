@@ -3,7 +3,11 @@
 
 #include <QMainWindow>
 #include "freqampdialog.h"
+#ifdef __linux__
+#include "../ResourceParameter.h"
+#else
 #include "..\ResourceParameter.h"
+#endif
 
 namespace Ui {
 class MainWindow;

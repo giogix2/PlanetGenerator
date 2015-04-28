@@ -1,7 +1,11 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 #include "freqampdialog.h"
+#ifdef __linux__
+#include "../ResourceParameter.h"
+#else
 #include "..\ResourceParameter.h"
+#endif
 #include <QDebug>
 #include <QColorDialog>
 #include <QVectorIterator>
