@@ -9,7 +9,7 @@ class HeightMap
 {
 public:
 	HeightMap(unsigned int size, const Ogre::Matrix3 face);
-    ~HeightMap();
+	~HeightMap();
 	unsigned int getSize();
 	void setHeight(unsigned int x, unsigned int y, float elevation);
 	void setToMinimumHeight(float minimumHeight);
@@ -19,7 +19,7 @@ public:
 	void generateMeshData(Ogre::Vector3 *vArray, Ogre::Vector2 *texArray,
 						  unsigned int *idxArray, float scalingFactor);
 private:
-	float *height;
+	float **height;
 	float minHeight;
 	float maxHeight;
 	unsigned int mapSize;

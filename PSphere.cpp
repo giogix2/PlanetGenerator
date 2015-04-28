@@ -131,8 +131,8 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 	Ogre::Vector3 spherePoint;
 	Ogre::Real latitude, longitude;
 	Ogre::Real height;
-	Ogre::uint32 x, y, octaves;
-	Ogre::uint8 red, green, blue, tempVal;
+	Ogre::uint32 x, y;
+	Ogre::uint8 red, green, blue;
 	vector <float> frequency = RParameter.getFrequency();
 	vector <float> amplitude = RParameter.getAmplitude();
 	float const multiplyer = 0.6;
@@ -214,10 +214,9 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 
 void PSphere::deform(HeightMap *map)
 {
-	unsigned int x, y, octaves;
+	unsigned int x, y;
 	Ogre::Vector3 spherePos;
 	Ogre::Real height;
-	Ogre::Real frequencys[2], amplitudes[2];
 
 	vector <float> frequency = RParameter.getFrequency();
 	vector <float> amplitude = RParameter.getAmplitude();

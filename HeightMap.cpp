@@ -1,11 +1,12 @@
 #include <assert.h>
 
 #include "HeightMap.h"
+#include "Common.h"
 
 HeightMap::HeightMap(unsigned int size, const Ogre::Matrix3 face)
 {
-	height = new float[size*size];
-	memset(height, 0, sizeof(float)*size*size);
+	height = allocate2DArray<float>(size, size);
+	memset(height[0], 0, sizeof(float)*size*size);
 
 	mapSize = size;
 	orientation = face;
@@ -37,7 +38,7 @@ void HeightMap::getHistogram(unsigned int histogram[], unsigned short brackets)
 		{
 			// Any better ways to create histograms?
 			i = 0;
-			while(height[y*mapSize+x] > (i/divider*(maxHeight-minHeight) + minHeight))
+			while(height[y][x] > (i/divider*(maxHeight-minHeight) + minHeight))
 				i++;
 			// Check overflow with assert
 			assert(i < brackets);
@@ -54,7 +55,7 @@ void HeightMap::getMinMax(float &min, float &max)
 
 void HeightMap::setHeight(unsigned int x, unsigned int y, float elevation)
 {
-	height[y*mapSize+x] = elevation;
+	height[y][x] = elevation;
 
 	if(elevation < minHeight)
 		minHeight = elevation;
@@ -66,10 +67,10 @@ void HeightMap::setToMinimumHeight(float minimumHeight)
 {
 	unsigned int x, y;
 
-	for(x=0; x < mapSize; x++)
-		for(y=0; y < mapSize; y++)
-			if(height[y*mapSize+x] < minimumHeight)
-				height[y*mapSize+x] = minimumHeight;
+	for(y=0; y < mapSize; y++)
+		for(x=0; x < mapSize; x++)
+			if(height[y][x] < minimumHeight)
+				height[y][x] = minimumHeight;
 
 	minHeight = minimumHeight;
 }
@@ -85,7 +86,7 @@ Ogre::Vector3 HeightMap::projectToSphere(unsigned int x, unsigned int y)
 	yFloat = static_cast<float>(y)/mSizeFloat;
 
 	// For convenience treat xy-heightmap as a xz-plane in sphere-coordinates
-	pos.x = -1.0f + xFloat*2.0f;
+	pos.x = 1.0f - xFloat*2.0f;
 	pos.z = -1.0f + yFloat*2.0f;
 	pos.y = 1.0f;
 	// Simple re-orientation
@@ -93,7 +94,7 @@ Ogre::Vector3 HeightMap::projectToSphere(unsigned int x, unsigned int y)
 	// project heightMap to sphere
 	pos.normalise();
 	/* add height */
-	pos = pos + pos*height[y*mapSize + x];
+	pos = pos + pos*height[y][x];
 	return pos;
 }
 
@@ -161,19 +162,19 @@ void HeightMap::generateMeshData(Ogre::Vector3 *vArray, Ogre::Vector2 *texArray,
 		for(y=0; y < mapSize-1; y++)
 		{
 			// Triangle 1
-			idxArray[idx]=x*mapSize+y+1;
-			idx++;
 			idxArray[idx]=x*mapSize+y+mapSize+1;
 			idx++;
 			idxArray[idx]=x*mapSize+y;
+			idx++;
+			idxArray[idx]=x*mapSize+y+mapSize;
 			idx++;
 
 			// Triangle 2, in other words, a quad.
-			idxArray[idx]=x*mapSize+y+mapSize;
-			idx++;
 			idxArray[idx]=x*mapSize+y;
 			idx++;
 			idxArray[idx]=x*mapSize+y+mapSize+1;
+			idx++;
+			idxArray[idx]=x*mapSize+y+1;
 			idx++;
 		}
 	}
