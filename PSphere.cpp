@@ -199,9 +199,16 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 				// Highest elevations are bright grey and go toward white
 				if(height > top * multiplyer)
 				{
-					red =  mountainFirstColorred + (mountainSecondColorred-mountainFirstColorred)*(height-top*multiplyer)/(top-top*multiplyer);
-					green =  mountainFirstColorgreen + (mountainSecondColorgreen-mountainFirstColorgreen)*(height-top*multiplyer)/(top-top*multiplyer);
-					blue =  mountainFirstColorblue + (mountainSecondColorblue-mountainFirstColorblue)*(height-top*multiplyer)/(top-top*multiplyer);
+					// to avoid unsigned char overflow
+					float substractred = (float)mountainSecondColorred - (mountainSecondColorred-mountainFirstColorred)*(top-height)/(top);
+					float substractgreen = (float)mountainSecondColorgreen - (mountainSecondColorgreen-mountainFirstColorgreen)*(top-height)/(top);
+					float substractblue = (float)mountainSecondColorblue - (mountainSecondColorblue-mountainFirstColorblue)*(top-height)/(top);
+					substractred < 0.0f ? substractred = 0.0f : (substractred >= 256.0f ? substractred = 255.0f : substractred);
+					substractgreen < 0.0f ? substractgreen = 0.0f : (substractgreen >= 256.0f ? substractgreen = 255.0f : substractgreen);
+					substractblue < 0.0f ? substractblue = 0.0f : (substractblue >= 256.0f ? substractblue = 255.0f : substractblue);
+					red =  substractred;
+					green =  substractgreen;
+					blue =  substractblue;
 				}
 			}
 
