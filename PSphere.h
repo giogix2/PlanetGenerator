@@ -49,6 +49,7 @@ private:
 	HeightMap			*faceZP;
 	HeightMap			*faceZM;
 	ResourceParameter	RParameter;
+	Ogre::Vector3		randomTranslate;
 
 	void calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour);
 

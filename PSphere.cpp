@@ -180,7 +180,7 @@ void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bot
 			spherePoint = convertSphericalToCartesian(latitude, longitude);
 
 			// Get height of a point
-			height = heightNoise(amplitude, frequency, spherePoint);
+			height = heightNoise(amplitude, frequency, spherePoint + randomTranslate);
 
 			// Set sea-colors, deeper part is slighly deeper blue.
 			if(height < seaHeight)
@@ -226,7 +226,7 @@ void PSphere::deform(HeightMap *map)
 		for(y=0; y < map->getSize(); y++)
 		{
 			spherePos = map->projectToSphere(x, y);
-			height = heightNoise(amplitude, frequency, spherePos);
+			height = heightNoise(amplitude, frequency, spherePos + randomTranslate);
 			map->setHeight(x, y, height);
 		}
 
@@ -384,6 +384,11 @@ void PSphere::create(Ogre::uint32 iters, ResourceParameter resourceParameter)
 	faceZP = new HeightMap(iters, Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f));
 	// 270 degrees through x-axis
 	faceZM = new HeightMap(iters, Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f));
+
+	srand(RParameter.getSeed());
+	randomTranslate.x = (float)((rand() % 1000)-500)/100.0f;
+	randomTranslate.y = (float)((rand() % 1000)-500)/100.0f;
+	randomTranslate.z = (float)((rand() % 1000)-500)/100.0f;
 
 	deform(faceYP);
 	deform(faceXM);
