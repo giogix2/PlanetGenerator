@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->lineEdit->setValidator( new QIntValidator(0, 100, this) );
     ui->lineEdit_2->setValidator( new QIntValidator(0, 100, this) );
-	params = new std::ResourceParameter();
+    params = new std::ResourceParameter();
 }
 
 MainWindow::~MainWindow()
@@ -62,7 +62,7 @@ void MainWindow::on_pushButton_clicked()
     }
 		
 	//debug messages
-	qDebug() << params->getRadius();
+    qDebug() << params->getRadius();
     qDebug() << params->getWaterFraction();
 	qDebug() << QString::fromStdString(params->getWaterFirstColor());
 	qDebug() << QString::fromStdString(params->getWaterSecondColor());
@@ -74,7 +74,7 @@ void MainWindow::on_pushButton_clicked()
 	for (std::vector<std::pair <float, float> >::const_iterator iter = params->getFrequencyAmplitude().begin(); iter != params->getFrequencyAmplitude().end(); ++iter)
 	{
 		qDebug() << iter->first <<", " << iter->second;
-	}
+    }
 }
 
 void MainWindow::on_pushButton_2_clicked()
@@ -148,12 +148,30 @@ void MainWindow::openNewWindow()
 			
 			//qDebug() << "first val: " + values.value(0);	
 			//qDebug() << "second val: " + values.value(1);
-			setAmps( values.value(0).toFloat(),  values.value(1).toFloat());
+            setAmps( values.value(0).toFloat(),  values.value(1).toFloat());
 		}		
 	}	
 }
 
 void MainWindow::setAmps(float p_val1, float p_val2)
 {
-	params->setFrequencyAmplitude(p_val1, p_val2);
+    params->setFrequencyAmplitude(p_val1, p_val2);
+}
+
+void MainWindow::on_pushButton_9_clicked()
+{
+    meshdialog = new MeshDialog();
+
+    if(meshdialog->exec())
+    {
+        for(int i=0; i<meshdialog->getMeshes()->count(); i++)
+        {
+            QString values = meshdialog->getMeshes()->item(i)->text();
+
+            qDebug() << "path: " + values;//.value(0);
+
+            //pass the mesh onwards to ResourceParameter
+
+        }
+    }
 }
