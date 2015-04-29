@@ -83,11 +83,15 @@ int initOgre::start(){
 
 	Ogre::ResourceGroupManager::getSingleton().declareResource("ram.mesh", "Mesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 	Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_col.png", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	//Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_nor.png", "Texture", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_nor.png", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_eyelids.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_eyes.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_horns.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+
+	Ogre::ResourceGroupManager::getSingleton().declareResource("asteroid.mesh", "Mesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	Ogre::ResourceGroupManager::getSingleton().declareResource("Material.001.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	Ogre::ResourceGroupManager::getSingleton().declareResource("space rock tex 3.jpg", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 
 	//Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(5);
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
@@ -156,8 +160,10 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	Camera->setFarClipDistance(3000.0f);     // note to self: do not set if using stencil shadows
 
 	// Let there be light
-	Scene->setAmbientLight(Ogre::ColourValue(0.02f, 0.02f, 0.02f));
+	Scene->setAmbientLight(Ogre::ColourValue(0.2f, 0.2f, 0.2f));
 	Ogre::Light *light = Scene->createLight( "PointLight" );
+	light->setDiffuseColour(1.0, 1.0, 1.0);
+	light->setSpecularColour(1.0, 1.0, 1.0);
 	light->setType(Ogre::Light::LT_POINT);
 	light->setPosition(200, 40, 150);
 
@@ -183,11 +189,8 @@ void initOgre::setSceneAndRun(PSphere *planet){
 
 	//planet->loadMeshFile("ram1.mesh", "LocalMesh");
 
-	planet->attachMesh(sphere1, Scene, "ram.mesh", 0.0, 0.0);
-
-	Ogre::MaterialPtr mat = Ogre::MaterialManager::getSingleton().create("PlaneMat", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-	//Ogre::TextureUnitState* tuisTexture = mat->getTechnique(0)->getPass(0)->createTextureUnitState("grass_1024.jpg");
-
+	planet->attachMesh(sphere1, Scene, "ram.mesh", 0.0, 200.0);
+	planet->attachMesh(sphere1, Scene, "asteroid.mesh", 0.0, 180.0);
 
 
 	// No need for this anymore
