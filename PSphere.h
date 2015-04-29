@@ -28,6 +28,8 @@ public:
 
 	Ogre::Real getObserverDistanceToSurface();
 
+	bool checkAccessibility(Ogre::Vector3 location);
+
 	PSphere();
 
 private:
@@ -39,6 +41,7 @@ private:
 	Ogre::uint32		vertexCount;
 	Ogre::uint32		indexCount;
 	Ogre::Real			radius;
+	Ogre::Real			seaHeight;
 	unsigned char		*image;
 	Ogre::MeshPtr		mesh;
 	Ogre::Vector3		observer;
@@ -55,9 +58,9 @@ private:
 
 	void fixTextureSeam();
 
-	void calculateSeaLevel(float &seaLevel, float &minElev, float &maxElev, float seaFraction);
+	void calculateSeaLevel(float &minElev, float &maxElev, float seaFraction);
 
-	void smoothSeaArea(float seaHeight);
+	void smoothSeaArea();
 
 	void deform(HeightMap *map);
 
@@ -68,7 +71,7 @@ private:
 	Ogre::Real heightNoise(vector<float> amplitude,
 						   vector<float> frequency, Ogre::Vector3 Point);
 
-	void generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom);
+	void generateImage(Ogre::Real top, Ogre::Real bottom);
 
 	void generateMeshData();
 

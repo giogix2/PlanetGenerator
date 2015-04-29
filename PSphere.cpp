@@ -127,7 +127,7 @@ Ogre::Real PSphere::getObserverDistanceToSurface()
 }
 
 /* Example that shows procedural generation of textures */
-void PSphere::generateImage(Ogre::Real seaHeight, Ogre::Real top, Ogre::Real bottom)
+void PSphere::generateImage(Ogre::Real top, Ogre::Real bottom)
 {
 	Ogre::Vector3 spherePoint;
 	Ogre::Real latitude, longitude;
@@ -285,7 +285,7 @@ void PSphere::calculateNormals()
 	}
 }
 
-void PSphere::calculateSeaLevel(float &seaLevel, float &minElev, float &maxElev, float seaFraction)
+void PSphere::calculateSeaLevel(float &minElev, float &maxElev, float seaFraction)
 {
 	Ogre::uint32 i, accumulator=0, histoTotal;
 
@@ -327,11 +327,11 @@ void PSphere::calculateSeaLevel(float &seaLevel, float &minElev, float &maxElev,
 			break;
 	}
 	// Figure out offset with i
-	seaLevel = Ogre::Real(i) / 99.0f * (maxElev-minElev) + minElev;
+	seaHeight = Ogre::Real(i) / 99.0f * (maxElev-minElev) + minElev;
 
 }
 
-void PSphere::smoothSeaArea(float seaHeight)
+void PSphere::smoothSeaArea()
 {
 	faceYP->setToMinimumHeight(seaHeight);
 	faceXM->setToMinimumHeight(seaHeight);
@@ -405,11 +405,11 @@ void PSphere::create(Ogre::uint32 iters, ResourceParameter resourceParameter)
 	deform(faceZP);
 	deform(faceZM);
 
-	float seaHeight, min, max;
+	float min, max;
 
-	calculateSeaLevel(seaHeight, min, max, waterFraction);
-	generateImage(seaHeight, max, min);
-	smoothSeaArea(seaHeight);
+	calculateSeaLevel(min, max, waterFraction);
+	generateImage(max, min);
+	smoothSeaArea();
 }
 
 /* Release resources allocated by Sphere class */
@@ -599,3 +599,97 @@ Ogre::MeshPtr PSphere::getMesh(){
 	return mesh;
 }
 
+bool PSphere::checkAccessibility(Ogre::Vector3 location)
+{
+	Ogre::Real x, y, z, x_f, y_f;
+	HeightMap *grid;
+
+edgeCase:
+	x = Ogre::Math::Abs(location.x);
+	y = Ogre::Math::Abs(location.y);
+	z = Ogre::Math::Abs(location.z);
+
+	if (x > y && x > z)
+	{
+		// Scale longest component to unit length
+		location *= (1.0f/x);
+		// Set grid y-component
+		y_f = location.z;
+		// Check if this is positive or negative face
+		if (location.x < 0.0f)
+		{
+			// grid x-component
+			x_f = -location.y;
+			grid = faceXM;
+		}
+		else
+		{
+			x_f = location.y;
+			grid = faceXP;
+		}
+	}
+	else if (y > x && y > z)
+	{
+		location *= (1.0f/y);
+		y_f = location.z;
+		if (location.y < 0.0f)
+		{
+			x_f = location.x;
+			grid = faceYM;
+		}
+		else
+		{
+			x_f = -location.x;
+			grid = faceYP;
+		}
+	}
+	else if (z > x && z > y)
+	{
+		location *= (1.0f/z);
+		x_f = -location.x;
+		if (location.z < 0.0f)
+		{
+			y_f = location.y;
+			grid = faceZM;
+		}
+		else
+		{
+			y_f = -location.y;
+			grid = faceZP;
+		}
+	}
+	else
+	{
+		// If vector length is zero, location can't reside on a cube.
+		if (location.length() == 0)
+			return false;
+
+		/* If two or three vector elements equal to each other, they are on
+		 * cube edges. This slightly shortens y compared to x and z compared to y.
+		 *  This results in ix and iy to fall within a correct range. */
+		if (x == y)
+		{
+			location.y *= 0.9999;
+
+		}
+		if (x == z)
+		{
+			location.z *= 0.9999;
+		}
+		if (y == z)
+		{
+			location.z *= 0.9999;
+		}
+		// Use goto to try again
+		goto edgeCase;
+	}
+
+	unsigned short iy = (unsigned short)((1.0f+y_f)/2.0f*grid->getSize());
+	unsigned short ix = (unsigned short)((1.0f+x_f)/2.0f*grid->getSize());
+
+	// If location height is more than sea-height, it is accessible.
+	if ((grid->getHeight(ix, iy) - seaHeight) > 0.0f)
+		return true;
+	else
+		return false;
+}

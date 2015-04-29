@@ -12,6 +12,7 @@ public:
 	~HeightMap();
 	unsigned int getSize();
 	void setHeight(unsigned int x, unsigned int y, float elevation);
+	float getHeight(unsigned int x, unsigned int y);
 	void setToMinimumHeight(float minimumHeight);
 	void getHistogram(unsigned int histogram[], unsigned short brackets);
 	void getMinMax(float &min, float &max);

@@ -63,6 +63,11 @@ void HeightMap::setHeight(unsigned int x, unsigned int y, float elevation)
 		maxHeight = elevation;
 }
 
+float HeightMap::getHeight(unsigned int x, unsigned int y)
+{
+	return height[y][x];
+}
+
 void HeightMap::setToMinimumHeight(float minimumHeight)
 {
 	unsigned int x, y;
