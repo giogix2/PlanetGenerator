@@ -82,8 +82,8 @@ int initOgre::start(){
 	}
 
 	Ogre::ResourceGroupManager::getSingleton().declareResource("ram.mesh", "Mesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_col.png", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_nor.png", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_col.jpg", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	//Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_nor.png", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_eyelids.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_eyes.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
