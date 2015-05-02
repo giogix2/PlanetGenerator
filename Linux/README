@@ -1,0 +1,49 @@
+########################
+#### Prerequisities ####
+cmake	>= 2.8.11	(tested: 3.0.2, 3.2.1)
+Ogre	== 1.9		(tested: 1.9.0)
+Qt	>= 5		(tested: 5.4.1)
+
+#### Ubuntu ############
+# Useful commands
+$ apt-cache search <word>
+$ sudo apt-get install <package>
+
+## Packages to install
+
+cmake
+libogre-1.9-dev
+libois-dev
+qtbase5-dev
+########################
+
+
+#### Gentoo ############
+# Useful commands
+$ nano
+$ equery uses <package>
+$ emerge <package>	(-s = search, -pv = pretend and show use-flags)
+
+## Packages to install
+# USE-flags can be set per package in /etc/portage/package.use
+
+cmake	(USEFLAGS qt5)
+ogre	(USEFLAGS ois cg)
+
+# These should be already installed by cmake +qt5
+qtcore
+qtgui
+qtwidgets
+########################
+
+#################################
+#### Compilation #### (debug-build with -DCMAKE_BUILD_TYPE=Debug)
+
+$ cmake -G "Unix Makefiles"
+$ make				(can be sped up somewhat with -j <num of jobs> switch)
+
+#################################
+#### Running the application ####
+
+$ cd bin
+$ ./PlanetGenerator
