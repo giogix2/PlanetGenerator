@@ -30,15 +30,17 @@ int initOgre::start(){
 	/* Use Posix-function stat to check existence of a file.
 	 * This is needed because Ogre makes zero effort to find its own plugins. */
 	struct stat statBuf;
-	Ogre::String PluginFile[3];
+	Ogre::String PluginFile[4];
 
 	PluginFile[0].append("/usr/lib/OGRE/RenderSystem_GL.so");
 	PluginFile[1].append("/usr/lib/local/OGRE/RenderSystem_GL.so");
 	// Ubuntu
 #ifdef __x86_64__
 	PluginFile[2].append("/usr/lib/x86_64-linux-gnu/OGRE-");
+	PluginFile[3].append("/usr/lib64/OGRE/RenderSystem_GL.so");
 #elif __i386__
 	PluginFile[2].append("/usr/lib/i386-linux-gnu/OGRE-");
+	PluginFile[3].append("/usr/lib32/OGRE/RenderSystem_GL.so");
 #endif
 	PluginFile[2] += Ogre::StringConverter::toString(OGRE_VERSION_MAJOR) + ".";
 	PluginFile[2] += Ogre::StringConverter::toString(OGRE_VERSION_MINOR) + ".";
@@ -46,7 +48,7 @@ int initOgre::start(){
 	PluginFile[2] += "/RenderSystem_GL.so";
 
 	int i;
-	for(i=0; i < 3; i++)
+	for(i=0; i < 4; i++)
 	{
 		if( stat(PluginFile[i].c_str(), &statBuf) == 0 )
 		{
@@ -56,7 +58,7 @@ int initOgre::start(){
 		}
 	}
 	if(PluginName == "")
-		PluginName.append("RenderSystem_GL");				// When all else fails...
+		Ogre::LogManager::getSingleton().logMessage(Ogre::LML_CRITICAL, "Could not find RenderSystem_GL.so!");
 #endif
 
 	// RenderSystem_GL_d if using Ogre debug mode

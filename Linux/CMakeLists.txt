@@ -28,8 +28,9 @@ elseif(EXISTS "/usr/share/OGRE/cmake/modules") # Ubuntu
 
     set(CMAKE_MODULE_PATH "/usr/share/OGRE/cmake/modules/;${CMAKE_MODULE_PATH}")
 
+# Just warn here, Fedora does not require this to succeed.
 else ()
-    message(SEND_ERROR "Failed to find module path.")
+    message(WARNING "Failed to find path for Ogres cmake-module.")
 
 endif(EXISTS "/usr/local/lib/OGRE/cmake")
 
@@ -131,6 +132,6 @@ target_link_libraries(PlanetGenerator ${OGRE_LIBRARIES} ${OIS_LIBRARIES} ${OGRE_
 set(CMAKE_CXX_FLAGS "-Wall -std=c++11")
 
 install(TARGETS PlanetGenerator
-        RUNTIME DESTINATION bin2
+        RUNTIME DESTINATION bin
         CONFIGURATIONS all)
  

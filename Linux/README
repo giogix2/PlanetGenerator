@@ -1,8 +1,16 @@
 ########################
-#### Prerequisities ####
+#### Prerequisites #####
+
+Compiler recent enough to support c++11
 cmake	>= 2.8.11	(tested: 3.0.2, 3.2.1)
 Ogre	== 1.9		(tested: 1.9.0)
+ois	== 1.3		(tested: 1.3.0)
 Qt	>= 5		(tested: 5.4.1)
+
+Tested on:
+Ubuntu 15.04	(x86_64)
+Fedora 21	(x86_64)
+Gentoo ~amd64	(x86_64)
 
 #### Ubuntu ############
 # Useful commands
@@ -17,6 +25,18 @@ libois-dev
 qtbase5-dev
 ########################
 
+#### Fedora ############
+# Useful commands
+$ yum search/info/install <package>
+
+## Packages to install
+
+gcc-c++
+cmake
+ogre-devel
+ois-devel
+qt5-qtbase-devel
+########################
 
 #### Gentoo ############
 # Useful commands
@@ -27,8 +47,8 @@ $ emerge <package>	(-s = search, -pv = pretend and show use-flags)
 ## Packages to install
 # USE-flags can be set per package in /etc/portage/package.use
 
-cmake	(USEFLAGS qt5)
-ogre	(USEFLAGS ois cg)
+cmake	(USE +qt5)
+ogre	(USE +ois)
 
 # These should be already installed by cmake +qt5
 qtcore
