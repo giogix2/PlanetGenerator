@@ -115,10 +115,22 @@ namespace std
 	{
 		return amplitude;
 	}
-	vector<pair <float, float>>& ResourceParameter::getFrequencyAmplitude(void)
+    vector<pair <float, float> >& ResourceParameter::getFrequencyAmplitude(void)
 	{
 		return frequencyAmplitude;
 	}
+    vector <string>& ResourceParameter::getMeshLocations(void)
+    {
+        return meshLocation;
+    }
+    vector <int>& ResourceParameter::getObjectAmount(void)
+    {
+        return objectAmount;
+    }
+    vector <pair <string, int> >& ResourceParameter::getMeshLocObjAmount(void)
+    {
+        return meshLocObjAmount;
+    }
 	void ResourceParameter::setTerrainFirstColor(string newTerrainFirstColor)
 	{
 		terrainFirstColor = newTerrainFirstColor;
@@ -173,6 +185,18 @@ namespace std
 	{
 		frequencyAmplitude.push_back(make_pair(p_frequency, p_amplitude));
 	}
+    void ResourceParameter::setMeshLocation(string p_location)
+    {
+        meshLocation.push_back(p_location);
+    }
+    void ResourceParameter::setObjectAmount(int p_objAmount)
+    {
+        objectAmount.push_back(p_objAmount);
+    }
+    void ResourceParameter::setMeshLocObjAmount(string p_location, int p_objAmount)
+    {
+        meshLocObjAmount.push_back(make_pair(p_location, p_objAmount));
+    }
 	unsigned char ResourceParameter::hexToBinary(const string& hexNumber)
 	{
 		stringstream stringstream1;
@@ -184,7 +208,7 @@ namespace std
 	}
 	/*if the number of the pairs it not even, the function will ignore the last one to have pair values.
 	the first value is frequency and the second is amplitude.*/
-	void ResourceParameter::splitToFrequencyAmplitude(const string& stringToSplit, char delimiter, vector<pair <float, float>>& tempVector)
+    void ResourceParameter::splitToFrequencyAmplitude(const string& stringToSplit, char delimiter, vector<pair <float, float> >& tempVector)
 	{
 	   string::size_type i = 0;
 	   string::size_type j = stringToSplit.find(delimiter);

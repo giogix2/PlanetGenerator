@@ -5,14 +5,16 @@
 #include <QDebug>
 #include <QColorDialog>
 #include <QVectorIterator>
+#include <QtMath>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->lineEdit->setValidator( new QIntValidator(0, 100, this) );
+    ui->lineEdit->setValidator( new QIntValidator(1, 100, this) );
     ui->lineEdit_2->setValidator( new QIntValidator(0, 100, this) );
+    ui->lineEdit_3->setValidator( new QIntValidator(1, 429496729, this) );
     params = new std::ResourceParameter();
 }
 
@@ -42,6 +44,11 @@ void MainWindow::on_pushButton_clicked()
             params->setWaterSecondColor(ui->pushButton_3->text().toUtf8().constData());
         }
     }
+    if(ui->lineEdit_3 != NULL)
+    {
+        int seed = ui->lineEdit_3->text().toInt();
+        params->setSeed(seed);
+    }
 	    
     if(ui->pushButton_4->text() != "Color")
     {        
@@ -61,9 +68,10 @@ void MainWindow::on_pushButton_clicked()
         params->setMountainSecondColor(ui->pushButton_7->text().toUtf8().constData());
     }
 		
-	//debug messages
+    //debug messages
     qDebug() << params->getRadius();
     qDebug() << params->getWaterFraction();
+    qDebug() << params->getSeed();
 	qDebug() << QString::fromStdString(params->getWaterFirstColor());
 	qDebug() << QString::fromStdString(params->getWaterSecondColor());
 	qDebug() << QString::fromStdString(params->getTerrainFirstColor());
@@ -74,6 +82,15 @@ void MainWindow::on_pushButton_clicked()
 	for (std::vector<std::pair <float, float> >::const_iterator iter = params->getFrequencyAmplitude().begin(); iter != params->getFrequencyAmplitude().end(); ++iter)
 	{
 		qDebug() << iter->first <<", " << iter->second;
+    }
+
+    for (std::vector<std::string>::const_iterator iter = params->getMeshLocations().begin(); iter != params->getMeshLocations().end(); ++iter)
+    {
+        qDebug() << "Mesh path:" << QString::fromStdString(*iter);
+    }
+    for (std::vector<int>::const_iterator iter = params->getObjectAmount().begin(); iter != params->getObjectAmount().end(); ++iter)
+    {
+        qDebug() << "Amount: " << *iter;
     }
 }
 
@@ -166,12 +183,19 @@ void MainWindow::on_pushButton_9_clicked()
     {
         for(int i=0; i<meshdialog->getMeshes()->count(); i++)
         {
-            QString values = meshdialog->getMeshes()->item(i)->text();
+            QStringList values = meshdialog->getMeshes()->item(i)->text().split(",");
 
-            qDebug() << "path: " + values;//.value(0);
+            qDebug() << "path: " + values.value(0)+"::::amount: "+values.value(1);//.value(0);
 
             //pass the mesh onwards to ResourceParameter
+            setMeshes( values.value(0),  values.value(1).toInt());
 
         }
     }
+}
+
+void MainWindow::setMeshes(QString p_path, int p_count)
+{
+    params->setMeshLocation(p_path.toStdString());
+    params->setObjectAmount(p_count);
 }

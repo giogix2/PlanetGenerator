@@ -34,6 +34,9 @@ namespace std
 		vector <float> getFrequency(void);
 		vector <float> getAmplitude(void);
 		vector<pair <float, float> >& getFrequencyAmplitude(void);
+        vector <string>& getMeshLocations(void);
+        vector <int>& getObjectAmount(void);
+        vector <pair <string, int> >& getMeshLocObjAmount(void);
 		void setTerrainFirstColor(string);
 		void setTerrainSecondColor(string);
 		void setWaterFirstColor(string);
@@ -47,6 +50,9 @@ namespace std
 		void setAmplitude(float);
 		void setFrequencyAmplitude(string NewfrequencyAmplitude, char delimiter);
 		void setFrequencyAmplitude(float p_frequency, float p_amplitude);
+        void setMeshLocation(string p_location);
+        void setObjectAmount(int p_objAmount);
+        void setMeshLocObjAmount(string p_location, int p_objAmount);
 	private:
 		string terrainFirstColor;
 		string terrainSecondColor;
@@ -62,6 +68,9 @@ namespace std
 		vector <pair <float, float> > frequencyAmplitude;
 		unsigned char hexToBinary(const string& hexNumber);
 		void splitToFrequencyAmplitude(const string& stringToSplit, char delimiter, vector<pair <float, float> >& tempVector);
+        vector <string> meshLocation;
+        vector <int> objectAmount;
+        vector <pair <string, int> > meshLocObjAmount;
 	};
 }
 #endif
