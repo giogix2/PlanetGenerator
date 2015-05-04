@@ -1,6 +1,7 @@
 #ifndef _PSphere_H_
 #define _PSphere_H_
 
+#include "Object.h"
 #include "HeightMap.h"
 #include "ResourceParameter.h"
 using namespace std;
@@ -53,6 +54,7 @@ private:
 	HeightMap			*faceZM;
 	ResourceParameter	RParameter;
 	Ogre::Vector3		randomTranslate;
+	vector<Object>		objects;
 
 	void calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour);
 
