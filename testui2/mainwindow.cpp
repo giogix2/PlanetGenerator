@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->lineEdit->setValidator( new QIntValidator(1, 100, this) );
     ui->lineEdit_2->setValidator( new QIntValidator(0, 100, this) );
-    ui->lineEdit_3->setValidator( new QIntValidator(1, 429496729, this) );
+    ui->lineEdit_3->setValidator( new QIntValidator(1, 429496729, this) ); //quick fix, need to set max value to 2^32
     params = new std::ResourceParameter();
 }
 
@@ -84,14 +84,18 @@ void MainWindow::on_pushButton_clicked()
 		qDebug() << iter->first <<", " << iter->second;
     }
 
-    for (std::vector<std::string>::const_iterator iter = params->getMeshLocations().begin(); iter != params->getMeshLocations().end(); ++iter)
+    for (std::vector<std::pair <std::string, int> >::const_iterator iter = params->getMeshLocObjAmount().begin(); iter != params->getMeshLocObjAmount().end(); ++iter)
+    {
+        qDebug() << QString::fromStdString(iter->first) <<", " << iter->second;
+    }
+ /*   for (std::vector<std::string>::const_iterator iter = params->getMeshLocations().begin(); iter != params->getMeshLocations().end(); ++iter)
     {
         qDebug() << "Mesh path:" << QString::fromStdString(*iter);
     }
     for (std::vector<int>::const_iterator iter = params->getObjectAmount().begin(); iter != params->getObjectAmount().end(); ++iter)
     {
         qDebug() << "Amount: " << *iter;
-    }
+    }*/
 }
 
 void MainWindow::on_pushButton_2_clicked()
@@ -156,15 +160,16 @@ void MainWindow::on_pushButton_8_clicked()
 void MainWindow::openNewWindow()
 {
     dialog = new FreqAmpDialog();
-    //dialog->show();
+    //add items from ResourceParameter vector to listwidget
+    dialog->instantiateList(params->getFrequencyAmplitude());
 	if(dialog->exec())
-	{
+    {
+        //clear ResourceParameter vector
+        params->emptyFrequencyAmplitude();
 		for(int i=0; i<dialog->getThem()->count(); i++)
 		{			
 			QStringList values = dialog->getThem()->item(i)->text().split(",");
-			
-			//qDebug() << "first val: " + values.value(0);	
-			//qDebug() << "second val: " + values.value(1);
+            //put values to ResourceParameter vector
             setAmps( values.value(0).toFloat(),  values.value(1).toFloat());
 		}		
 	}	
@@ -173,29 +178,36 @@ void MainWindow::openNewWindow()
 void MainWindow::setAmps(float p_val1, float p_val2)
 {
     params->setFrequencyAmplitude(p_val1, p_val2);
+
+    //alternate way:
+    //params->setFrequency(p_val1);
+    //params->setAmplitude(p_val2);
 }
 
 void MainWindow::on_pushButton_9_clicked()
 {
     meshdialog = new MeshDialog();
-
+    //add items from ResourceParameter vector to listwidget
+    meshdialog->instantiateList(params->getMeshLocObjAmount());
     if(meshdialog->exec())
     {
+        //clear ResourceParameter vector
+        params->emptyMeshLocObjAmount();
         for(int i=0; i<meshdialog->getMeshes()->count(); i++)
         {
             QStringList values = meshdialog->getMeshes()->item(i)->text().split(",");
 
-            qDebug() << "path: " + values.value(0)+"::::amount: "+values.value(1);//.value(0);
-
-            //pass the mesh onwards to ResourceParameter
+            //put values to ResourceParameter vector
             setMeshes( values.value(0),  values.value(1).toInt());
-
         }
     }
 }
 
 void MainWindow::setMeshes(QString p_path, int p_count)
 {
-    params->setMeshLocation(p_path.toStdString());
-    params->setObjectAmount(p_count);
+    params->setMeshLocObjAmount(p_path.toStdString(), p_count);
+
+    //alternate way:
+    //params->setMeshLocation(p_path.toStdString());
+    //params->setObjectAmount(p_count);
 }

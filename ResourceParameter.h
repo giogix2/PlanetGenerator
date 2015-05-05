@@ -53,6 +53,9 @@ namespace std
         void setMeshLocation(string p_location);
         void setObjectAmount(int p_objAmount);
         void setMeshLocObjAmount(string p_location, int p_objAmount);
+
+        void emptyFrequencyAmplitude();
+        void emptyMeshLocObjAmount();
 	private:
 		string terrainFirstColor;
 		string terrainSecondColor;

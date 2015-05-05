@@ -241,5 +241,14 @@ namespace std
 		tempVector.push_back(pair);
 		}
 	}
+    //empty the vector
+    void ResourceParameter::emptyFrequencyAmplitude()
+    {
+        frequencyAmplitude.clear();
+    }
+    void ResourceParameter::emptyMeshLocObjAmount()
+    {
+        meshLocObjAmount.clear();
+    }
 
 }

@@ -17,11 +17,14 @@ public:
     ~MeshDialog();
 
     QListWidget* getMeshes();
+    void instantiateList(std::vector< std::pair < std::string, int > > meshLocObjAmount);
 
 private slots:
     void on_pushButton_clicked();
 
     void on_pushButton_2_clicked();
+
+    void on_pushButton_3_clicked();
 
 private:
     Ui::MeshDialog *ui;

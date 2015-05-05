@@ -39,3 +39,19 @@ QListWidget* FreqAmpDialog::getThem()
 {
 	return ui->listWidget;
 }
+
+void FreqAmpDialog::on_pushButton_2_clicked()
+{
+    qDeleteAll(ui->listWidget->selectedItems());
+}
+
+void FreqAmpDialog::instantiateList(std::vector< std::pair < float, float > > freqamps)
+{
+    for (std::vector<std::pair <float, float> >::const_iterator iter = freqamps.begin(); iter != freqamps.end(); ++iter)
+    {
+        QString freq = QString::number(iter->first);
+        QString amp = QString::number(iter->second);
+        ui->listWidget->addItem(""+freq+","+amp);
+        //qDebug() << iter->first <<", " << iter->second;
+    }
+}
