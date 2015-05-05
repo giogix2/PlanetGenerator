@@ -83,6 +83,7 @@ set(HDRS
     ../CollisionTools.h
     ../Common.h
     ../ResourceParameter.h
+    ../Object.h
     ../testui2/mainwindow.h
     ../testui2/freqampdialog.h
     ../testui2/meshdialog.h
@@ -98,6 +99,7 @@ set(SRCS
     ../CollisionTools.cpp
     ../Common.cpp
     ../ResourceParameter.cpp
+    ../Object.cpp
     ../testui2/mainwindow.cpp
     ../testui2/freqampdialog.cpp
     ../testui2/meshdialog.cpp
