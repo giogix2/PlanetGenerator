@@ -32,10 +32,10 @@ material Material.001
 
             texture_unit 
             {
-                texture space rock tex 3.jpg
+                texture "space rock tex 3.jpg"
                 tex_address_mode wrap
                 scale 1.0 1.0
-                colour_op modulate
+                colour_op replace
             }
         }
     }
