@@ -1,7 +1,7 @@
 #ifndef _PSphere_H_
 #define _PSphere_H_
 
-#include "Object.h"
+#include "ObjectInfo.h"
 #include "HeightMap.h"
 #include "ResourceParameter.h"
 using namespace std;
@@ -18,8 +18,9 @@ public:
 
 	void loadMeshFile(const std::string &path, const std::string &meshName);
 
-	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z);
+	bool checkIfObjectIsIn (const std::string &objectName);
 
+	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z);
 
 	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude);
 
@@ -54,7 +55,7 @@ private:
 	HeightMap			*faceZM;
 	ResourceParameter	RParameter;
 	Ogre::Vector3		randomTranslate;
-	vector<Object>		objects;
+	vector<ObjectInfo>		objects;
 
 	void calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour);
 
