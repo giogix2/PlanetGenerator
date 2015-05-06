@@ -14,7 +14,11 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->setupUi(this);
     ui->lineEdit->setValidator( new QIntValidator(1, 100, this) );
     ui->lineEdit_2->setValidator( new QIntValidator(0, 100, this) );
-    ui->lineEdit_3->setValidator( new QIntValidator(1, 429496729, this) ); //quick fix, need to set max value to 2^32
+
+    //regex to handle max value for lineEdit to be 2*32-1 (UINT_MAX)
+    QRegExp rx("^(\\d|\\d{1,9}|3\\d{1,9}|41\\d{8}|428\\d{7}|4293\\d{6}|42948\\d{5}|429495\\d{4}|4294966\\d{3}|42949671\\d{2}|429496729[0-5])$");
+    QValidator *validator = new QRegExpValidator(rx, this);
+    ui->lineEdit_3->setValidator(validator);
     params = new std::ResourceParameter();
 }
 
