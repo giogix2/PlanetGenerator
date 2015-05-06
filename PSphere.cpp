@@ -595,6 +595,13 @@ bool PSphere::checkIfObjectIsIn (const std::string &objectName) {
 }
 
 void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z) {
+		//	while (checkIfObjectIsIn(newName)) {
+		//	temp_int++;
+		//	char temp_char[3];
+		//	itoa(temp_int, temp_char, 10);
+		//	string newName = objectName;
+		//	newName = objectName+string(temp_char);
+		//}
 	if (!checkIfObjectIsIn(objectName)){
 		Ogre::Vector3 position = Ogre::Vector3(x, y, z);
 		Ogre::Entity *entity = scene->createEntity(objectName, objectName);
@@ -605,11 +612,26 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 	}
 	else { // If the name of this object has already been chosen, create a new one not used yet.
 		int temp_int = 1;
-		char temp_char[3];
-		itoa(temp_int, temp_char, 10);
-		printf("%s\n", temp_char);
-		string newName = objectName+string(temp_char);
+		//char temp_char[3];
+		//itoa(temp_int, temp_char, 10);
 
+		ostringstream convert;
+		convert << temp_int;
+		string result = convert.str();
+		string newName = objectName+result;
+
+		//string newName = objectName+string(temp_char);
+		while (checkIfObjectIsIn(newName)) {
+			temp_int++;
+			//char temp_char[3];
+			//itoa(temp_int, temp_char, 10);
+			ostringstream convert;
+			convert << temp_int;
+			string result = convert.str();
+			string newName = objectName+result;
+
+			//newName = objectName+string(temp_char);
+		}
 		Ogre::Vector3 position = Ogre::Vector3(x, y, z);
 		Ogre::Entity *entity = scene->createEntity(newName, objectName);
 		Ogre::SceneNode *cube = node->createChildSceneNode(newName, position);
@@ -617,6 +639,25 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 		objects.push_back(object);
 		cube->attachObject(entity);
 	}
+	//if (checkIfObjectIsIn(objectName)) {
+	//	int temp_int = 1;
+	//	char temp_char[3];
+	//	itoa(temp_int, temp_char, 10);
+	//	string newName = objectName+string(temp_char);
+	//	while (checkIfObjectIsIn(newName)) {
+	//		temp_int++;
+	//		char temp_char[3];
+	//		itoa(temp_int, temp_char, 10);
+	//		string newName = objectName;
+	//		newName = objectName+string(temp_char);
+	//	}
+	//	Ogre::Vector3 position = Ogre::Vector3(x, y, z);
+	//	Ogre::Entity *entity = scene->createEntity(newName, objectName);
+	//	Ogre::SceneNode *cube = node->createChildSceneNode(newName, position);
+	//	ObjectInfo object = ObjectInfo(position, newName, node);
+	//	objects.push_back(object);
+	//	cube->attachObject(entity);
+	//}
 }
 
 void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude) {

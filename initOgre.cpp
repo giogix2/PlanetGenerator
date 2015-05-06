@@ -193,6 +193,8 @@ void initOgre::setSceneAndRun(PSphere *planet){
 
 	planet->attachMesh(sphere1, Scene, "ram.mesh", 0.0, 200.0);
 	planet->attachMesh(sphere1, Scene, "asteroid.mesh", 0.0, 180.0);
+	planet->attachMesh(sphere1, Scene, "ram.mesh", 0.0, 160.0);
+	//planet->attachMesh(sphere1, Scene, "ram.mesh", 0.0, 140.0);
 
 
 	// No need for this anymore
