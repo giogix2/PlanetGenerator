@@ -583,11 +583,11 @@ void PSphere::loadMeshFile(const std::string &path, const std::string &meshName)
 	meshSerializer.importMesh(stream, pMesh.getPointer());
 }
 
-bool PSphere::checkIfObjectIsIn (const std::string &objectName) {
+bool PSphere::checkIfObjectIsIn (std::string &objectName) {
 	// Check if the object if already attached to the planet. Or at least is in the list of objects (the vector objects)
 	for (vector<ObjectInfo>::iterator it = objects.begin() ; it != objects.end(); ++it) {
 		ObjectInfo objTemp = *it;
-		if (objTemp.getObjectName() == objectName) {
+		if (objTemp.getObjectName().compare(objectName) == 0) {
 			return true;
 		}
 	}
@@ -595,69 +595,24 @@ bool PSphere::checkIfObjectIsIn (const std::string &objectName) {
 }
 
 void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z) {
-		//	while (checkIfObjectIsIn(newName)) {
-		//	temp_int++;
-		//	char temp_char[3];
-		//	itoa(temp_int, temp_char, 10);
-		//	string newName = objectName;
-		//	newName = objectName+string(temp_char);
-		//}
-	if (!checkIfObjectIsIn(objectName)){
-		Ogre::Vector3 position = Ogre::Vector3(x, y, z);
-		Ogre::Entity *entity = scene->createEntity(objectName, objectName);
-		Ogre::SceneNode *cube = node->createChildSceneNode(objectName, position);
-		ObjectInfo object = ObjectInfo(position, objectName, node);	
-		objects.push_back(object);
-		cube->attachObject(entity);
-	}
-	else { // If the name of this object has already been chosen, create a new one not used yet.
-		int temp_int = 1;
-		//char temp_char[3];
-		//itoa(temp_int, temp_char, 10);
-
-		ostringstream convert;
-		convert << temp_int;
-		string result = convert.str();
-		string newName = objectName+result;
-
-		//string newName = objectName+string(temp_char);
-		while (checkIfObjectIsIn(newName)) {
+	int temp_int = 0;
+	string newName = objectName;
+	string result;
+	while (checkIfObjectIsIn(newName)) {
 			temp_int++;
-			//char temp_char[3];
-			//itoa(temp_int, temp_char, 10);
 			ostringstream convert;
 			convert << temp_int;
 			string result = convert.str();
-			string newName = objectName+result;
-
-			//newName = objectName+string(temp_char);
+			newName = objectName+result;
 		}
-		Ogre::Vector3 position = Ogre::Vector3(x, y, z);
-		Ogre::Entity *entity = scene->createEntity(newName, objectName);
-		Ogre::SceneNode *cube = node->createChildSceneNode(newName, position);
-		ObjectInfo object = ObjectInfo(position, newName, node);
-		objects.push_back(object);
-		cube->attachObject(entity);
-	}
-	//if (checkIfObjectIsIn(objectName)) {
-	//	int temp_int = 1;
-	//	char temp_char[3];
-	//	itoa(temp_int, temp_char, 10);
-	//	string newName = objectName+string(temp_char);
-	//	while (checkIfObjectIsIn(newName)) {
-	//		temp_int++;
-	//		char temp_char[3];
-	//		itoa(temp_int, temp_char, 10);
-	//		string newName = objectName;
-	//		newName = objectName+string(temp_char);
-	//	}
-	//	Ogre::Vector3 position = Ogre::Vector3(x, y, z);
-	//	Ogre::Entity *entity = scene->createEntity(newName, objectName);
-	//	Ogre::SceneNode *cube = node->createChildSceneNode(newName, position);
-	//	ObjectInfo object = ObjectInfo(position, newName, node);
-	//	objects.push_back(object);
-	//	cube->attachObject(entity);
-	//}
+
+	Ogre::Vector3 position = Ogre::Vector3(x, y, z);
+	Ogre::Entity *entity = scene->createEntity(newName, objectName);
+	Ogre::SceneNode *cube = node->createChildSceneNode(newName, position);
+	ObjectInfo object = ObjectInfo(position, newName, node);
+	objects.push_back(object);
+	cube->attachObject(entity);
+
 }
 
 void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude) {

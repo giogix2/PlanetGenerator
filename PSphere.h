@@ -18,7 +18,7 @@ public:
 
 	void loadMeshFile(const std::string &path, const std::string &meshName);
 
-	bool checkIfObjectIsIn (const std::string &objectName);
+	bool checkIfObjectIsIn (std::string &objectName);
 
 	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z);
 
