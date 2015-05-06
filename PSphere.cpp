@@ -594,7 +594,32 @@ bool PSphere::checkIfObjectIsIn (std::string &objectName) {
 	return false;
 }
 
-void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z) {
+void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, Ogre::Real x, Ogre::Real y, Ogre::Real z) {
+	int temp_int = 0;
+	string newName = meshName;
+	string result;
+	string delimiter = ".";
+	string nameWithoutFormat = newName.substr(0, newName.find(delimiter)); // Remove the format from the name (the part of the name after the ".")
+	string finalName = nameWithoutFormat;
+	while (checkIfObjectIsIn(finalName)) { 
+		// If the name has already been used it change it adding an auto-increased number in the end
+		temp_int++;
+		ostringstream convert;
+		convert << temp_int;
+		string result = convert.str();
+		finalName = nameWithoutFormat+result;
+	}
+
+	Ogre::Vector3 position = Ogre::Vector3(x, y, z);
+	Ogre::Entity *entity = scene->createEntity(finalName, meshName);
+	Ogre::SceneNode *cube = node->createChildSceneNode(finalName, position);
+	ObjectInfo object = ObjectInfo(position, finalName, node);
+	objects.push_back(object);
+	cube->attachObject(entity);
+
+}
+
+void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z) {
 	int temp_int = 0;
 	string newName = objectName;
 	string result;
@@ -611,20 +636,27 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 	}
 
 	Ogre::Vector3 position = Ogre::Vector3(x, y, z);
-	Ogre::Entity *entity = scene->createEntity(finalName, objectName);
+	Ogre::Entity *entity = scene->createEntity(finalName, meshName);
 	Ogre::SceneNode *cube = node->createChildSceneNode(finalName, position);
 	ObjectInfo object = ObjectInfo(position, finalName, node);
 	objects.push_back(object);
 	cube->attachObject(entity);
-
 }
 
-void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude) {
+void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude) {
 	Ogre::Vector3 cart_coord = convertSphericalToCartesian(latitude, longitude);
 	Ogre::Real x = radius*1.2*cart_coord.x;
 	Ogre::Real y = radius*1.2*cart_coord.y;
 	Ogre::Real z = radius*1.2*cart_coord.z;
-	this->attachMesh(node, scene, objectName, x, y, z);
+	this->attachMesh(node, scene, meshName, objectName, x, y, z);
+}
+
+void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, Ogre::Real latitude, Ogre::Real longitude) {
+	Ogre::Vector3 cart_coord = convertSphericalToCartesian(latitude, longitude);
+	Ogre::Real x = radius*1.2*cart_coord.x;
+	Ogre::Real y = radius*1.2*cart_coord.y;
+	Ogre::Real z = radius*1.2*cart_coord.z;
+	this->attachMesh(node, scene, meshName, x, y, z);
 
 }
 

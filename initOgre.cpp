@@ -191,8 +191,8 @@ void initOgre::setSceneAndRun(PSphere *planet){
 
 	//planet->loadMeshFile("ram1.mesh", "LocalMesh");
 
-	planet->attachMesh(sphere1, Scene, "ram.mesh", 0.0, 200.0);
-	planet->attachMesh(sphere1, Scene, "asteroid.mesh", 0.0, 180.0);
+	planet->attachMesh(sphere1, Scene, "ram.mesh", "Ramiro", 0.0, 200.0);
+	planet->attachMesh(sphere1, Scene, "asteroid.mesh", "CK7", 0.0, 180.0);
 
 	// No need for this anymore
 	//Ogre::MeshManager::getSingleton().remove("CustomMesh");
