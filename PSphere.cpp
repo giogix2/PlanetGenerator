@@ -396,6 +396,13 @@ void PSphere::create(Ogre::uint32 iters, ResourceParameter resourceParameter)
 	// 270 degrees through x-axis
 	faceZM = new HeightMap(iters, Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f));
 
+	faceYP->setNeighbours(faceXM, faceXP, faceZP, faceZM);
+	faceXM->setNeighbours(faceYM, faceYP, faceZP, faceZM);
+	faceYM->setNeighbours(faceXP, faceXM, faceZP, faceZM);
+	faceXP->setNeighbours(faceYP, faceYM, faceZP, faceZM);
+	faceZP->setNeighbours(faceXM, faceXP, faceYM, faceYP);
+	faceZM->setNeighbours(faceXM, faceXP, faceYP, faceYM);
+
 	srand(RParameter.getSeed());
 	randomTranslate.x = (float)((rand() % 1000)-500)/100.0f;
 	randomTranslate.y = (float)((rand() % 1000)-500)/100.0f;
@@ -664,10 +671,17 @@ Ogre::MeshPtr PSphere::getMesh(){
 	return mesh;
 }
 
-bool PSphere::checkAccessibility(Ogre::Vector3 location)
+/* Figures which one of the cubefaces 3D-location lands, and what 2D-coordinates
+ * that face has.
+ * Returns:
+ *	On success, pointer to a pointer of HeightMap location lands,
+ *	HeightMap-coordinates x and y, and function return value true.
+ *	On failure, return function value is false. */
+bool PSphere::getGridLocation(Ogre::Vector3 location, HeightMap **face,
+							  unsigned int &ix, unsigned int &iy)
 {
-	Ogre::Real x, y, z, x_f, y_f;
 	HeightMap *grid;
+	Ogre::Real x, y, z, x_f, y_f;
 
 edgeCase:
 	x = Ogre::Math::Abs(location.x);
@@ -749,12 +763,90 @@ edgeCase:
 		goto edgeCase;
 	}
 
-	unsigned short iy = (unsigned short)((1.0f+y_f)/2.0f*grid->getSize());
-	unsigned short ix = (unsigned short)((1.0f+x_f)/2.0f*grid->getSize());
+	iy = (unsigned short)((1.0f+y_f)/2.0f*grid->getSize());
+	ix = (unsigned short)((1.0f+x_f)/2.0f*grid->getSize());
+
+	(*face) = grid;
+
+	return true;
+}
+
+/* Checks if position is water or solid ground.
+ * Returns:
+ *  On ground, return true.
+ *  On water, return false. */
+bool PSphere::checkAccessibility(Ogre::Vector3 location)
+{
+	HeightMap *grid;
+	unsigned int ix, iy;
+
+	getGridLocation(location, &grid, ix, iy);
+	std::cout << "IX AND IY: " << ix << " " << iy << std::endl;
 
 	// If location height is more than sea-height, it is accessible.
 	if ((grid->getHeight(ix, iy) - seaHeight) > 0.0f)
 		return true;
 	else
 		return false;
+}
+
+Ogre::Vector3 PSphere::nextPosition(Ogre::Vector3 location, PSphere::Direction dir)
+{
+	Ogre::Vector3 newPos;
+	HeightMap *grid;
+	unsigned int int_x, int_y;
+
+	/* Using 3D cartesian position figures out which face of the 6 cubefaces it
+	 * resides, and gives integer grid-coordinates x and y for it. */
+	getGridLocation(location, &grid, int_x, int_y);
+
+	// Going y+
+	if (dir == PSPHERE_GRID_YPLUS)
+	{
+		// Handles migrating from one grid to the next
+		if (int_y == grid->getSize()-1)
+		{
+			// Outputs adjacent x and y on neighboring grid by using current grid x and y
+			grid->getNeighbourEntryCoordinates(HeightMap::neighbour_YP, int_x, int_y);
+			// Set neighbour as a grid
+			grid = grid->getNeighbourPtr(HeightMap::neighbour_YP);
+		}
+		else
+			int_y++;
+	}
+	else if (dir == PSPHERE_GRID_YMINUS)
+	{
+		if (int_y == 0)
+		{
+			grid->getNeighbourEntryCoordinates(HeightMap::neighbour_YM, int_x, int_y);
+			grid = grid->getNeighbourPtr(HeightMap::neighbour_YM);
+		}
+		else
+			int_y--;
+	}
+	else if (dir == PSPHERE_GRID_XPLUS)
+	{
+		if (int_x == grid->getSize()-1)
+		{
+			grid->getNeighbourEntryCoordinates(HeightMap::neighbour_XP, int_x, int_y);
+			grid = grid->getNeighbourPtr(HeightMap::neighbour_XP);
+		}
+		else
+			int_x++;
+	}
+	else if (dir == PSPHERE_GRID_XMINUS)
+	{
+		if (int_x == 0)
+		{
+			grid->getNeighbourEntryCoordinates(HeightMap::neighbour_XM, int_x, int_y);
+			grid = grid->getNeighbourPtr(HeightMap::neighbour_XM);
+		}
+		else
+			int_x--;
+	}
+
+	// Project 2D grid-location back to 3D cartesian coordinate
+	newPos = grid->projectToSphere(int_x, int_y);
+
+	return newPos;
 }

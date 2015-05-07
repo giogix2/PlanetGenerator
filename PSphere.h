@@ -10,6 +10,8 @@ using namespace std;
 class PSphere
 {
 public:
+	enum Direction {PSPHERE_GRID_YPLUS, PSPHERE_GRID_YMINUS, PSPHERE_GRID_XPLUS, PSPHERE_GRID_XMINUS};
+
 	void create(Ogre::uint32 iters, ResourceParameter resourceParameter);
 
 	void destroy();
@@ -37,6 +39,10 @@ public:
 	Ogre::Real getObserverDistanceToSurface();
 
 	bool checkAccessibility(Ogre::Vector3 location);
+
+	bool getGridLocation(Ogre::Vector3 location, HeightMap **face, unsigned int &x, unsigned int &y);
+
+	Ogre::Vector3 nextPosition(Ogre::Vector3 location, PSphere::Direction dir);
 
 	PSphere();
 
