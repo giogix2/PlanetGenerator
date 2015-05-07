@@ -83,7 +83,7 @@ set(HDRS
     ../CollisionTools.h
     ../Common.h
     ../ResourceParameter.h
-    ../Object.h
+    ../ObjectInfo.h
     ../testui2/mainwindow.h
     ../testui2/freqampdialog.h
     ../testui2/meshdialog.h
@@ -99,7 +99,7 @@ set(SRCS
     ../CollisionTools.cpp
     ../Common.cpp
     ../ResourceParameter.cpp
-    ../Object.cpp
+    ../ObjectInfo.cpp
     ../testui2/mainwindow.cpp
     ../testui2/freqampdialog.cpp
     ../testui2/meshdialog.cpp
@@ -131,7 +131,7 @@ set_target_properties(PlanetGenerator PROPERTIES DEBUG_POSTFIX _d)
  
 target_link_libraries(PlanetGenerator ${OGRE_LIBRARIES} ${OIS_LIBRARIES} ${OGRE_Overlay_LIBRARIES} ${Qt5Libs})
 
-set(CMAKE_CXX_FLAGS "-Wall -std=c++11")
+set(CMAKE_CXX_FLAGS "-Wall")
 
 install(TARGETS PlanetGenerator
         RUNTIME DESTINATION bin
