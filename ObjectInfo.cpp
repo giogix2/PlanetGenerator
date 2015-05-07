@@ -17,4 +17,8 @@ namespace std {
 		return name;
 	}
 
+	Ogre::Vector3 ObjectInfo::getPosition() {
+		return position;
+	}
+
 }

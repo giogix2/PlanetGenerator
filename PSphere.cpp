@@ -774,14 +774,28 @@ edgeCase:
 /* Checks if position is water or solid ground.
  * Returns:
  *  On ground, return true.
- *  On water, return false. */
+ *  On water or has an object, return false. */
 bool PSphere::checkAccessibility(Ogre::Vector3 location)
 {
-	HeightMap *grid;
-	unsigned int ix, iy;
+	HeightMap *grid, *gridObj;
+	unsigned int i, ix, iy, Obj_x, Obj_y;
+	Ogre::Vector3 ObjPos;
 
 	getGridLocation(location, &grid, ix, iy);
-	std::cout << "IX AND IY: " << ix << " " << iy << std::endl;
+
+	// Check if location to check has already an object
+	for(i=0; i < objects.size(); i++)
+	{
+		ObjPos = objects[i].getPosition();
+		getGridLocation(ObjPos, &gridObj, Obj_x, Obj_y);
+
+		// Checks if location and object is on a same grid
+		if (grid == gridObj)
+		{
+			if ( (ix == Obj_x) && (iy = Obj_y) )
+				return false;
+		}
+	}
 
 	// If location height is more than sea-height, it is accessible.
 	if ((grid->getHeight(ix, iy) - seaHeight) > 0.0f)
