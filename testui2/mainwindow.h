@@ -4,6 +4,8 @@
 #include <QMainWindow>
 #include "freqampdialog.h"
 #include "meshdialog.h"
+#include "../PSphere.h"
+#include "../initOgre.h"
 
 #include "../ResourceParameter.h"
 

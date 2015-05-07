@@ -23,7 +23,7 @@ int main(int argc, char *argv[])
     MainWindow w;
     w.show();
 
-	vector<float> frequency;
+/*	vector<float> frequency;
 	frequency.push_back(0.4f);
 	frequency.push_back(0.06666f);
 	vector <float> amplitude;
@@ -31,17 +31,8 @@ int main(int argc, char *argv[])
 	amplitude.push_back(0.006666f);
 
 	ResourceParameter resourceParameter = ResourceParameter((string)"#00FF00",(string)"#FACD00",(string)"#32CDFF"
-		,(string)"#64FFFF",(string)"#B4B4B4",(string)"#FFFFFF",0.6f,7.5f,60,frequency,amplitude);
-	PSphere mySphere;
-	initOgre rendering;
-
-	mySphere.create(100, resourceParameter);
-
-	rendering.start();
-	rendering.setSceneAndRun(&mySphere);
-	rendering.cleanup();
-
-	mySphere.destroy();
+		,(string)"#64FFFF",(string)"#B4B4B4",(string)"#FFFFFF",0.6f,7.5f,60,frequency,amplitude);*/
+	a.exec();
 
 	return 0;
 }

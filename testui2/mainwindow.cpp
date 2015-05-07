@@ -19,7 +19,20 @@ MainWindow::MainWindow(QWidget *parent) :
     QRegExp rx("^(\\d|\\d{1,9}|3\\d{1,9}|41\\d{8}|428\\d{7}|4293\\d{6}|42948\\d{5}|429495\\d{4}|4294966\\d{3}|42949671\\d{2}|429496729[0-5])$");
     QValidator *validator = new QRegExpValidator(rx, this);
     ui->lineEdit_3->setValidator(validator);
-    params = new std::ResourceParameter();
+
+	//set default parameters for now::
+	vector<float> frequency;
+	frequency.push_back(0.4);
+	frequency.push_back(0.06666);
+	vector <float> amplitude;
+	amplitude.push_back(0.02);
+	amplitude.push_back(0.006666);
+
+	float waterfraction = 0.6;
+	float radius = 7.5;
+
+    params = new std::ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#32CDFF"
+		,(std::string)"#64FFFF",(std::string)"#B4B4B4",(std::string)"#FFFFFF",waterfraction,radius,60,frequency,amplitude);
 }
 
 MainWindow::~MainWindow()
@@ -29,13 +42,13 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_pushButton_clicked()
 {   
-    if(ui->lineEdit != NULL)
+	if(!ui->lineEdit->text().isEmpty())
     {        
         float radius = ui->lineEdit->text().toFloat();
         params->setRadius(radius);
     }
 	
-    if(ui->lineEdit_2 != NULL)
+    if(!ui->lineEdit_2->text().isEmpty())
     {       
         float waterfraction = (ui->lineEdit_2->text().toFloat())/100;
         params->setWaterFraction(waterfraction);
@@ -48,7 +61,7 @@ void MainWindow::on_pushButton_clicked()
             params->setWaterSecondColor(ui->pushButton_3->text().toUtf8().constData());
         }
     }
-    if(ui->lineEdit_3 != NULL)
+    if(!ui->lineEdit_3->text().isEmpty())
     {
         int seed = ui->lineEdit_3->text().toInt();
         params->setSeed(seed);
@@ -83,10 +96,19 @@ void MainWindow::on_pushButton_clicked()
 	qDebug() << QString::fromStdString(params->getMountainFirstColor());
 	qDebug() << QString::fromStdString(params->getMountainSecondColor());
 	
-	for (std::vector<std::pair <float, float> >::const_iterator iter = params->getFrequencyAmplitude().begin(); iter != params->getFrequencyAmplitude().end(); ++iter)
+/*	for (std::vector<std::pair <float, float> >::const_iterator iter = params->getFrequencyAmplitude().begin(); iter != params->getFrequencyAmplitude().end(); ++iter)
 	{
 		qDebug() << iter->first <<", " << iter->second;
+    }*/
+	for (std::vector<float>::const_iterator iter = params->getFrequency().begin(); iter != params->getFrequency().end(); ++iter)
+    {
+        qDebug() << "Frequency:" << *iter;
     }
+    for (std::vector<float>::const_iterator iter = params->getAmplitude().begin(); iter != params->getAmplitude().end(); ++iter)
+    {
+        qDebug() << "Amplitude: " << *iter;
+    }
+
 
     for (std::vector<std::pair <std::string, int> >::const_iterator iter = params->getMeshLocObjAmount().begin(); iter != params->getMeshLocObjAmount().end(); ++iter)
     {
@@ -100,6 +122,16 @@ void MainWindow::on_pushButton_clicked()
     {
         qDebug() << "Amount: " << *iter;
     }*/
+	PSphere mySphere;
+	initOgre rendering;
+
+	mySphere.create(100, *params);
+
+	rendering.start();
+	rendering.setSceneAndRun(&mySphere);
+	rendering.cleanup();
+
+	mySphere.destroy();
 }
 
 void MainWindow::on_pushButton_2_clicked()
@@ -181,11 +213,11 @@ void MainWindow::openNewWindow()
 
 void MainWindow::setAmps(float p_val1, float p_val2)
 {
-    params->setFrequencyAmplitude(p_val1, p_val2);
+    //params->setFrequencyAmplitude(p_val1, p_val2);
 
     //alternate way:
-    //params->setFrequency(p_val1);
-    //params->setAmplitude(p_val2);
+    params->setFrequency(p_val1);
+    params->setAmplitude(p_val2);
 }
 
 void MainWindow::on_pushButton_9_clicked()

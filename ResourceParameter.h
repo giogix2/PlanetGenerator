@@ -31,8 +31,8 @@ namespace std
 		float getWaterFraction(void);
 		float getRadius(void);
 		int getSeed(void);
-		vector <float> getFrequency(void);
-		vector <float> getAmplitude(void);
+		vector <float>& getFrequency(void);
+		vector <float>& getAmplitude(void);
 		vector<pair <float, float> >& getFrequencyAmplitude(void);
         vector <string>& getMeshLocations(void);
         vector <int>& getObjectAmount(void);

@@ -6,9 +6,9 @@ namespace std
 {
 	ResourceParameter::ResourceParameter(void)
 	{
-		waterFraction = 0.0;
+		/*waterFraction = 0.0;
 		radius = 0.0;
-		seed = 0;
+		seed = 0;*/
 	}
 	ResourceParameter::ResourceParameter(string newTerrainFirstColor,string newTerrainSecondColor, string newWaterFirstColor,
 								string newWaterSecondColor, string newMountainFirstColor, string newMountainSecondColor,
@@ -107,11 +107,11 @@ namespace std
 	{
 		return seed;
 	}
-	vector <float> ResourceParameter::getFrequency(void)
+	vector <float>& ResourceParameter::getFrequency(void)
 	{
 		return frequency;
 	}
-	vector <float> ResourceParameter::getAmplitude(void)
+	vector <float>& ResourceParameter::getAmplitude(void)
 	{
 		return amplitude;
 	}
