@@ -792,7 +792,7 @@ bool PSphere::checkAccessibility(Ogre::Vector3 location)
 		// Checks if location and object is on a same grid
 		if (grid == gridObj)
 		{
-			if ( (ix == Obj_x) && (iy = Obj_y) )
+			if ( (ix == Obj_x) && (iy == Obj_y) )
 				return false;
 		}
 	}
