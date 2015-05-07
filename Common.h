@@ -6,6 +6,8 @@
 
 Ogre::Vector3 convertSphericalToCartesian (Ogre::Real latitude, Ogre::Real longitude);
 
+Ogre::Vector2 convertCartesianToPlateCarree(Ogre::Vector3 position);
+
 /* 2d-array allocator. Because of templating, the whole definition must be in a header */
 template <typename T>
 T **allocate2DArray(unsigned short sizeY, unsigned short sizeX)

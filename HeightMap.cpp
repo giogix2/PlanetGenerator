@@ -268,43 +268,8 @@ void HeightMap::generateMeshData(Ogre::Vector3 *vArray, Ogre::Vector2 *texArray,
 			// Project height-map location to a sphere
 			vArray[idx] = projectToSphere(x, y) * scalingFactor;
 
-			Ogre::Vector3	XYprojection, LongitudeRef, LatitudeRef;
-			Ogre::Real		u, v;
-
-			/* Calculates equirectangular projection AKA plate carrée
-			 * Coordinate convention for textures:
-			 * texture(0.0 <= u <= 1.0, 0.0 <= v <= 1.0)
-			 * z-direction is polar. model(rnd, rnd, +z) => texture(rnd, >0.5)
-			 * model(+x, 0, rnd) => texture(0, rnd) and
-			 * model(0, +y, rnd) => texture(0.25, rnd)
-			 * and model(0, -y, rnd) => texture(0.75, rnd) */
-
-			// vertex projection in xy-plane
-			XYprojection = Ogre::Vector3(vArray[idx].x, vArray[idx].y, 0.0f);
-
-			// if x and y are both zero, result for u is nan. Guard against it.
-			if(XYprojection.length() != 0)
-			{
-				LongitudeRef = Ogre::Vector3(1.0f, 0.0f, 0.0f);
-				u = acosf( XYprojection.dotProduct(LongitudeRef)
-						  /(XYprojection.length()*LongitudeRef.length()) );
-				if(vArray[idx].y < 0)
-					u = Ogre::Math::TWO_PI - u;
-				u = u/Ogre::Math::TWO_PI;
-			}
-			else
-			{
-				u = 0.0f;   // x = 0 and y = 0, set u = 0;
-			}
-
-			// -z is defined as southpole
-			LatitudeRef = Ogre::Vector3(0.0f, 0.0f, -1.0f);
-			v = acosf(vArray[idx].dotProduct(LatitudeRef)
-					  /(vArray[idx].length()*LatitudeRef.length()));
-
-			v = v/Ogre::Math::PI;
-
-			texArray[idx] = Ogre::Vector2(u, v);
+			// Calculate texture-coordinate for the vertex
+			texArray[idx] = convertCartesianToPlateCarree(vArray[idx]);
 
 			idx++;
 		}
