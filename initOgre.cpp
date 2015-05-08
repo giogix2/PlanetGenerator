@@ -153,7 +153,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	Camera = Scene->createCamera("VertCamera");
 
 	// Camera position
-	Camera->setPosition(Ogre::Vector3(0,0,20));
+	Camera->setPosition(Ogre::Vector3(0,0,planet->getRadius()*2.65f));
 	planet->setObserverPosition(Camera->getPosition());
 	// Camera looks toward origo
 	Camera->lookAt(Ogre::Vector3(0,0,0));
