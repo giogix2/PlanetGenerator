@@ -872,3 +872,8 @@ Ogre::Vector3 PSphere::nextPosition(Ogre::Vector3 location, PSphere::Direction d
 
 	return newPos;
 }
+
+Ogre::Real PSphere::getRadius()
+{
+	return radius;
+}

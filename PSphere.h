@@ -44,6 +44,8 @@ public:
 
 	Ogre::Vector3 nextPosition(Ogre::Vector3 location, PSphere::Direction dir);
 
+	Ogre::Real getRadius();
+
 	PSphere();
 
 private:
