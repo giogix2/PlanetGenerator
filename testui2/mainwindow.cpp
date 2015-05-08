@@ -21,18 +21,20 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lineEdit_3->setValidator(validator);
 	
 	//set default parameters for now::
-	vector<float> frequency;
+	/*vector<float> frequency;
 	frequency.push_back(0.4);
 	frequency.push_back(0.06666);
 	vector <float> amplitude;
 	amplitude.push_back(0.02);
-	amplitude.push_back(0.006666);
+	amplitude.push_back(0.006666);*/
+
+	std::string frequencyAmplitude = "0.4 0.02 0.06666 0.006666";
 
 	float waterfraction = 0.6;
 	float radius = 7.5;
 
     params = new std::ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#32CDFF"
-		,(std::string)"#64FFFF",(std::string)"#B4B4B4",(std::string)"#FFFFFF",waterfraction,radius,60,frequency,amplitude);
+		,(std::string)"#64FFFF",(std::string)"#B4B4B4",(std::string)"#FFFFFF",waterfraction,radius,60,frequencyAmplitude);
 }
 
 MainWindow::~MainWindow()
@@ -199,6 +201,7 @@ void MainWindow::openNewWindow()
     dialog = new FreqAmpDialog();
     //add items from ResourceParameter vector to listwidget
     dialog->instantiateList(params->getFrequencyAmplitude());
+	std::string frequencyAmplitude;
 	if(dialog->exec())
     {
         //clear ResourceParameter vector
@@ -208,7 +211,9 @@ void MainWindow::openNewWindow()
 			QStringList values = dialog->getThem()->item(i)->text().split(",");
             //put values to ResourceParameter vector
             setAmps( values.value(0).toFloat(),  values.value(1).toFloat());
-		}		
+			frequencyAmplitude += values.value(0).toStdString() + ' ' +  values.value(1).toStdString() + ' ';
+		}
+		params->setFrequencyAmplitude(frequencyAmplitude, ' ');
 	}	
 }
 
@@ -217,8 +222,8 @@ void MainWindow::setAmps(float p_val1, float p_val2)
     //params->setFrequencyAmplitude(p_val1, p_val2);
 
     //alternate way:
-    params->setFrequency(p_val1);
-    params->setAmplitude(p_val2);
+    //params->setFrequency(p_val1);
+    //params->setAmplitude(p_val2);
 }
 
 void MainWindow::on_pushButton_9_clicked()

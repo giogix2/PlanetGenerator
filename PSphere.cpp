@@ -171,6 +171,7 @@ void PSphere::generateImage(Ogre::Real top, Ogre::Real bottom)
 	// Guard against multiple memory allocations to avoid memory leaks
 	if(image != NULL)
 		delete[] image;
+
 	image = new unsigned char[TEX_WIDTH*TEX_HEIGHT*3];
 
 	for(y=0; y < TEX_HEIGHT; y++)

@@ -14,7 +14,7 @@ namespace std
 		ResourceParameter(void);
 		ResourceParameter(string terrainFirstColor,string terrainSecondColor, string waterFirstColor
 			, string waterSecondColor, string mountainFirstColor, string mountainSecondColor
-			, float waterFraction, float radius, int seed, vector <float> frequency, vector <float> amplitude);
+			, float waterFraction, float radius, int seed, string frequencyAmplitude);
 		~ResourceParameter(void);
 		void getTerrainFirstColor(unsigned char &red, unsigned char &green, unsigned char &blue);
 		void getTerrainSecondColor(unsigned char &red, unsigned char &green, unsigned char &blue);
@@ -46,14 +46,11 @@ namespace std
 		void setWaterFraction(float);
 		void setRadius(float);
 		void setSeed(int);
-		void setFrequency(float);
-		void setAmplitude(float);
 		void setFrequencyAmplitude(string NewfrequencyAmplitude, char delimiter);
 		void setFrequencyAmplitude(float p_frequency, float p_amplitude);
         void setMeshLocation(string p_location);
         void setObjectAmount(int p_objAmount);
         void setMeshLocObjAmount(string p_location, int p_objAmount);
-
         void emptyFrequencyAmplitude();
         void emptyMeshLocObjAmount();
 	private:
@@ -74,6 +71,8 @@ namespace std
         vector <string> meshLocation;
         vector <int> objectAmount;
         vector <pair <string, int> > meshLocObjAmount;
+		void setFrequency(float);
+		void setAmplitude(float);
 	};
 }
 #endif

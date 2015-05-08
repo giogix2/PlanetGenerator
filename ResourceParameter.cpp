@@ -12,7 +12,7 @@ namespace std
 	}
 	ResourceParameter::ResourceParameter(string newTerrainFirstColor,string newTerrainSecondColor, string newWaterFirstColor,
 								string newWaterSecondColor, string newMountainFirstColor, string newMountainSecondColor,
-								float newWaterFraction, float newRadius, int newSeed, vector <float> newFrequency, vector <float> newAmplitude)
+								float newWaterFraction, float newRadius, int newSeed, string newFrequencyAmplitude)
 	{
 		terrainFirstColor = newTerrainFirstColor;
 		waterFirstColor = newWaterFirstColor;
@@ -23,8 +23,7 @@ namespace std
 		waterFraction = newWaterFraction;
 		radius = newRadius;
 		seed = newSeed;
-		frequency = newFrequency;
-		amplitude = newAmplitude;
+		setFrequencyAmplitude(newFrequencyAmplitude,' ');
 	}
 	ResourceParameter::~ResourceParameter(void)
 	{
@@ -169,12 +168,12 @@ namespace std
 	}
 	void ResourceParameter::setFrequency(float newFrequency)
 	{
-		newFrequency = newFrequency < 0 ? 1 : newFrequency;
+		newFrequency = newFrequency < 0 ? 0 : newFrequency;
 		frequency.push_back(newFrequency);
 	}
 	void ResourceParameter::setAmplitude(float newAmplitude)
 	{
-		newAmplitude = newAmplitude < 0 ? 1 : newAmplitude;
+		newAmplitude = newAmplitude < 0 ? 0 : newAmplitude;
 		amplitude.push_back(newAmplitude);
 	}
 	void ResourceParameter::setFrequencyAmplitude(string NewfrequencyAmplitude, char delimiter)
@@ -183,6 +182,10 @@ namespace std
 	}
 	void ResourceParameter::setFrequencyAmplitude(float p_frequency, float p_amplitude)
 	{
+		p_frequency = p_frequency < 0 ? 0 : p_frequency;
+		p_amplitude = p_amplitude < 0 ? 0 : p_amplitude;
+		setFrequency(p_frequency);
+		setAmplitude(p_amplitude);
 		frequencyAmplitude.push_back(make_pair(p_frequency, p_amplitude));
 	}
     void ResourceParameter::setMeshLocation(string p_location)
@@ -234,9 +237,11 @@ namespace std
 		amplitude = std::atof(stringTemp2.c_str());
 
 		//control the range
-		frequency = frequency < 0 ? 1 : frequency;
-		amplitude = amplitude < 0 ? 1 : amplitude;
+		frequency = frequency < 0 ? 0 : frequency;
+		amplitude = amplitude < 0 ? 0 : amplitude;
 
+		setFrequency(frequency);
+		setAmplitude(amplitude);
 		pair = std::make_pair(frequency,amplitude);
 		tempVector.push_back(pair);
 		}
