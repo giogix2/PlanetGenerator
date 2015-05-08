@@ -40,7 +40,7 @@ public:
 
 	Ogre::Real getObserverDistanceToSurface();
 
-	Ogre::Real PSphere::getSurfaceHeight(Ogre::Vector3 Position);
+	Ogre::Real getSurfaceHeight(Ogre::Vector3 Position);
 
 	bool checkAccessibility(Ogre::Vector3 location);
 
