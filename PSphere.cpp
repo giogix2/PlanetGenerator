@@ -431,6 +431,13 @@ void PSphere::destroy()
 	delete[] vertexes;
 	delete[] vNorms;
 	delete[] image;
+
+	delete faceXM;
+	delete faceXP;
+	delete faceYM;
+	delete faceYP;
+	delete faceZM;
+	delete faceZP;
 }
 
 void PSphere::generateMeshData()

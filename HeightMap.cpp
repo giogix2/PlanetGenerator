@@ -22,7 +22,7 @@ HeightMap::HeightMap(unsigned int size, const Ogre::Matrix3 face)
 
 HeightMap::~HeightMap()
 {
-
+	free2DArray(height);
 }
 
 unsigned int HeightMap::getSize()
