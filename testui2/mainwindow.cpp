@@ -130,7 +130,6 @@ void MainWindow::on_pushButton_clicked()
 	rendering = new initOgre();
 	rendering->start();
 	rendering->setSceneAndRun(mySphere);
-	mySphere->destroy();
 	delete mySphere;
 	rendering->cleanup();
 

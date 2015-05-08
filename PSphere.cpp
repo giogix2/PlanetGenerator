@@ -29,6 +29,23 @@ PSphere::PSphere(){
 	observer =	Ogre::Vector3(0.0f, 0.0f, 0.0f);
 }
 
+PSphere::~PSphere()
+{
+	delete[] colours;
+	delete[] indexes;
+	delete[] texCoords;
+	delete[] vertexes;
+	delete[] vNorms;
+	delete[] image;
+
+	delete faceXM;
+	delete faceXP;
+	delete faceYM;
+	delete faceYP;
+	delete faceZM;
+	delete faceZP;
+}
+
 /* Set position for the observer. This must be position vector in modelspace,
  * not in worldspace. In other words, one must undo rotations. */
 void PSphere::setObserverPosition(Ogre::Vector3 position)
@@ -452,24 +469,6 @@ void PSphere::create(Ogre::uint32 iters, ResourceParameter resourceParameter)
 	calculateSeaLevel(min, max, waterFraction);
 	generateImage(max, min);
 	smoothSeaArea();
-}
-
-/* Release resources allocated by Sphere class */
-void PSphere::destroy()
-{
-	delete[] colours;
-	delete[] indexes;
-	delete[] texCoords;
-	delete[] vertexes;
-	delete[] vNorms;
-	delete[] image;
-
-	delete faceXM;
-	delete faceXP;
-	delete faceYM;
-	delete faceYP;
-	delete faceZM;
-	delete faceZP;
 }
 
 void PSphere::generateMeshData()

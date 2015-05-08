@@ -14,8 +14,6 @@ public:
 
 	void create(Ogre::uint32 iters, ResourceParameter resourceParameter);
 
-	void destroy();
-
 	void loadToBuffers(const std::string &meshName, const std::string &textureName);
 
 	void loadMeshFile(const std::string &path, const std::string &meshName);
@@ -51,6 +49,8 @@ public:
 	Ogre::Vector3 nextPosition(Ogre::Vector3 location, PSphere::Direction dir);
 
 	PSphere();
+
+	~PSphere();
 
 private:
 	Ogre::Vector3		*vertexes;
