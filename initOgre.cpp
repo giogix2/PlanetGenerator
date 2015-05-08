@@ -136,12 +136,12 @@ int initOgre::start(){
 	return 0;
 }
 
-void initOgre::CreateFrameListener(){
+void initOgre::CreateFrameListener(PSphere *pSphere){
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS
 	FrameListener= new GeneratorFrameListener(Window, Camera, true, true, true);
 #else
-	FrameListener= new GeneratorFrameListener(Window, Camera,RootSceneNode,Scene);
+	FrameListener= new GeneratorFrameListener(Window, Camera,pSphere ,Scene , RootSceneNode);
 #endif
 	//FrameListener->showDebugOverlay(true);
 	Root->addFrameListener(FrameListener);
@@ -153,7 +153,8 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	Camera = Scene->createCamera("VertCamera");
 
 	// Camera position
-	Camera->setPosition(Ogre::Vector3(0,0,planet->getRadius()*2.5f));
+	Camera->setPosition(Ogre::Vector3(0,0,20));
+	planet->setObserverPosition(Camera->getPosition());
 	// Camera looks toward origo
 	Camera->lookAt(Ogre::Vector3(0,0,0));
 
@@ -195,7 +196,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
 
 	//planet->loadMeshFile("ram1.mesh", "LocalMesh");
 
-	planet->attachMesh(sphere1, Scene, "ram.mesh", "Ramiro", 0.0, 200.0);
+	planet->attachMeshOnGround(sphere1, Scene, "ram.mesh", "Ramiro", 0.0, 200.0);
 	planet->attachMesh(sphere1, Scene, "asteroid.mesh", "CK7", 0.0, 180.0);
 
 	// No need for this anymore
@@ -212,7 +213,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	sphere1->setOrientation(1.3003361e-01f, -1.5604560e-01f, -7.5052901e-01f, 6.2884596e-01f);
 
 	//createFrameListener
-	CreateFrameListener();
+	CreateFrameListener(planet);
 
 	//start Rendering
 	Root->startRendering();

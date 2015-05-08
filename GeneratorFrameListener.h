@@ -36,7 +36,7 @@ D:        Step right
 #include "OgreOverlaySystem.h"
 #include "OgreTextAreaOverlayElement.h"
 #include "OgreFontManager.h"
-
+#include "PSphere.h"
 
 
 
@@ -58,7 +58,8 @@ public:
 	Ogre::SceneNode     *RootSceneNode;//use to operate the entity
 
 	MOC::CollisionTools *CollisionManager;
-	Ogre::SceneManager		*Scene;
+	Ogre::SceneManager	*Scene;
+	PSphere				*pSphere;
 	
 
 	GeneratorFrameListener()
@@ -66,16 +67,18 @@ public:
 	}
 
 	// Constructor takes a RenderWindow because it uses that to determine input context
-	GeneratorFrameListener(Ogre::RenderWindow* win, Ogre::Camera* cam, Ogre::SceneNode  *RSN=NULL,Ogre::SceneManager	*Sc=NULL,bool bufferedKeys = false, bool bufferedMouse = false,
+	GeneratorFrameListener(Ogre::RenderWindow* win, Ogre::Camera* cam, PSphere *ps, Ogre::SceneManager *Sc,Ogre::SceneNode     *RSN,bool bufferedKeys = false, bool bufferedMouse = false,
 				 bool bufferedJoy = false ) :
 		mCamera(cam), mTranslateVector(Ogre::Vector3::ZERO), mCurrentSpeed(0), mWindow(win), mStatsOn(true), mNumScreenShots(0),
 		mMoveScale(0.0f), mRotScale(0.0f), mTimeUntilNextToggle(0), mFiltering(Ogre::TFO_BILINEAR),
 		mAniso(1), mSceneDetailIndex(0), mMoveSpeed(100), mRotateSpeed(18), mDebugOverlay(0),
 		mInputManager(0), mMouse(0), mKeyboard(0), mJoy(0)
 	{
-		RootSceneNode=RSN;//NEW
+		RootSceneNode = RSN;//NEW
 
-		Scene=Sc;
+		Scene = Sc;
+
+		pSphere = ps;
 		
 		// init the collision handler
 		CollisionManager = new MOC::CollisionTools(Scene);

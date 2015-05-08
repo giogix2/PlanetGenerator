@@ -121,7 +121,7 @@ Ogre::Real PSphere::getObserverDistanceToSurface()
 	direction = observer.normalisedCopy();
 	/* Get position of the surface along the line that goes from
 	 * the planet origo to the observer */
-	height = heightNoise(amplitude, frequency, direction);
+	height = heightNoise(amplitude, frequency, direction + randomTranslate);
 	surfacePos = direction*(height*radius + radius);
 
 	distance = fabsf(observer.length()) - fabsf(surfacePos.length());
@@ -129,6 +129,37 @@ Ogre::Real PSphere::getObserverDistanceToSurface()
 	return distance;
 }
 
+/* Get the Height of a particular position of the surface.
+ * Position is a 3-d vector over the surface which you need to know the height
+ * return the height */
+Ogre::Real PSphere::getSurfaceHeight(Ogre::Vector3 Position)
+{
+	Ogre::Real height;
+	Ogre::Vector3 direction, surfacePos;
+	Ogre::Real distance;
+
+	// Hardcode these values for now, waiting for parameter class.
+	vector <float> frequency = RParameter.getFrequency();
+	vector <float> amplitude = RParameter.getAmplitude();
+
+	// normal vector that points from the origo to the observer
+	direction = Position.normalisedCopy();
+	/* Get position of the surface along the line that goes from
+	 * the planet origo to the observer */
+	height = heightNoise(amplitude, frequency, direction + randomTranslate);
+	surfacePos = direction*(height*radius + radius);
+
+	//distance = fabsf(observer.length()) - fabsf(surfacePos.length());
+
+	return surfacePos.length();
+}
+/*
+*return radius
+*/
+Ogre::Real PSphere::getRadius()
+{
+	return radius;
+}
 /* Example that shows procedural generation of textures */
 void PSphere::generateImage(Ogre::Real top, Ogre::Real bottom)
 {
@@ -656,6 +687,8 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 	ObjectInfo object = ObjectInfo(position, finalName, node);
 	objects.push_back(object);
 	cube->attachObject(entity);
+
+	
 }
 
 void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude) {
@@ -663,6 +696,7 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 	Ogre::Real x = radius*1.2*cart_coord.x;
 	Ogre::Real y = radius*1.2*cart_coord.y;
 	Ogre::Real z = radius*1.2*cart_coord.z;
+
 	this->attachMesh(node, scene, meshName, objectName, x, y, z);
 }
 
@@ -674,6 +708,52 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 	this->attachMesh(node, scene, meshName, x, y, z);
 
 }
+/*
+*To skip collision detection while moving object, I try to attach it on the ground and set the initial orientation
+*Maybe later we need object in air or outer space, so I leave attachmesh() and create this function which could put the object on ground.
+*/
+void PSphere::attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude) {
+	Ogre::Vector3 cart_coord = convertSphericalToCartesian(latitude, longitude);
+	Ogre::Real x = radius*cart_coord.x;
+	Ogre::Real y = radius*cart_coord.y;
+	Ogre::Real z = radius*cart_coord.z;
+
+	int temp_int = 0;
+	string newName = objectName;
+	string result;
+	string delimiter = ".";
+	string nameWithoutFormat = newName.substr(0, newName.find(delimiter)); // Remove the format from the name (the part of the name after the ".")
+	string finalName = nameWithoutFormat;
+	while (checkIfObjectIsIn(finalName)) { 
+		// If the name has already been used it change it adding an auto-increased number in the end
+		temp_int++;
+		ostringstream convert;
+		convert << temp_int;
+		string result = convert.str();
+		finalName = nameWithoutFormat+result;
+	}
+
+	Ogre::Vector3 position = Ogre::Vector3(x, y, z);
+	Ogre::Real surfaceHeight = getSurfaceHeight(position);
+	Ogre::Entity *entity = scene->createEntity(finalName, meshName);
+	Ogre::SceneNode *cube = node->createChildSceneNode(finalName);
+	cube->attachObject(entity);
+
+	//cube->_updateBounds();
+	//float objectSize=cube->_getWorldAABB().getSize().length();
+	//float ratio = (surfaceHeight+objectSize/2 )/position.length();
+	float ratio = (surfaceHeight )/position.length();
+	position = position*ratio;
+	cube->setPosition( position );
+
+	//change orientation
+	Ogre::Quaternion q = Ogre::Vector3::UNIT_Y.getRotationTo(position);
+	cube->setOrientation( q );
+
+	ObjectInfo object = ObjectInfo(position, finalName, node);
+	objects.push_back(object);
+}
+
 
 Ogre::MeshPtr PSphere::getMesh(){
 	return mesh;
@@ -871,9 +951,4 @@ Ogre::Vector3 PSphere::nextPosition(Ogre::Vector3 location, PSphere::Direction d
 	newPos = grid->projectToSphere(int_x, int_y);
 
 	return newPos;
-}
-
-Ogre::Real PSphere::getRadius()
-{
-	return radius;
 }

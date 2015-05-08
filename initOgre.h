@@ -23,7 +23,7 @@ private:
 	GeneratorFrameListener  *FrameListener;
 	Ogre::OverlaySystem     *OverlaySystem;
 
-	void CreateFrameListener();
+	void CreateFrameListener(PSphere *pSphere);
 };
 
 #endif

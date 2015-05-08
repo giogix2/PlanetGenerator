@@ -1,4 +1,5 @@
 #include "GeneratorFrameListener.h"
+#include <iostream>
 
 void GeneratorFrameListener::updateStats(void)
 	{
@@ -140,10 +141,17 @@ bool GeneratorFrameListener::processUnbufferedKeyInput(const Ogre::FrameEvent& e
 			float distToColl;
 			Ogre::Vector2 *Vec=new Ogre::Vector2(mMouse->getMouseState().X.abs,mMouse->getMouseState().Y.abs);
 
-			if( !CollisionManager->raycastFromCamera(mWindow,mCamera,*Vec,result,tmpE,distToColl) )
+			/*if( !CollisionManager->raycastFromCamera(mWindow,mCamera,*Vec,result,tmpE,distToColl) )
 			{
 					mTranslateVector.z = -moveScale;
-			}	 
+			}	*/
+			//cout<<pSphere->getObserverDistanceToSurface();
+			//if( pSphere->getObserverDistanceToSurface()>=2.0f)
+			{
+					//mTranslateVector.z = -moveScale;
+					mTranslateVector.z = -pSphere->getRadius()*0.1;
+			}
+
 		}
 			
 
@@ -156,8 +164,13 @@ bool GeneratorFrameListener::processUnbufferedKeyInput(const Ogre::FrameEvent& e
 			//mTranslateVector.z = moveScale;// Move camera backward
 			//if( CollisionManager->raycastFromCamera(mWindow,mCamera,*Vec,result,tmpE,distToColl) )
 				//mTranslateVector.z = -moveScale;	// Move camera back
-			if( !CollisionManager->raycastFromCamera(mWindow,mCamera,*Vec,result,tmpE,distToColl) )
-				mTranslateVector.z = moveScale;	
+			//if( !CollisionManager->raycastFromCamera(mWindow,mCamera,*Vec,result,tmpE,distToColl) )
+			//if( pSphere->getObserverDistanceToSurface()>=2.0f)
+			{
+				//mTranslateVector.z = moveScale;
+				mTranslateVector.z = pSphere->getRadius()*0.1;
+			}
+					
 		}
 			
 
@@ -332,7 +345,14 @@ void GeneratorFrameListener::moveCamera()
 		//(e.g. airplane)
 		mCamera->yaw(mRotX);
 		mCamera->pitch(mRotY);
+		Ogre::Vector3 oldPosition=mCamera->getPosition();
 		mCamera->moveRelative(mTranslateVector);
+		pSphere->setObserverPosition(mCamera->getPosition());
+		//later need to detect all the collision between camera and objects
+		if( pSphere->getObserverDistanceToSurface()<=2.0f)
+		{
+			mCamera->setPosition(oldPosition);
+		}
 	}
 
 void GeneratorFrameListener::showDebugOverlay(bool show)
@@ -348,10 +368,11 @@ void GeneratorFrameListener::showDebugOverlay(bool show)
 
 bool GeneratorFrameListener::frameStarted(const Ogre::FrameEvent& evt)
 	{
-		//RootSceneNode->getChild("planetSphere")->roll(Ogre::Radian(0.004));
+		RootSceneNode->getChild("planetSphere")->roll(Ogre::Radian(0.004));
+		//pSphere->getObserverDistanceToSurface();
 
 		//Physical movement according to the gravity
-		Ogre::SceneNode::ChildNodeIterator it = RootSceneNode->getChild("planetSphere")->getChildIterator();
+		/*Ogre::SceneNode::ChildNodeIterator it = RootSceneNode->getChild("planetSphere")->getChildIterator();
 		while(it.hasMoreElements())
 		{
 			
@@ -415,13 +436,13 @@ bool GeneratorFrameListener::frameStarted(const Ogre::FrameEvent& evt)
 			
 			it.getNext();
 		}
-		
+		*/
 		return true;
 	}
 
 bool GeneratorFrameListener::frameRenderingQueued(const Ogre::FrameEvent& evt)
 	{
-		RootSceneNode->getChild("planetSphere")->roll(Ogre::Radian(0.004));
+		//RootSceneNode->getChild("planetSphere")->roll(Ogre::Radian(0.004));
 
 		if(mWindow->isClosed())	return false;
 

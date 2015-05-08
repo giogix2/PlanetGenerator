@@ -30,6 +30,8 @@ public:
 
 	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, Ogre::Real latitude, Ogre::Real longitude);
 
+	void attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude);
+
 
 
 	Ogre::MeshPtr getMesh();
@@ -38,13 +40,15 @@ public:
 
 	Ogre::Real getObserverDistanceToSurface();
 
+	Ogre::Real PSphere::getSurfaceHeight(Ogre::Vector3 Position);
+
 	bool checkAccessibility(Ogre::Vector3 location);
+
+	Ogre::Real getRadius();
 
 	bool getGridLocation(Ogre::Vector3 location, HeightMap **face, unsigned int &x, unsigned int &y);
 
 	Ogre::Vector3 nextPosition(Ogre::Vector3 location, PSphere::Direction dir);
-
-	Ogre::Real getRadius();
 
 	PSphere();
 
