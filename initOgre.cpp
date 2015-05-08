@@ -8,11 +8,15 @@
 #endif
 
 initOgre::initOgre(){
-		FrameListener = 0;
-		Root = 0;
-		OverlaySystem = 0;
+		FrameListener = NULL;
+		Root = NULL;
+		OverlaySystem = NULL;
 
 	}
+initOgre::~initOgre()
+{
+	//delete Root;
+}
 
 int initOgre::start(){
 
@@ -226,8 +230,16 @@ void initOgre::cleanup(){
 	Scene->destroyLight("PointLight");
 	Ogre::Root::getSingleton().getRenderSystem()->destroyRenderWindow("My little planet");
 	Scene->clearScene();
-	Root->shutdown();
 	Root->destroySceneManager(Scene);
 
-	Ogre::LogManager::getSingleton().logMessage("Ogre is cleaned up");
+	Root->shutdown();
+	
+	delete FrameListener;
+	FrameListener = NULL;
+	delete OverlaySystem;
+	OverlaySystem = NULL;
+	delete Root;
+	Root = NULL;
+
+	//Ogre::LogManager::getSingleton().logMessage("Ogre is cleaned up");
 }

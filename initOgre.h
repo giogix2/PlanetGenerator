@@ -9,6 +9,7 @@
 class initOgre{
  public:
 	initOgre();
+	~initOgre();
 
 	int start();
 	void setSceneAndRun(PSphere *planet);

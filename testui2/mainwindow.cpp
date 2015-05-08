@@ -19,7 +19,7 @@ MainWindow::MainWindow(QWidget *parent) :
     QRegExp rx("^(\\d|\\d{1,9}|3\\d{1,9}|41\\d{8}|428\\d{7}|4293\\d{6}|42948\\d{5}|429495\\d{4}|4294966\\d{3}|42949671\\d{2}|429496729[0-5])$");
     QValidator *validator = new QRegExpValidator(rx, this);
     ui->lineEdit_3->setValidator(validator);
-
+	
 	//set default parameters for now::
 	vector<float> frequency;
 	frequency.push_back(0.4);
@@ -122,16 +122,16 @@ void MainWindow::on_pushButton_clicked()
     {
         qDebug() << "Amount: " << *iter;
     }*/
-	PSphere mySphere;
-	initOgre rendering;
+	
+	mySphere = new PSphere();
+	mySphere->create(100, *params);
+	rendering = new initOgre();
+	rendering->start();
+	rendering->setSceneAndRun(mySphere);
+	mySphere->destroy();
+	rendering->cleanup();
 
-	mySphere.create(100, *params);
-
-	rendering.start();
-	rendering.setSceneAndRun(&mySphere);
-	rendering.cleanup();
-
-	mySphere.destroy();
+	
 }
 
 void MainWindow::on_pushButton_2_clicked()

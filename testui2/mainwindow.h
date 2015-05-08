@@ -54,6 +54,8 @@ private:
     FreqAmpDialog *dialog;
     MeshDialog *meshdialog;
 	std::ResourceParameter *params;
+	PSphere *mySphere;
+	initOgre *rendering;
 };
 
 #endif // MAINWINDOW_H
