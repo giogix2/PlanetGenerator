@@ -9,6 +9,7 @@ namespace std{
 		ObjectInfo(Ogre::Vector3 position, const std::string& objName, Ogre::SceneNode *rootNode);
 		std::string getObjectName();
 		Ogre::Vector3 getPosition();
+		Ogre::Node *getNode();
 
 	private:
 		Ogre::Vector3 position;

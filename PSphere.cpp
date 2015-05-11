@@ -952,3 +952,9 @@ Ogre::Vector3 PSphere::nextPosition(Ogre::Vector3 location, PSphere::Direction d
 
 	return newPos;
 }
+
+
+vector<ObjectInfo> *PSphere::getObjects()
+{
+	return &objects;
+}

@@ -141,13 +141,15 @@ void initOgre::CreateFrameListener(PSphere *pSphere){
 #if OGRE_PLATFORM == OGRE_PLATFORM_APPLE_IOS
 	FrameListener= new GeneratorFrameListener(Window, Camera, true, true, true);
 #else
-	FrameListener= new GeneratorFrameListener(Window, Camera,pSphere ,Scene , RootSceneNode);
+	FrameListener= new GeneratorFrameListener(Window, Camera,pSphere ,Scene , RootSceneNode ,CollisionDetectionManager);
 #endif
 	//FrameListener->showDebugOverlay(true);
 	Root->addFrameListener(FrameListener);
 }
 
 void initOgre::setSceneAndRun(PSphere *planet){
+	
+	CollisionDetectionManager = new CollisionManager(planet->getObjects());
 
 	// Create camera
 	Camera = Scene->createCamera("VertCamera");

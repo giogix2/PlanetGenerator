@@ -11,6 +11,7 @@ namespace std {
 		position = pos;
 		name = objName;
 		node = rootNode->getChild(objName);
+		
 	}
 
 	std::string ObjectInfo::getObjectName() {
@@ -20,5 +21,8 @@ namespace std {
 	Ogre::Vector3 ObjectInfo::getPosition() {
 		return position;
 	}
-
+	
+	Ogre::Node *ObjectInfo::getNode(){
+		return node;
+	}
 }

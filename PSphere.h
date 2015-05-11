@@ -32,8 +32,6 @@ public:
 
 	void attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude);
 
-
-
 	Ogre::MeshPtr getMesh();
 
 	void setObserverPosition(Ogre::Vector3 position);
@@ -49,6 +47,8 @@ public:
 	bool getGridLocation(Ogre::Vector3 location, HeightMap **face, unsigned int &x, unsigned int &y);
 
 	Ogre::Vector3 nextPosition(Ogre::Vector3 location, PSphere::Direction dir);
+
+	vector<ObjectInfo> *getObjects();
 
 	PSphere();
 
