@@ -962,6 +962,11 @@ vector<ObjectInfo> *PSphere::getObjects()
 	return &objects;
 }
 
+void PSphere::setCollisionManager(CollisionManager	*CDM)
+{
+	CollisionDetectionManager = CDM;
+}
+
 void PSphere::moveObject(const std::string &objectName, int direction, float pace) {
 	
 	for (vector<ObjectInfo>::iterator it = objects.begin() ; it != objects.end(); ++it) {
@@ -991,6 +996,23 @@ void PSphere::moveObject(const std::string &objectName, int direction, float pac
 					//newPosition.y = newPosition.y+pace;
 					node->setPosition(newPosition);
 					objTemp.setPosition(newPosition);
+
+
+					
+					//collision detection
+					if(CollisionDetectionManager->checkCollisionAABB(objTemp).collided)
+					{	
+						node->setPosition(oldPosition);
+						objTemp.setPosition(oldPosition);
+					}else{
+						//change orientation
+						Ogre::Quaternion q;
+
+						//q = Ogre::Vector3::UNIT_Y.getRotationTo(newPosition);
+						//node->setOrientation( q );
+						q = Ogre::Vector3::UNIT_Z.getRotationTo(newPosition-oldPosition);
+						node->setOrientation( q );
+					}
 					break;
 				case (DOWN):
 					newPosition.y = newPosition.y-pace;

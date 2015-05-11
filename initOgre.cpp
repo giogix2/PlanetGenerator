@@ -214,6 +214,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
 
 	//Collision Manager
 	CollisionDetectionManager = new CollisionManager(planet->getObjects(),Camera);
+	planet->setCollisionManager( CollisionDetectionManager );
 
 	//createFrameListener
 	CreateFrameListener(planet);

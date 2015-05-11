@@ -4,6 +4,7 @@
 #include "ObjectInfo.h"
 #include "HeightMap.h"
 #include "ResourceParameter.h"
+#include "CollisionManager.h"
 using namespace std;
 
 
@@ -50,6 +51,8 @@ public:
 
 	vector<ObjectInfo> *getObjects();
 
+	void setCollisionManager(CollisionManager	*CDM);
+
 	PSphere();
 
 	~PSphere();
@@ -75,7 +78,8 @@ private:
 	HeightMap			*faceZM;
 	ResourceParameter	RParameter;
 	Ogre::Vector3		randomTranslate;
-	vector<ObjectInfo>		objects;
+	vector<ObjectInfo>	objects;
+	CollisionManager	*CollisionDetectionManager;
 
 	void calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour);
 
