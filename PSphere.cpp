@@ -963,24 +963,25 @@ void PSphere::moveObject(const std::string &objectName, int direction, int pace)
 		if (objTemp.getObjectName().compare(objectName) == 0) {
 			Ogre::Node *node = objTemp.getNode();
 			Ogre::Vector3 oldPosition = node->getPosition();
+			Ogre::Vector3 newPosition(oldPosition.x, oldPosition.y, oldPosition.z);
 			switch (direction) {
 				case (UP):
-					Ogre::Vector3 newPosition(oldPosition.x, oldPosition.y+pace, oldPosition.z);
+					newPosition.y = newPosition.y+pace;
 					node->setPosition(newPosition);
 					objTemp.setPosition(newPosition);
 					break;
 				case (DOWN):
-					Ogre::Vector3 newPosition(oldPosition.x, oldPosition.y-pace, oldPosition.z);
+					newPosition.y = newPosition.y-pace;
 					node->setPosition(newPosition);
 					objTemp.setPosition(newPosition);
 					break;
 				case (LEFT):
-					Ogre::Vector3 newPosition(oldPosition.x-pace, oldPosition.y, oldPosition.z);
+					newPosition.x = newPosition.x-pace;
 					node->setPosition(newPosition);
 					objTemp.setPosition(newPosition);
 					break;
 				case (RIGHT):
-					Ogre::Vector3 newPosition(oldPosition.x+pace, oldPosition.y, oldPosition.z);
+					newPosition.x = newPosition.x+pace;
 					node->setPosition(newPosition);
 					objTemp.setPosition(newPosition);
 					break;
