@@ -18,6 +18,10 @@ using namespace std;
 // Let's set texture dimensions this way for a time being
 #define TEX_WIDTH 1024
 #define TEX_HEIGHT 512
+#define UP 1
+#define DOWN 2
+#define LEFT 3
+#define RIGHT 4
 
 PSphere::PSphere(){
 	vertexes =	NULL;
@@ -950,4 +954,37 @@ Ogre::Vector3 PSphere::nextPosition(Ogre::Vector3 location, PSphere::Direction d
 	newPos = grid->projectToSphere(int_x, int_y);
 
 	return newPos;
+}
+
+void PSphere::moveObject(const std::string &objectName, int direction, int pace) {
+	
+	for (vector<ObjectInfo>::iterator it = objects.begin() ; it != objects.end(); ++it) {
+		ObjectInfo objTemp = *it;
+		if (objTemp.getObjectName().compare(objectName) == 0) {
+			Ogre::Node *node = objTemp.getNode();
+			Ogre::Vector3 oldPosition = node->getPosition();
+			switch (direction) {
+				case (UP):
+					Ogre::Vector3 newPosition(oldPosition.x, oldPosition.y+pace, oldPosition.z);
+					node->setPosition(newPosition);
+					objTemp.setPosition(newPosition);
+					break;
+				case (DOWN):
+					Ogre::Vector3 newPosition(oldPosition.x, oldPosition.y-pace, oldPosition.z);
+					node->setPosition(newPosition);
+					objTemp.setPosition(newPosition);
+					break;
+				case (LEFT):
+					Ogre::Vector3 newPosition(oldPosition.x-pace, oldPosition.y, oldPosition.z);
+					node->setPosition(newPosition);
+					objTemp.setPosition(newPosition);
+					break;
+				case (RIGHT):
+					Ogre::Vector3 newPosition(oldPosition.x+pace, oldPosition.y, oldPosition.z);
+					node->setPosition(newPosition);
+					objTemp.setPosition(newPosition);
+					break;
+			}
+		}
+	}
 }

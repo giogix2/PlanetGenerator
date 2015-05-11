@@ -30,7 +30,7 @@ public:
 
 	void attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude);
 
-
+	void moveObject(const std::string &objectName, int direction, int pace);
 
 	Ogre::MeshPtr getMesh();
 
