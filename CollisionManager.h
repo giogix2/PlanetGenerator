@@ -16,7 +16,7 @@ struct CheckCollisionAnswer
 class CollisionManager
 {
 public:
-	CollisionManager(std::vector<std::ObjectInfo> *Obs);
+	CollisionManager(std::vector<std::ObjectInfo> *Obs,Ogre::Camera *cam);
 
 	std::vector<std::ObjectInfo> *Objects;
 	
@@ -25,7 +25,7 @@ public:
 	CheckCollisionAnswer checkCameraCollision();
 
 private:
-
+	Ogre::Camera            *camera;
 };
 
 #endif

@@ -149,7 +149,7 @@ void initOgre::CreateFrameListener(PSphere *pSphere){
 
 void initOgre::setSceneAndRun(PSphere *planet){
 	
-	CollisionDetectionManager = new CollisionManager(planet->getObjects());
+	CollisionDetectionManager = new CollisionManager(planet->getObjects(),Camera);
 
 	// Create camera
 	Camera = Scene->createCamera("VertCamera");

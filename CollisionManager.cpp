@@ -1,8 +1,9 @@
 #include "CollisionManager.h"
 
-CollisionManager::CollisionManager(std::vector<std::ObjectInfo> *Obs)
+CollisionManager::CollisionManager(std::vector<std::ObjectInfo> *Obs, Ogre::Camera *cam)
 {
 	Objects=Obs;
+	camera=cam;
 }
 CheckCollisionAnswer CollisionManager::checkCollisionAABB(std::ObjectInfo object)
 {
@@ -36,21 +37,18 @@ CheckCollisionAnswer CollisionManager::checkCameraCollision()
 	answer.objectName="camera";
 	answer.collided=false;
 
-	//Ogre::AxisAlignedBox spbox = new Ogre::AxisAlignedBox(
-	//for (std::vector<std::ObjectInfo>::iterator iter = Objects->begin(); iter != Objects->end(); iter++)
- //   {
+	Ogre::AxisAlignedBox spbox = *(new Ogre::AxisAlignedBox(	camera->getPosition().x-0.1f,camera->getPosition().y-0.1f,camera->getPosition().z-0.1f,
+																camera->getPosition().x+0.1f,camera->getPosition().y+0.1f,camera->getPosition().z+0.1f));
+	for (std::vector<std::ObjectInfo>::iterator iter = Objects->begin(); iter != Objects->end(); iter++)
+    {
+		Ogre::AxisAlignedBox cbbox=static_cast<Ogre::SceneNode*>(iter->getNode())->_getWorldAABB(); 
 
-	//	if(object.getObjectName() != iter->getObjectName() )
-	//	{
-	//		Ogre::AxisAlignedBox cbbox=static_cast<Ogre::SceneNode*>(iter->getNode())->_getWorldAABB(); 
-
-	//		if(spbox.intersects(cbbox))//collided
-	//		{
-	//			answer.amount++;
-	//			answer.collided=true;
-	//			answer.collidedList.push_back(*iter);
-	//		}
-	//	}
- //   }
+		if(spbox.intersects(cbbox))//collided
+		{
+			answer.amount++;
+			answer.collided=true;
+			answer.collidedList.push_back(*iter);
+		}
+    }
 	return answer;
 }
