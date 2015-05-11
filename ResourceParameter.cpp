@@ -254,10 +254,14 @@ namespace std
     void ResourceParameter::emptyFrequencyAmplitude()
     {
         frequencyAmplitude.clear();
+        frequency.clear();
+        amplitude.clear();
     }
     void ResourceParameter::emptyMeshLocObjAmount()
     {
         meshLocObjAmount.clear();
+        meshLocation.clear();
+        objectAmount.clear();
     }
 
 }

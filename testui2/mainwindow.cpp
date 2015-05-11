@@ -54,21 +54,22 @@ void MainWindow::on_pushButton_clicked()
     {       
         float waterfraction = (ui->lineEdit_2->text().toFloat())/100;
         params->setWaterFraction(waterfraction);
-        if(ui->pushButton_2->text() != "Color")
-        {            
-            params->setWaterFirstColor(ui->pushButton_2->text().toUtf8().constData());
-        }
-        if(ui->pushButton_3->text() != "Color")
-        {            
-            params->setWaterSecondColor(ui->pushButton_3->text().toUtf8().constData());
-        }
     }
     if(!ui->lineEdit_3->text().isEmpty())
     {
         int seed = ui->lineEdit_3->text().toInt();
         params->setSeed(seed);
     }
-	    
+
+    if(ui->pushButton_2->text() != "Color")
+    {
+        params->setWaterFirstColor(ui->pushButton_2->text().toUtf8().constData());
+    }
+    if(ui->pushButton_3->text() != "Color")
+    {
+        params->setWaterSecondColor(ui->pushButton_3->text().toUtf8().constData());
+    }
+
     if(ui->pushButton_4->text() != "Color")
     {        
         params->setTerrainFirstColor(ui->pushButton_4->text().toUtf8().constData());
@@ -98,18 +99,18 @@ void MainWindow::on_pushButton_clicked()
 	qDebug() << QString::fromStdString(params->getMountainFirstColor());
 	qDebug() << QString::fromStdString(params->getMountainSecondColor());
 	
-/*	for (std::vector<std::pair <float, float> >::const_iterator iter = params->getFrequencyAmplitude().begin(); iter != params->getFrequencyAmplitude().end(); ++iter)
+    for (std::vector<std::pair <float, float> >::const_iterator iter = params->getFrequencyAmplitude().begin(); iter != params->getFrequencyAmplitude().end(); ++iter)
 	{
 		qDebug() << iter->first <<", " << iter->second;
-    }*/
-	for (std::vector<float>::const_iterator iter = params->getFrequency().begin(); iter != params->getFrequency().end(); ++iter)
+    }
+ /*   for (std::vector<float>::const_iterator iter = params->getFrequency().begin(); iter != params->getFrequency().end(); ++iter)
     {
         qDebug() << "Frequency:" << *iter;
     }
     for (std::vector<float>::const_iterator iter = params->getAmplitude().begin(); iter != params->getAmplitude().end(); ++iter)
     {
         qDebug() << "Amplitude: " << *iter;
-    }
+    }*/
 
 
     for (std::vector<std::pair <std::string, int> >::const_iterator iter = params->getMeshLocObjAmount().begin(); iter != params->getMeshLocObjAmount().end(); ++iter)
@@ -125,13 +126,13 @@ void MainWindow::on_pushButton_clicked()
         qDebug() << "Amount: " << *iter;
     }*/
 	
-	mySphere = new PSphere();
+    mySphere = new PSphere();
 	mySphere->create(100, *params);
 	rendering = new initOgre();
 	rendering->start();
 	rendering->setSceneAndRun(mySphere);
 	delete mySphere;
-	rendering->cleanup();
+    rendering->cleanup();
 
 	
 }
