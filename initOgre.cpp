@@ -87,17 +87,17 @@ int initOgre::start(){
 
 	}
 
-	Ogre::ResourceGroupManager::getSingleton().declareResource("ram.mesh", "Mesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_col.jpg", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	//Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_nor.png", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_eyelids.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_eyes.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_horns.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	//Ogre::ResourceGroupManager::getSingleton().declareResource("ram.mesh", "Mesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	//Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_col.jpg", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	////Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_nor.png", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	//Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	//Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_eyelids.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	//Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_eyes.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	//Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_horns.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 
-	Ogre::ResourceGroupManager::getSingleton().declareResource("asteroid.mesh", "Mesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	Ogre::ResourceGroupManager::getSingleton().declareResource("Material.001.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	Ogre::ResourceGroupManager::getSingleton().declareResource("space rock tex 3.jpg", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	//Ogre::ResourceGroupManager::getSingleton().declareResource("asteroid.mesh", "Mesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	//Ogre::ResourceGroupManager::getSingleton().declareResource("Material.001.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
+	//Ogre::ResourceGroupManager::getSingleton().declareResource("space rock tex 3.jpg", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 
 	//Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(5);
 	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
@@ -155,7 +155,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	Camera = Scene->createCamera("VertCamera");
 
 	// Camera position
-	Camera->setPosition(Ogre::Vector3(0,0,20));
+	Camera->setPosition(Ogre::Vector3(0,0,planet->getRadius()*2.65f));
 	planet->setObserverPosition(Camera->getPosition());
 	// Camera looks toward origo
 	Camera->lookAt(Ogre::Vector3(0,0,0));

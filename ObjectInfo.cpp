@@ -21,8 +21,11 @@ namespace std {
 	Ogre::Vector3 ObjectInfo::getPosition() {
 		return position;
 	}
-	
-	Ogre::Node *ObjectInfo::getNode(){
+	void ObjectInfo::setPosition(Ogre::Vector3 newPosition) {
+		position = newPosition;
+	}
+
+	Ogre::Node *ObjectInfo::getNode() {
 		return node;
 	}
 }

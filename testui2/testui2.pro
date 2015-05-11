@@ -15,11 +15,13 @@ TEMPLATE = app
 SOURCES += main.cpp\
         mainwindow.cpp\
         freqampdialog.cpp \
-    meshdialog.cpp
+    meshdialog.cpp \
+    ../ResourceParameter.cpp
 
 HEADERS  += mainwindow.h\
             freqampdialog.h \
-    meshdialog.h
+    meshdialog.h \    
+    ../ResourceParameter.h
 
 FORMS    += mainwindow.ui\
             freqampdialog.ui \

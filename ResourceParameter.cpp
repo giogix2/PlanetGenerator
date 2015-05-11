@@ -233,8 +233,12 @@ namespace std
 		{
 			stringTemp2 = stringToSplit.substr(i, stringToSplit.length());
 		}
-		frequency = std::atof(stringTemp1.c_str());
-		amplitude = std::atof(stringTemp2.c_str());
+		/* std::atof(string.c_str()) returned zero with perfectly good string.
+		 * Using istringstream instead. */
+		istringstream convStream1(stringTemp1);
+		convStream1 >> frequency;
+		istringstream convStream2(stringTemp2);
+		convStream2 >> amplitude;
 
 		//control the range
 		frequency = frequency < 0 ? 0 : frequency;
@@ -250,10 +254,14 @@ namespace std
     void ResourceParameter::emptyFrequencyAmplitude()
     {
         frequencyAmplitude.clear();
+        frequency.clear();
+        amplitude.clear();
     }
     void ResourceParameter::emptyMeshLocObjAmount()
     {
         meshLocObjAmount.clear();
+        meshLocation.clear();
+        objectAmount.clear();
     }
 
 }

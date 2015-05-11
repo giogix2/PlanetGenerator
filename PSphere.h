@@ -14,8 +14,6 @@ public:
 
 	void create(Ogre::uint32 iters, ResourceParameter resourceParameter);
 
-	void destroy();
-
 	void loadToBuffers(const std::string &meshName, const std::string &textureName);
 
 	void loadMeshFile(const std::string &path, const std::string &meshName);
@@ -32,13 +30,15 @@ public:
 
 	void attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude);
 
+	void moveObject(const std::string &objectName, int direction, int pace);
+
 	Ogre::MeshPtr getMesh();
 
 	void setObserverPosition(Ogre::Vector3 position);
 
 	Ogre::Real getObserverDistanceToSurface();
 
-	Ogre::Real PSphere::getSurfaceHeight(Ogre::Vector3 Position);
+	Ogre::Real getSurfaceHeight(Ogre::Vector3 Position);
 
 	bool checkAccessibility(Ogre::Vector3 location);
 
@@ -51,6 +51,8 @@ public:
 	vector<ObjectInfo> *getObjects();
 
 	PSphere();
+
+	~PSphere();
 
 private:
 	Ogre::Vector3		*vertexes;

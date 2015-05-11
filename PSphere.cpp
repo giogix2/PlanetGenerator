@@ -18,6 +18,10 @@ using namespace std;
 // Let's set texture dimensions this way for a time being
 #define TEX_WIDTH 1024
 #define TEX_HEIGHT 512
+#define UP 1
+#define DOWN 2
+#define LEFT 3
+#define RIGHT 4
 
 PSphere::PSphere(){
 	vertexes =	NULL;
@@ -27,6 +31,23 @@ PSphere::PSphere(){
 	indexes =	NULL;
 	image =		NULL;
 	observer =	Ogre::Vector3(0.0f, 0.0f, 0.0f);
+}
+
+PSphere::~PSphere()
+{
+	delete[] colours;
+	delete[] indexes;
+	delete[] texCoords;
+	delete[] vertexes;
+	delete[] vNorms;
+	delete[] image;
+
+	delete faceXM;
+	delete faceXP;
+	delete faceYM;
+	delete faceYP;
+	delete faceZM;
+	delete faceZP;
 }
 
 /* Set position for the observer. This must be position vector in modelspace,
@@ -452,24 +473,6 @@ void PSphere::create(Ogre::uint32 iters, ResourceParameter resourceParameter)
 	calculateSeaLevel(min, max, waterFraction);
 	generateImage(max, min);
 	smoothSeaArea();
-}
-
-/* Release resources allocated by Sphere class */
-void PSphere::destroy()
-{
-	delete[] colours;
-	delete[] indexes;
-	delete[] texCoords;
-	delete[] vertexes;
-	delete[] vNorms;
-	delete[] image;
-
-	delete faceXM;
-	delete faceXP;
-	delete faceYM;
-	delete faceYP;
-	delete faceZM;
-	delete faceZP;
 }
 
 void PSphere::generateMeshData()
@@ -957,4 +960,38 @@ Ogre::Vector3 PSphere::nextPosition(Ogre::Vector3 location, PSphere::Direction d
 vector<ObjectInfo> *PSphere::getObjects()
 {
 	return &objects;
+}
+
+void PSphere::moveObject(const std::string &objectName, int direction, int pace) {
+	
+	for (vector<ObjectInfo>::iterator it = objects.begin() ; it != objects.end(); ++it) {
+		ObjectInfo objTemp = *it;
+		if (objTemp.getObjectName().compare(objectName) == 0) {
+			Ogre::Node *node = objTemp.getNode();
+			Ogre::Vector3 oldPosition = node->getPosition();
+			Ogre::Vector3 newPosition(oldPosition.x, oldPosition.y, oldPosition.z);
+			switch (direction) {
+				case (UP):
+					newPosition.y = newPosition.y+pace;
+					node->setPosition(newPosition);
+					objTemp.setPosition(newPosition);
+					break;
+				case (DOWN):
+					newPosition.y = newPosition.y-pace;
+					node->setPosition(newPosition);
+					objTemp.setPosition(newPosition);
+					break;
+				case (LEFT):
+					newPosition.x = newPosition.x-pace;
+					node->setPosition(newPosition);
+					objTemp.setPosition(newPosition);
+					break;
+				case (RIGHT):
+					newPosition.x = newPosition.x+pace;
+					node->setPosition(newPosition);
+					objTemp.setPosition(newPosition);
+					break;
+			}
+		}
+	}
 }
