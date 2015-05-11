@@ -12,11 +12,22 @@ MainWindow::MainWindow(QWidget *parent) :
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    ui->lineEdit->setValidator( new QIntValidator(1, 100, this) );
-    ui->lineEdit_2->setValidator( new QIntValidator(0, 100, this) );
+
+
+
+    //Regex validators to handle 2 decimal float values from 0-100
+    QRegExp rex("[0-9][0-9]\\.\\d{0,2}|[0-9]\\.\\d{0,2}|(100)");
+    QRegExpValidator *radiusvalidator = new QRegExpValidator(rex, this);
+
+    ui->lineEdit->setValidator( radiusvalidator );
+
+    QRegExp rex2("[0-9][0-9]\\.\\d{0,2}|[0-9]\\.\\d{0,2}|(100)");
+    QRegExpValidator *watervalidator = new QRegExpValidator(rex2, this);
+
+    ui->lineEdit_2->setValidator( watervalidator );
 
     //regex to handle max value for lineEdit to be 2*32-1 (UINT_MAX)
-    QRegExp rx("^(\\d|\\d{1,9}|3\\d{1,9}|41\\d{8}|428\\d{7}|4293\\d{6}|42948\\d{5}|429495\\d{4}|4294966\\d{3}|42949671\\d{2}|429496729[0-5])$");
+    QRegExp rx("^(\\d|\\d{1,9}|[0-3]\\d{1,9}|4[0-1]\\d{8}|42[0-8]\\d{7}|429[0-3]\\d{6}|4294[0-8]\\d{5}|42949[0-5]\\d{4}|429496[0-6]\\d{3}|4294967[0-1]\\d{2}|429496729[0-5])$");
     QValidator *validator = new QRegExpValidator(rx, this);
     ui->lineEdit_3->setValidator(validator);
 	
@@ -32,6 +43,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	float waterfraction = 0.6;
 	float radius = 7.5;
+
+    ui->lineEdit->setText(""+QString::number(radius));
+    ui->lineEdit_2->setText(""+QString::number(waterfraction*100));
 
     params = new std::ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#32CDFF"
 		,(std::string)"#64FFFF",(std::string)"#B4B4B4",(std::string)"#FFFFFF",waterfraction,radius,60,frequencyAmplitude);
@@ -210,7 +224,7 @@ void MainWindow::openNewWindow()
 		{			
 			QStringList values = dialog->getThem()->item(i)->text().split(",");
             //put values to ResourceParameter vector
-            setAmps( values.value(0).toFloat(),  values.value(1).toFloat());
+            //setAmps( values.value(0).toFloat(),  values.value(1).toFloat());
 			frequencyAmplitude += values.value(0).toStdString() + ' ' +  values.value(1).toStdString() + ' ';
 		}
 		params->setFrequencyAmplitude(frequencyAmplitude, ' ');
