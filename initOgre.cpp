@@ -148,8 +148,6 @@ void initOgre::CreateFrameListener(PSphere *pSphere){
 }
 
 void initOgre::setSceneAndRun(PSphere *planet){
-	
-	CollisionDetectionManager = new CollisionManager(planet->getObjects(),Camera);
 
 	// Create camera
 	Camera = Scene->createCamera("VertCamera");
@@ -213,6 +211,9 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	entity1->setMaterial(textureMap);
 
 	sphere1->setOrientation(1.3003361e-01f, -1.5604560e-01f, -7.5052901e-01f, 6.2884596e-01f);
+
+	//Collision Manager
+	CollisionDetectionManager = new CollisionManager(planet->getObjects(),Camera);
 
 	//createFrameListener
 	CreateFrameListener(planet);

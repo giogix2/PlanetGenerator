@@ -349,15 +349,17 @@ void GeneratorFrameListener::moveCamera()
 		mCamera->moveRelative(mTranslateVector);
 		pSphere->setObserverPosition(mCamera->getPosition());
 
-		if( pSphere->getObserverDistanceToSurface()<=2.0f)//not inside the sphere
+		if( pSphere->getObserverDistanceToSurface()<=2.0f)// inside the sphere
 		{
-			if(!CollisionDetectionManager->checkCameraCollision().collided)
-			{
-				mCamera->setPosition(oldPosition);
-			}
+			mCamera->setPosition(oldPosition);
+			return;
+		}
+		if(CollisionDetectionManager->checkCameraCollision().collided)
+		{
+			mCamera->setPosition(oldPosition);
+			return;
 		}
 	}
-
 void GeneratorFrameListener::showDebugOverlay(bool show)
 	{
 		if (mDebugOverlay)
