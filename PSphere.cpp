@@ -956,6 +956,12 @@ Ogre::Vector3 PSphere::nextPosition(Ogre::Vector3 location, PSphere::Direction d
 	return newPos;
 }
 
+
+vector<ObjectInfo> *PSphere::getObjects()
+{
+	return &objects;
+}
+
 void PSphere::moveObject(const std::string &objectName, int direction, float pace) {
 	
 	for (vector<ObjectInfo>::iterator it = objects.begin() ; it != objects.end(); ++it) {

@@ -48,6 +48,8 @@ public:
 
 	Ogre::Vector3 nextPosition(Ogre::Vector3 location, PSphere::Direction dir);
 
+	vector<ObjectInfo> *getObjects();
+
 	PSphere();
 
 	~PSphere();

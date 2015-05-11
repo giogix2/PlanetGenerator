@@ -37,6 +37,7 @@ D:        Step right
 #include "OgreTextAreaOverlayElement.h"
 #include "OgreFontManager.h"
 #include "PSphere.h"
+#include "CollisionManager.h"
 
 
 
@@ -57,9 +58,10 @@ protected:
 public:
 	Ogre::SceneNode     *RootSceneNode;//use to operate the entity
 
-	MOC::CollisionTools *CollisionManager;
+	//MOC::CollisionTools *CollisionManager;
 	Ogre::SceneManager	*Scene;
 	PSphere				*pSphere;
+	CollisionManager	*CollisionDetectionManager;
 	
 
 	GeneratorFrameListener()
@@ -67,13 +69,16 @@ public:
 	}
 
 	// Constructor takes a RenderWindow because it uses that to determine input context
-	GeneratorFrameListener(Ogre::RenderWindow* win, Ogre::Camera* cam, PSphere *ps, Ogre::SceneManager *Sc,Ogre::SceneNode     *RSN,bool bufferedKeys = false, bool bufferedMouse = false,
+	GeneratorFrameListener(Ogre::RenderWindow* win, Ogre::Camera* cam, PSphere *ps, Ogre::SceneManager *Sc,Ogre::SceneNode    *RSN,CollisionManager	*CDM ,bool bufferedKeys = false, bool bufferedMouse = false,
 				 bool bufferedJoy = false ) :
 		mCamera(cam), mTranslateVector(Ogre::Vector3::ZERO), mCurrentSpeed(0), mWindow(win), mStatsOn(true), mNumScreenShots(0),
 		mMoveScale(0.0f), mRotScale(0.0f), mTimeUntilNextToggle(0), mFiltering(Ogre::TFO_BILINEAR),
 		mAniso(1), mSceneDetailIndex(0), mMoveSpeed(100), mRotateSpeed(18), mDebugOverlay(0),
 		mInputManager(0), mMouse(0), mKeyboard(0), mJoy(0)
 	{
+
+		CollisionDetectionManager = CDM;
+
 		RootSceneNode = RSN;//NEW
 
 		Scene = Sc;
@@ -81,9 +86,9 @@ public:
 		pSphere = ps;
 		
 		// init the collision handler
-		CollisionManager = new MOC::CollisionTools(Scene);
+		//CollisionManager = new MOC::CollisionTools(Scene);
 		// set how far we want the camera to be above ground
-		CollisionManager->setHeightAdjust(5);
+		//CollisionManager->setHeightAdjust(5);
 		
 
 		Ogre::OverlayManager &om = Ogre::OverlayManager::getSingleton();

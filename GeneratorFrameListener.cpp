@@ -348,10 +348,13 @@ void GeneratorFrameListener::moveCamera()
 		Ogre::Vector3 oldPosition=mCamera->getPosition();
 		mCamera->moveRelative(mTranslateVector);
 		pSphere->setObserverPosition(mCamera->getPosition());
-		//later need to detect all the collision between camera and objects
-		if( pSphere->getObserverDistanceToSurface()<=2.0f)
+
+		if( pSphere->getObserverDistanceToSurface()<=2.0f)//not inside the sphere
 		{
-			mCamera->setPosition(oldPosition);
+			if(!CollisionDetectionManager->checkCameraCollision().collided)
+			{
+				mCamera->setPosition(oldPosition);
+			}
 		}
 	}
 

@@ -5,6 +5,7 @@
 #include "GeneratorFrameListener.h"
 #include "PSphere.h"
 #include <vector>
+#include "CollisionManager.h"
 
 class initOgre{
  public:
@@ -22,6 +23,7 @@ private:
 	Ogre::Camera            *Camera;
 	GeneratorFrameListener  *FrameListener;
 	Ogre::OverlaySystem     *OverlaySystem;
+	CollisionManager		*CollisionDetectionManager;
 
 	void CreateFrameListener(PSphere *pSphere);
 };
