@@ -932,66 +932,54 @@ void PSphere::setCollisionManager(CollisionManager	*CDM)
 }
 
 void PSphere::moveObject(const std::string &objectName, int direction, float pace) {
-	
 	for (vector<ObjectInfo>::iterator it = objects.begin() ; it != objects.end(); ++it) {
 		ObjectInfo objTemp = *it;
 		if (objTemp.getObjectName().compare(objectName) == 0) {
 			Ogre::Node *node = objTemp.getNode();
 			Ogre::Vector3 oldPosition = node->getPosition();
 			Ogre::Vector3 newPosition(oldPosition.x, oldPosition.y, oldPosition.z);
-			//Ogre::Real surfaceHeight;
 			Ogre::Vector2 cartesianCoord;
 			Ogre::Vector3 cart_coord;
 			switch (direction) {
 				case (UP):
-					//Ogre::Vector2 cartesianCoord = convertCartesianToPlateCarree(newPosition);
-					cartesianCoord=Ogre::Vector2(asin(oldPosition.z / radius), atan2(oldPosition.y, oldPosition.x));
+					oldPosition.normalise();
+					cartesianCoord=Ogre::Vector2(asin(oldPosition.z ), atan2(oldPosition.y, oldPosition.x));
+					cartesianCoord = Ogre::Vector2(cartesianCoord.x*(180/Ogre::Math::PI)-pace, 360+cartesianCoord.y*(180/Ogre::Math::PI)); // Convertion from radians to degrees
+					cart_coord = convertSphericalToCartesian(cartesianCoord.x, cartesianCoord.y);
+					newPosition.x = radius*1.2*cart_coord.x;
+					newPosition.y = radius*1.2*cart_coord.y;
+					newPosition.z = radius*1.2*cart_coord.z;
+					node->setPosition(newPosition);
+					objTemp.setPosition(newPosition);
+					break;
+				case (DOWN):
+					oldPosition.normalise();
+					cartesianCoord=Ogre::Vector2(asin(oldPosition.z ), atan2(oldPosition.y, oldPosition.x));
+					cartesianCoord = Ogre::Vector2(cartesianCoord.x*(180/Ogre::Math::PI)+pace, 360+cartesianCoord.y*(180/Ogre::Math::PI)); // Convertion from radians to degrees
+					cart_coord = convertSphericalToCartesian(cartesianCoord.x, cartesianCoord.y);
+					newPosition.x = radius*1.2*cart_coord.x;
+					newPosition.y = radius*1.2*cart_coord.y;
+					newPosition.z = radius*1.2*cart_coord.z;
+					node->setPosition(newPosition);
+					objTemp.setPosition(newPosition);
+					break;
+				case (LEFT):
+					cartesianCoord=Ogre::Vector2(asin(oldPosition.z ), atan2(oldPosition.y, oldPosition.x));
 					cartesianCoord = Ogre::Vector2(cartesianCoord.x*(180/Ogre::Math::PI), 360+cartesianCoord.y*(180/Ogre::Math::PI)+pace); // Convertion from radians to degrees
 					cart_coord = convertSphericalToCartesian(cartesianCoord.x, cartesianCoord.y);
 					newPosition.x = radius*1.2*cart_coord.x;
 					newPosition.y = radius*1.2*cart_coord.y;
 					newPosition.z = radius*1.2*cart_coord.z;
-					//newPosition.x = oldPosition.x;
-					//newPosition.y = oldPosition.y+pace;
-					//newPosition.z = oldPosition.z;
-					//newPosition.normalise();
-					//surfaceHeight = getSurfaceHeight(newPosition);
-					//newPosition = newPosition*surfaceHeight;
-					//newPosition.y = newPosition.y+pace;
-					node->setPosition(newPosition);
-					objTemp.setPosition(newPosition);
-
-
-					
-					//collision detection
-					if(CollisionDetectionManager->checkCollisionAABB(objTemp).collided)
-					{	
-						node->setPosition(oldPosition);
-						objTemp.setPosition(oldPosition);
-					}else{
-						//change orientation
-						Ogre::Quaternion q;
-
-						//q = Ogre::Vector3::UNIT_Y.getRotationTo(newPosition);
-						//node->setOrientation( q );
-						q = Ogre::Vector3::UNIT_Z.getRotationTo(newPosition-oldPosition);
-						node->setOrientation( q );
-					}
-					break;
-				case (DOWN):
-					newPosition.y = newPosition.y-pace;
-					node->setPosition(newPosition);
-					objTemp.setPosition(newPosition);
-					break;
-				case (LEFT):
-					newPosition.x = oldPosition.x+pace;
-					newPosition.y = oldPosition.y;
-					newPosition.z = oldPosition.z;
 					node->setPosition(newPosition);
 					objTemp.setPosition(newPosition);
 					break;
 				case (RIGHT):
-					newPosition.x = newPosition.x+pace;
+					cartesianCoord=Ogre::Vector2(asin(oldPosition.z ), atan2(oldPosition.y, oldPosition.x));
+					cartesianCoord = Ogre::Vector2(cartesianCoord.x*(180/Ogre::Math::PI), 360+cartesianCoord.y*(180/Ogre::Math::PI)-pace); // Convertion from radians to degrees
+					cart_coord = convertSphericalToCartesian(cartesianCoord.x, cartesianCoord.y);
+					newPosition.x = radius*1.2*cart_coord.x;
+					newPosition.y = radius*1.2*cart_coord.y;
+					newPosition.z = radius*1.2*cart_coord.z;
 					node->setPosition(newPosition);
 					objTemp.setPosition(newPosition);
 					break;
