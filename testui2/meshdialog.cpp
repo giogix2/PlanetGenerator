@@ -16,7 +16,12 @@ MeshDialog::~MeshDialog()
 
 void MeshDialog::on_pushButton_clicked()
 {
-    ui->lineEdit->setText(QFileDialog::getOpenFileName(this, "Choose mesh", "../", "*.mesh"));
+    QDir dir("../");
+    QString path;
+
+    path = dir.relativeFilePath(QFileDialog::getOpenFileName(this, "Choose mesh", "../media/models", "*.mesh"));
+
+    ui->lineEdit->setText(path);
 
     //QListWidgetItem *item = new QListWidgetItem(meshpath.toString());
     //item->setTextAlignment(Qt::AlignRight);
