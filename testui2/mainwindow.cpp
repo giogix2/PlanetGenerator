@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-
+    setFixedSize(geometry().width(), geometry().height());
 
     //Regex validators to handle 2 decimal float values from 0-100
     QRegExp rex("[0-9][0-9]\\.\\d{0,2}|[0-9]\\.\\d{0,2}|(100)");
@@ -152,6 +152,7 @@ void MainWindow::on_pushButton_clicked()
 	rendering->setSceneAndRun(mySphere);
 	delete mySphere;
     rendering->cleanup();
+
 	
 }
 

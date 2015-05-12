@@ -8,6 +8,8 @@ FreqAmpDialog::FreqAmpDialog(QWidget *parent) :
     ui(new Ui::FreqAmpDialog)
 {
     ui->setupUi(this);
+
+    setFixedSize(geometry().width(), geometry().height());
 }
 
 FreqAmpDialog::~FreqAmpDialog()

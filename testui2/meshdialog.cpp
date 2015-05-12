@@ -7,6 +7,8 @@ MeshDialog::MeshDialog(QWidget *parent) :
     ui(new Ui::MeshDialog)
 {
     ui->setupUi(this);    
+
+    setFixedSize(geometry().width(), geometry().height());
 }
 
 MeshDialog::~MeshDialog()
