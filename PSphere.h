@@ -60,7 +60,6 @@ public:
 private:
 	Ogre::Vector3		*vertexes;
 	Ogre::Vector3		*vNorms;
-	Ogre::ColourValue	*colours;
 	Ogre::Vector2		*texCoords;
 	Ogre::uint32		*indexes;
 	Ogre::uint32		vertexCount;
@@ -90,8 +89,6 @@ private:
 	void smoothSeaArea();
 
 	void deform(HeightMap *map);
-
-	void calculateNormals();
 
 	Ogre::Vector3 calculateSphereCoordsFromTexCoords(Ogre::Vector2 *texCoord);
 
