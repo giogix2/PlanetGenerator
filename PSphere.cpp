@@ -13,6 +13,8 @@
 #include "OgreConfigFile.h"
 #include "Common.h"
 #include "ResourceParameter.h"
+#include <qdebug.h>
+
 using namespace std;
 
 // Let's set texture dimensions this way for a time being
@@ -696,9 +698,9 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 
 void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude) {
 	Ogre::Vector3 cart_coord = convertSphericalToCartesian(latitude, longitude);
-	Ogre::Real x = radius*1.2*cart_coord.x;
-	Ogre::Real y = radius*1.2*cart_coord.y;
-	Ogre::Real z = radius*1.2*cart_coord.z;
+	Ogre::Real x = radius*2*cart_coord.x;
+	Ogre::Real y = radius*2*cart_coord.y;
+	Ogre::Real z = radius*2*cart_coord.z;
 
 	this->attachMesh(node, scene, meshName, objectName, x, y, z);
 }
@@ -994,25 +996,35 @@ void PSphere::moveObject(const std::string &objectName, int direction, float pac
 					//surfaceHeight = getSurfaceHeight(newPosition);
 					//newPosition = newPosition*surfaceHeight;
 					//newPosition.y = newPosition.y+pace;
+
+					//set on the ground
+					newPosition *= ( getSurfaceHeight(newPosition) / newPosition.length()) ;
+
+
 					node->setPosition(newPosition);
 					objTemp.setPosition(newPosition);
 
 
+
+					
+
 					
 					//collision detection
-					if(CollisionDetectionManager->checkCollisionAABB(objTemp).collided)
+					if(CollisionDetectionManager->checkCollisionAABB(objTemp).collided)//collided,move back
 					{	
 						node->setPosition(oldPosition);
 						objTemp.setPosition(oldPosition);
-					}else{
+					}else{//not collided, change orientataion and position
+						
 						//change orientation
 						Ogre::Quaternion q;
-
-						//q = Ogre::Vector3::UNIT_Y.getRotationTo(newPosition);
-						//node->setOrientation( q );
-						q = Ogre::Vector3::UNIT_Z.getRotationTo(newPosition-oldPosition);
+						q = Ogre::Vector3::UNIT_Y.getRotationTo(newPosition);
+						Ogre::Quaternion a;
 						node->setOrientation( q );
+						node->yaw ( Ogre::Math::Abs( (newPosition-oldPosition).getRotationTo(q*Ogre::Vector3::UNIT_Z).getYaw() )*-1 );
+
 					}
+
 					break;
 				case (DOWN):
 					newPosition.y = newPosition.y-pace;
