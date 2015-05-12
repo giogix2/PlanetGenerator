@@ -373,8 +373,9 @@ void GeneratorFrameListener::showDebugOverlay(bool show)
 
 bool GeneratorFrameListener::frameStarted(const Ogre::FrameEvent& evt)
 	{
-		//RootSceneNode->getChild("planetSphere")->roll(Ogre::Radian(0.004));
-		pSphere->moveObject("Ramiro", 4, 0.5);
+		//RootSceneNode->getChild("planetSphere")->roll(Ogre::Radian(0.04));
+		pSphere->moveObject("Ramiro", 2, 0.1);
+		//pSphere->moveObject("CK7", 2, 0.5);
 		//pSphere->getObserverDistanceToSurface();
 
 		//Physical movement according to the gravity
