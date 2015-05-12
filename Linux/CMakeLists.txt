@@ -80,7 +80,7 @@ set(HDRS
     ../GeneratorFrameListener.h
     ../initOgre.h
     ../HeightMap.h
-    ../CollisionTools.h
+    ../CollisionManager.h
     ../Common.h
     ../ResourceParameter.h
     ../ObjectInfo.h
@@ -96,7 +96,7 @@ set(SRCS
     ../initOgre.cpp
     ../main.cpp
     ../HeightMap.cpp
-    ../CollisionTools.cpp
+    ../CollisionManager.cpp
     ../Common.cpp
     ../ResourceParameter.cpp
     ../ObjectInfo.cpp

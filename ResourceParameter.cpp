@@ -10,9 +10,9 @@ namespace std
 		radius = 0.0;
 		seed = 0;*/
 	}
-	ResourceParameter::ResourceParameter(string newTerrainFirstColor,string newTerrainSecondColor, string newWaterFirstColor,
+    ResourceParameter::ResourceParameter(string newTerrainFirstColor,string newTerrainSecondColor, string newWaterFirstColor,
 								string newWaterSecondColor, string newMountainFirstColor, string newMountainSecondColor,
-								float newWaterFraction, float newRadius, int newSeed, string newFrequencyAmplitude)
+                                float newWaterFraction, float newRadius, int newSeed, string newFrequencyAmplitude, vector <pair <string, int> > p_meshLocObjAmount)
 	{
 		terrainFirstColor = newTerrainFirstColor;
 		waterFirstColor = newWaterFirstColor;
@@ -24,6 +24,7 @@ namespace std
 		radius = newRadius;
 		seed = newSeed;
 		setFrequencyAmplitude(newFrequencyAmplitude,' ');
+        meshLocObjAmount = p_meshLocObjAmount;
 	}
 	ResourceParameter::~ResourceParameter(void)
 	{

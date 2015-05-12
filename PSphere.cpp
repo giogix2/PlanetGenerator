@@ -28,7 +28,6 @@ using namespace std;
 PSphere::PSphere(){
 	vertexes =	NULL;
 	vNorms =	NULL;
-	colours =	NULL;
 	texCoords =	NULL;
 	indexes =	NULL;
 	image =		NULL;
@@ -37,7 +36,6 @@ PSphere::PSphere(){
 
 PSphere::~PSphere()
 {
-	delete[] colours;
 	delete[] indexes;
 	delete[] texCoords;
 	delete[] vertexes;
@@ -101,7 +99,6 @@ void PSphere::fixTextureSeam()
 					// Duplicate offending vertex data
 					vertexes[vertexCount] = vertexes[indexes[i+j]];
 					vNorms[vertexCount] = vNorms[indexes[i+j]];
-					colours[vertexCount] = colours[indexes[i+j]];
 					texCoords[vertexCount] = texCoords[indexes[i+j]];
 
 					// Give correct u
@@ -299,50 +296,6 @@ void PSphere::deform(HeightMap *map)
 	}
 }
 
-void PSphere::calculateNormals()
-{
-	Ogre::uint32 i;
-	Ogre::Vector3 p1, p2, normal;
-
-	// Simple normal calculation, 1 normal for 3 vertices of a triangle
- /*   for(i=0; i < indexCount; i = i + 3)
-	{
-		p1 = vertexes[indexes[i]] - vertexes[indexes[i+1]];
-		p2 = vertexes[indexes[i+1]] - vertexes[indexes[i+2]];
-		normal = p1.crossProduct(p2);
-		normal.normalise();
-		vNorms[indexes[i]] = normal;
-		vNorms[indexes[i+1]] = normal;
-		vNorms[indexes[i+2]] = normal;
-	}*/
-
-	// Blended normals for a vertex
-	// first, zero our normals, so that we can use it as a accumulator
-	for(i=0; i < vertexCount; i++)
-	{
-		vNorms[i].x = 0.0f;
-		vNorms[i].y = 0.0f;
-		vNorms[i].z = 0.0f;
-	}
-	/* calculate normals for every triangle. Multiple normals are added together
-	 * for each vertex, so the result is average of all the normals. */
-	for(i=0; i < indexCount; i = i + 3)
-	{
-		p1 = vertexes[indexes[i]] - vertexes[indexes[i+1]];
-		p2 = vertexes[indexes[i+1]] - vertexes[indexes[i+2]];
-		normal = p1.crossProduct(p2);
-		// FIXME: Probably more correct to normalize before adding, investigate later.
-		vNorms[indexes[i]] += normal;
-		vNorms[indexes[i+1]] += normal;
-		vNorms[indexes[i+2]] += normal;
-	}
-	// Normalization pass
-	for(i=0; i < vertexCount; i++)
-	{
-		vNorms[i].normalise();
-	}
-}
-
 void PSphere::calculateSeaLevel(float &minElev, float &maxElev, float seaFraction)
 {
 	Ogre::uint32 i, accumulator=0, histoTotal;
@@ -423,8 +376,6 @@ void PSphere::create(Ogre::uint32 iters, ResourceParameter resourceParameter)
 		delete[] vertexes;
 	if(vNorms != NULL)
 		delete[] vNorms;
-	if(colours != NULL)
-		delete[] colours;
 	if(texCoords != NULL)
 		delete[] texCoords;
 	if(indexes != NULL)
@@ -434,7 +385,6 @@ void PSphere::create(Ogre::uint32 iters, ResourceParameter resourceParameter)
 	 * Approximate, but should be on a safe side */
 	vertexes =	new Ogre::Vector3[iters*iters*6 + iters*8];
 	vNorms =	new Ogre::Vector3[iters*iters*6 + iters*8];
-	colours =	new Ogre::ColourValue[iters*iters*6 + iters*8];
 	texCoords =	new Ogre::Vector2[iters*iters*6 + iters*8];
 	indexes =	new Ogre::uint32[(iters-1)*(iters-1)*6*6];
 
@@ -481,29 +431,44 @@ void PSphere::generateMeshData()
 {
 	unsigned int iters;
 
-	faceYP->generateMeshData(vertexes, texCoords, indexes, radius);
+	faceYP->generateMeshData(radius);
+	faceXM->generateMeshData(radius);
+	faceYM->generateMeshData(radius);
+	faceXP->generateMeshData(radius);
+	faceZP->generateMeshData(radius);
+	faceZM->generateMeshData(radius);
+
+	// Meshes must be done before trying to blend normals
+	faceYP->blendNormalsWithNeighbours();
+	faceXM->blendNormalsWithNeighbours();
+	faceYM->blendNormalsWithNeighbours();
+	faceXP->blendNormalsWithNeighbours();
+	faceZP->blendNormalsWithNeighbours();
+	faceZM->blendNormalsWithNeighbours();
+
+	faceYP->outputMeshData(vertexes, vNorms, texCoords, indexes);
 	// Assuming all faces have same size
 	iters = faceYP->getSize();
 	indexCount = (iters-1)*(iters-1)*6;
 	vertexCount = iters*iters;
-	faceXM->generateMeshData(&vertexes[vertexCount], &texCoords[vertexCount],
-							 &indexes[indexCount], radius);
+	faceXM->outputMeshData(&vertexes[vertexCount], &vNorms[vertexCount], &texCoords[vertexCount], &indexes[indexCount]);
+
 	indexCount += (iters-1)*(iters-1)*6;
 	vertexCount += iters*iters;
-	faceYM->generateMeshData(&vertexes[vertexCount], &texCoords[vertexCount],
-							 &indexes[indexCount], radius);
+	faceYM->outputMeshData(&vertexes[vertexCount], &vNorms[vertexCount], &texCoords[vertexCount], &indexes[indexCount]);
+
 	indexCount += (iters-1)*(iters-1)*6;
 	vertexCount += iters*iters;
-	faceXP->generateMeshData(&vertexes[vertexCount], &texCoords[vertexCount],
-							 &indexes[indexCount], radius);
+	faceXP->outputMeshData(&vertexes[vertexCount], &vNorms[vertexCount], &texCoords[vertexCount], &indexes[indexCount]);
+
 	indexCount += (iters-1)*(iters-1)*6;
 	vertexCount += iters*iters;
-	faceZP->generateMeshData(&vertexes[vertexCount], &texCoords[vertexCount],
-							 &indexes[indexCount], radius);
+	faceZP->outputMeshData(&vertexes[vertexCount], &vNorms[vertexCount], &texCoords[vertexCount], &indexes[indexCount]);
+
 	indexCount += (iters-1)*(iters-1)*6;
 	vertexCount += iters*iters;
-	faceZM->generateMeshData(&vertexes[vertexCount], &texCoords[vertexCount],
-							 &indexes[indexCount], radius);
+	faceZM->outputMeshData(&vertexes[vertexCount], &vNorms[vertexCount], &texCoords[vertexCount], &indexes[indexCount]);
+
 	indexCount += (iters-1)*(iters-1)*6;
 	vertexCount += iters*iters;
 
@@ -515,8 +480,7 @@ void PSphere::generateMeshData()
 		indexes[i] += faceNum*iters*iters;
 	}
 
-	calculateNormals();
-	fixTextureSeam(); // Call this after calculateNormals
+	fixTextureSeam();
 }
 
 void PSphere::loadToBuffers(const std::string &meshName, const std::string &textureName)
@@ -970,45 +934,29 @@ void PSphere::setCollisionManager(CollisionManager	*CDM)
 }
 
 void PSphere::moveObject(const std::string &objectName, int direction, float pace) {
-	
 	for (vector<ObjectInfo>::iterator it = objects.begin() ; it != objects.end(); ++it) {
 		ObjectInfo objTemp = *it;
 		if (objTemp.getObjectName().compare(objectName) == 0) {
 			Ogre::Node *node = objTemp.getNode();
 			Ogre::Vector3 oldPosition = node->getPosition();
 			Ogre::Vector3 newPosition(oldPosition.x, oldPosition.y, oldPosition.z);
-			//Ogre::Real surfaceHeight;
 			Ogre::Vector2 cartesianCoord;
 			Ogre::Vector3 cart_coord;
 			switch (direction) {
 				case (UP):
-					//Ogre::Vector2 cartesianCoord = convertCartesianToPlateCarree(newPosition);
-					cartesianCoord=Ogre::Vector2(asin(oldPosition.z / radius), atan2(oldPosition.y, oldPosition.x));
-					cartesianCoord = Ogre::Vector2(cartesianCoord.x*(180/Ogre::Math::PI), 360+cartesianCoord.y*(180/Ogre::Math::PI)+pace); // Convertion from radians to degrees
+					oldPosition.normalise();
+					cartesianCoord=Ogre::Vector2(asin(oldPosition.z ), atan2(oldPosition.y, oldPosition.x));
+					cartesianCoord = Ogre::Vector2(cartesianCoord.x*(180/Ogre::Math::PI)-pace, 360+cartesianCoord.y*(180/Ogre::Math::PI)); // Convertion from radians to degrees
 					cart_coord = convertSphericalToCartesian(cartesianCoord.x, cartesianCoord.y);
 					newPosition.x = radius*1.2*cart_coord.x;
 					newPosition.y = radius*1.2*cart_coord.y;
 					newPosition.z = radius*1.2*cart_coord.z;
-					//newPosition.x = oldPosition.x;
-					//newPosition.y = oldPosition.y+pace;
-					//newPosition.z = oldPosition.z;
-					//newPosition.normalise();
-					//surfaceHeight = getSurfaceHeight(newPosition);
-					//newPosition = newPosition*surfaceHeight;
-					//newPosition.y = newPosition.y+pace;
-
 					//set on the ground
 					newPosition *= ( getSurfaceHeight(newPosition) / newPosition.length()) ;
-
-
+					
 					node->setPosition(newPosition);
 					objTemp.setPosition(newPosition);
 
-
-
-					
-
-					
 					//collision detection
 					if(CollisionDetectionManager->checkCollisionAABB(objTemp).collided)//collided,move back
 					{	
@@ -1024,22 +972,35 @@ void PSphere::moveObject(const std::string &objectName, int direction, float pac
 						node->yaw ( Ogre::Math::Abs( (newPosition-oldPosition).getRotationTo(q*Ogre::Vector3::UNIT_Z).getYaw() )*-1 );
 
 					}
-
 					break;
 				case (DOWN):
-					newPosition.y = newPosition.y-pace;
+					oldPosition.normalise();
+					cartesianCoord=Ogre::Vector2(asin(oldPosition.z ), atan2(oldPosition.y, oldPosition.x));
+					cartesianCoord = Ogre::Vector2(cartesianCoord.x*(180/Ogre::Math::PI)+pace, 360+cartesianCoord.y*(180/Ogre::Math::PI)); // Convertion from radians to degrees
+					cart_coord = convertSphericalToCartesian(cartesianCoord.x, cartesianCoord.y);
+					newPosition.x = radius*1.2*cart_coord.x;
+					newPosition.y = radius*1.2*cart_coord.y;
+					newPosition.z = radius*1.2*cart_coord.z;
 					node->setPosition(newPosition);
 					objTemp.setPosition(newPosition);
 					break;
 				case (LEFT):
-					newPosition.x = oldPosition.x+pace;
-					newPosition.y = oldPosition.y;
-					newPosition.z = oldPosition.z;
+					cartesianCoord=Ogre::Vector2(asin(oldPosition.z ), atan2(oldPosition.y, oldPosition.x));
+					cartesianCoord = Ogre::Vector2(cartesianCoord.x*(180/Ogre::Math::PI), 360+cartesianCoord.y*(180/Ogre::Math::PI)+pace); // Convertion from radians to degrees
+					cart_coord = convertSphericalToCartesian(cartesianCoord.x, cartesianCoord.y);
+					newPosition.x = radius*1.2*cart_coord.x;
+					newPosition.y = radius*1.2*cart_coord.y;
+					newPosition.z = radius*1.2*cart_coord.z;
 					node->setPosition(newPosition);
 					objTemp.setPosition(newPosition);
 					break;
 				case (RIGHT):
-					newPosition.x = newPosition.x+pace;
+					cartesianCoord=Ogre::Vector2(asin(oldPosition.z ), atan2(oldPosition.y, oldPosition.x));
+					cartesianCoord = Ogre::Vector2(cartesianCoord.x*(180/Ogre::Math::PI), 360+cartesianCoord.y*(180/Ogre::Math::PI)-pace); // Convertion from radians to degrees
+					cart_coord = convertSphericalToCartesian(cartesianCoord.x, cartesianCoord.y);
+					newPosition.x = radius*1.2*cart_coord.x;
+					newPosition.y = radius*1.2*cart_coord.y;
+					newPosition.z = radius*1.2*cart_coord.z;
 					node->setPosition(newPosition);
 					objTemp.setPosition(newPosition);
 					break;

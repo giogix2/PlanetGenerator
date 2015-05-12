@@ -40,15 +40,20 @@ MainWindow::MainWindow(QWidget *parent) :
 	amplitude.push_back(0.006666);*/
 
 	std::string frequencyAmplitude = "0.4 0.02 0.06666 0.006666";
+    std::vector < std::pair < std::string, int > > meshlocs;
+    meshlocs.push_back(std::make_pair("media/models/ram.mesh", 1));
+    meshlocs.push_back(std::make_pair("media/models/asteroid.mesh", 1));
 
 	float waterfraction = 0.6;
 	float radius = 7.5;
+    int seed = 60;
 
     ui->lineEdit->setText(""+QString::number(radius));
     ui->lineEdit_2->setText(""+QString::number(waterfraction*100));
+    ui->lineEdit_3->setText(""+QString::number(seed));
 
     params = new std::ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#32CDFF"
-		,(std::string)"#64FFFF",(std::string)"#B4B4B4",(std::string)"#FFFFFF",waterfraction,radius,60,frequencyAmplitude);
+        ,(std::string)"#64FFFF",(std::string)"#B4B4B4",(std::string)"#FFFFFF",waterfraction,radius,seed,frequencyAmplitude, meshlocs);
 }
 
 MainWindow::~MainWindow()
@@ -147,7 +152,6 @@ void MainWindow::on_pushButton_clicked()
 	rendering->setSceneAndRun(mySphere);
 	delete mySphere;
     rendering->cleanup();
-
 	
 }
 
