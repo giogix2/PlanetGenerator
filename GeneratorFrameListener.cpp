@@ -373,77 +373,13 @@ void GeneratorFrameListener::showDebugOverlay(bool show)
 
 bool GeneratorFrameListener::frameStarted(const Ogre::FrameEvent& evt)
 	{
+		//debug code
+
 		//RootSceneNode->getChild("planetSphere")->roll(Ogre::Radian(0.04));
 		pSphere->moveObject("Ramiro", 2, 0.1);
 		//pSphere->moveObject("CK7", 2, 0.5);
 		//pSphere->getObserverDistanceToSurface();
 
-		//Physical movement according to the gravity
-		/*Ogre::SceneNode::ChildNodeIterator it = RootSceneNode->getChild("planetSphere")->getChildIterator();
-		while(it.hasMoreElements())
-		{
-			
-			
-			Ogre::Vector3 oldPosition = it.current()->second->getPosition();
-
-			//it.current()->second->setPosition( *new Ogre::Vector3(oldPosition.x-0.01,oldPosition.y-0.01,oldPosition.z-0.01));
-			it.current()->second->setPosition( oldPosition*0.98 );
-			
-			if (CollisionManager->collidesWithEntity(oldPosition, it.current()->second->getPosition(),0.4F))
-			{
-				it.current()->second->setPosition(oldPosition);
-			}
-			it.getNext();
-		}
-		//change orientation
-		it = RootSceneNode->getChild("planetSphere")->getChildIterator();
-		while(it.hasMoreElements())
-		{
-			
-			
-			//Vector3 oldPosition = it.current()->second->getPosition();
-			//Vector3 gravity = Vector3::ZERO-oldPosition;
-			//Vector3 direction = (it.current()->second->getOrientation() * gravity).UNIT_SCALE*0.01;
-			//Vector3 yAxis=Vector3(Math::Abs(it.current()->second->_getDerivedPosition().x),Math::Abs(it.current()->second->_getDerivedPosition().y),Math::Abs(it.current()->second->_getDerivedPosition().z));
-			//Ogre::Vector3 yAxis=Ogre::Vector3(it.current()->second->_getDerivedPosition().x,it.current()->second->_getDerivedPosition().y,it.current()->second->_getDerivedPosition().z);
-			Ogre::Vector3 yAxis=Ogre::Vector3(it.current()->second->getPosition().x,it.current()->second->getPosition().y,it.current()->second->getPosition().z);
-			//move
-			//it.current()->second->setPosition( oldPosition + direction );
-			//Quaternion q( Degree( 10 ), gravity );
-			//it.current()->second->setOrientation( q );
-			//Quaternion *q = new Quaternion( Ogre::Degree(10.0f), Vector3::UNIT_X );
-			Ogre::Quaternion q = RotationBetweenVectors(Ogre::Vector3::UNIT_Y,yAxis);
-			
-			//if( q.getPitch() != Ogre::Radian(0.0f) && q.getRoll() != Ogre::Radian(0.0f) && q.getYaw() != Ogre::Radian(0.0f) )
-			//it.current()->second->pitch(q.getPitch());
-			//it.current()->second->roll(q.getRoll());
-			//it.current()->second->yaw(q.getYaw());
-			it.current()->second->setOrientation( q );
-			//it.current()->second->pitch( Ogre::Degree(10.0f) ); //Y axis
-			//it.current()->second->rotate(gravity ,Ogre::Degree(1.0f));
-			//it.current()->second->_getDerivedOrientation()
-			
-			
-			//it.current()->second->setOrientation(RotationBetweenVectors(-it.current()->second->_getDerivedPosition(),Vector3::UNIT_Y));
-			it.getNext();
-		}
-		//move forword
-		
-		it = RootSceneNode->getChild("planetSphere")->getChildIterator();
-		while(it.hasMoreElements())
-		{
-			Ogre::Vector3 oldPosition = it.current()->second->getPosition();
-			//Vector3 yAxis=Vector3(Math::Abs(it.current()->second->_getDerivedPosition().x),Math::Abs(it.current()->second->_getDerivedPosition().y),Math::Abs(it.current()->second->_getDerivedPosition().z));
-			//Ogre::Vector3 yAxis=Ogre::Vector3(it.current()->second->_getDerivedPosition().x,it.current()->second->_getDerivedPosition().y,it.current()->second->_getDerivedPosition().z);
-			Ogre::Vector3 yAxis=Ogre::Vector3(it.current()->second->getPosition().x,it.current()->second->getPosition().y,it.current()->second->getPosition().z);
-			Ogre::Quaternion q = RotationBetweenVectors(Ogre::Vector3::UNIT_Y,yAxis);
-			Ogre::Vector3 direction = (q*Ogre::Vector3::UNIT_Z).normalisedCopy();
-			
-			it.current()->second->setPosition( oldPosition + direction*0.15 );
-			
-			it.getNext();
-		}
-		*/
 		return true;
 	}
 
