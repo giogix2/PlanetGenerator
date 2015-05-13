@@ -292,7 +292,30 @@ void PSphere::deform(HeightMap *map)
 			height = heightNoise(amplitude, frequency, spherePos + randomTranslate);
 			map->setHeight(x, y, height);
 		}
+	}
+}
 
+void PSphere::setGridLandInfo(Grid *grid)
+{
+	unsigned int x, y;
+	Ogre::Vector3 spherePos;
+	Ogre::Real height;
+
+	vector <float> frequency = RParameter.getFrequency();
+	vector <float> amplitude = RParameter.getAmplitude();
+
+	for(x=0; x < grid->getSize(); x++)
+	{
+		for(y=0; y < grid->getSize(); y++)
+		{
+			spherePos = grid->projectToSphere(x, y);
+			height = heightNoise(amplitude, frequency, spherePos + randomTranslate);
+
+			if (height > seaHeight)
+				grid->setValue(x, y, 1);
+			else
+				grid->setValue(x, y, 0);
+		}
 	}
 }
 
@@ -354,7 +377,7 @@ void PSphere::smoothSeaArea()
 
 
 // Makes a sphere out of a cube that is made of 6 squares
-void PSphere::create(Ogre::uint32 iters, ResourceParameter resourceParameter)
+void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter)
 {
 	RParameter = resourceParameter;
 	float waterFraction = resourceParameter.getWaterFraction();
@@ -388,18 +411,33 @@ void PSphere::create(Ogre::uint32 iters, ResourceParameter resourceParameter)
 	texCoords =	new Ogre::Vector2[iters*iters*6 + iters*8];
 	indexes =	new Ogre::uint32[(iters-1)*(iters-1)*6*6];
 
+	Ogre::Matrix3 noRot, rotZ_90, rotZ_180, rotZ_270, rotX_90, rotX_270;
+
+	noRot = Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+	rotZ_90 = Ogre::Matrix3(0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+	rotZ_180 = Ogre::Matrix3(-1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+	rotZ_270 = Ogre::Matrix3(0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+	rotX_90 = Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
+	rotX_270 = Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f);
+
 	// No rotation
-	faceYP = new HeightMap(iters, Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f));
+	faceYP = new HeightMap(iters, noRot);
+	gridYP = new Grid(gridSize, noRot);
 	// 90 degrees through z-axis
-	faceXM = new HeightMap(iters, Ogre::Matrix3(0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f));
+	faceXM = new HeightMap(iters, rotZ_90);
+	gridXM = new Grid(gridSize, rotZ_90);
 	// 180 degrees through z-axis
-	faceYM = new HeightMap(iters, Ogre::Matrix3(-1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f));
+	faceYM = new HeightMap(iters, rotZ_180);
+	gridYM = new Grid(gridSize, rotZ_180);
 	// 270 degrees through z-axis
-	faceXP = new HeightMap(iters, Ogre::Matrix3(0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f));
+	faceXP = new HeightMap(iters, rotZ_270);
+	gridXP = new Grid(gridSize, rotZ_270);
 	// 90 degrees through x-axis
-	faceZP = new HeightMap(iters, Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f));
+	faceZP = new HeightMap(iters, rotX_90);
+	gridZP = new Grid(gridSize, rotX_90);
 	// 270 degrees through x-axis
-	faceZM = new HeightMap(iters, Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f));
+	faceZM = new HeightMap(iters, rotX_270);
+	gridZM = new Grid(gridSize, rotX_270);
 
 	faceYP->setNeighbours(faceXM, faceXP, faceZP, faceZM);
 	faceXM->setNeighbours(faceYM, faceYP, faceZP, faceZM);
@@ -407,6 +445,13 @@ void PSphere::create(Ogre::uint32 iters, ResourceParameter resourceParameter)
 	faceXP->setNeighbours(faceYP, faceYM, faceZP, faceZM);
 	faceZP->setNeighbours(faceXM, faceXP, faceYM, faceYP);
 	faceZM->setNeighbours(faceXM, faceXP, faceYP, faceYM);
+
+	gridYP->setNeighbours(gridXM, gridXP, gridZP, gridZM);
+	gridXM->setNeighbours(gridYM, gridYP, gridZP, gridZM);
+	gridYM->setNeighbours(gridXP, gridXM, gridZP, gridZM);
+	gridXP->setNeighbours(gridYP, gridYM, gridZP, gridZM);
+	gridZP->setNeighbours(gridXM, gridXP, gridYM, gridYP);
+	gridZM->setNeighbours(gridXM, gridXP, gridYP, gridYM);
 
 	srand(RParameter.getSeed());
 	randomTranslate.x = (float)((rand() % 1000)-500)/100.0f;
@@ -424,6 +469,15 @@ void PSphere::create(Ogre::uint32 iters, ResourceParameter resourceParameter)
 
 	calculateSeaLevel(min, max, waterFraction);
 	generateImage(max, min);//take longtime
+
+	// Requires variable seaHeight that is set by calculateSeaLevel
+	setGridLandInfo(gridYP);
+	setGridLandInfo(gridXM);
+	setGridLandInfo(gridYM);
+	setGridLandInfo(gridXP);
+	setGridLandInfo(gridZP);
+	setGridLandInfo(gridZM);
+
 	smoothSeaArea();
 }
 
@@ -734,10 +788,10 @@ Ogre::MeshPtr PSphere::getMesh(){
  *	On success, pointer to a pointer of HeightMap location lands,
  *	HeightMap-coordinates x and y, and function return value true.
  *	On failure, return function value is false. */
-bool PSphere::getGridLocation(Ogre::Vector3 location, HeightMap **face,
+bool PSphere::getGridLocation(Ogre::Vector3 location, Grid **face,
 							  unsigned int &ix, unsigned int &iy)
 {
-	HeightMap *grid;
+	Grid *grid;
 	Ogre::Real x, y, z, x_f, y_f;
 
 edgeCase:
@@ -756,12 +810,12 @@ edgeCase:
 		{
 			// grid x-component
 			x_f = -location.y;
-			grid = faceXM;
+			grid = gridXM;
 		}
 		else
 		{
 			x_f = location.y;
-			grid = faceXP;
+			grid = gridXP;
 		}
 	}
 	else if (y > x && y > z)
@@ -771,12 +825,12 @@ edgeCase:
 		if (location.y < 0.0f)
 		{
 			x_f = location.x;
-			grid = faceYM;
+			grid = gridYM;
 		}
 		else
 		{
 			x_f = -location.x;
-			grid = faceYP;
+			grid = gridYP;
 		}
 	}
 	else if (z > x && z > y)
@@ -786,12 +840,12 @@ edgeCase:
 		if (location.z < 0.0f)
 		{
 			y_f = location.y;
-			grid = faceZM;
+			grid = gridZM;
 		}
 		else
 		{
 			y_f = -location.y;
-			grid = faceZP;
+			grid = gridZP;
 		}
 	}
 	else
@@ -834,7 +888,7 @@ edgeCase:
  *  On water or has an object, return false. */
 bool PSphere::checkAccessibility(Ogre::Vector3 location)
 {
-	HeightMap *grid, *gridObj;
+	Grid *grid, *gridObj;
 	unsigned int i, ix, iy, Obj_x, Obj_y;
 	Ogre::Vector3 ObjPos;
 
@@ -855,7 +909,7 @@ bool PSphere::checkAccessibility(Ogre::Vector3 location)
 	}
 
 	// If location height is more than sea-height, it is accessible.
-	if ((grid->getHeight(ix, iy) - seaHeight) > 0.0f)
+	if (grid->getValue(ix, iy) != 0.0)
 		return true;
 	else
 		return false;
@@ -864,7 +918,7 @@ bool PSphere::checkAccessibility(Ogre::Vector3 location)
 Ogre::Vector3 PSphere::nextPosition(Ogre::Vector3 location, PSphere::Direction dir)
 {
 	Ogre::Vector3 newPos;
-	HeightMap *grid;
+	Grid *grid;
 	unsigned int int_x, int_y;
 
 	/* Using 3D cartesian position figures out which face of the 6 cubefaces it
@@ -878,9 +932,9 @@ Ogre::Vector3 PSphere::nextPosition(Ogre::Vector3 location, PSphere::Direction d
 		if (int_y == grid->getSize()-1)
 		{
 			// Outputs adjacent x and y on neighboring grid by using current grid x and y
-			grid->getNeighbourEntryCoordinates(HeightMap::neighbour_YP, int_x, int_y);
+			grid->getNeighbourEntryCoordinates(Grid::neighbour_YP, int_x, int_y);
 			// Set neighbour as a grid
-			grid = grid->getNeighbourPtr(HeightMap::neighbour_YP);
+			grid = grid->getNeighbourPtr(Grid::neighbour_YP);
 		}
 		else
 			int_y++;
@@ -889,8 +943,8 @@ Ogre::Vector3 PSphere::nextPosition(Ogre::Vector3 location, PSphere::Direction d
 	{
 		if (int_y == 0)
 		{
-			grid->getNeighbourEntryCoordinates(HeightMap::neighbour_YM, int_x, int_y);
-			grid = grid->getNeighbourPtr(HeightMap::neighbour_YM);
+			grid->getNeighbourEntryCoordinates(Grid::neighbour_YM, int_x, int_y);
+			grid = grid->getNeighbourPtr(Grid::neighbour_YM);
 		}
 		else
 			int_y--;
@@ -899,8 +953,8 @@ Ogre::Vector3 PSphere::nextPosition(Ogre::Vector3 location, PSphere::Direction d
 	{
 		if (int_x == grid->getSize()-1)
 		{
-			grid->getNeighbourEntryCoordinates(HeightMap::neighbour_XP, int_x, int_y);
-			grid = grid->getNeighbourPtr(HeightMap::neighbour_XP);
+			grid->getNeighbourEntryCoordinates(Grid::neighbour_XP, int_x, int_y);
+			grid = grid->getNeighbourPtr(Grid::neighbour_XP);
 		}
 		else
 			int_x++;
@@ -909,8 +963,8 @@ Ogre::Vector3 PSphere::nextPosition(Ogre::Vector3 location, PSphere::Direction d
 	{
 		if (int_x == 0)
 		{
-			grid->getNeighbourEntryCoordinates(HeightMap::neighbour_XM, int_x, int_y);
-			grid = grid->getNeighbourPtr(HeightMap::neighbour_XM);
+			grid->getNeighbourEntryCoordinates(Grid::neighbour_XM, int_x, int_y);
+			grid = grid->getNeighbourPtr(Grid::neighbour_XM);
 		}
 		else
 			int_x--;

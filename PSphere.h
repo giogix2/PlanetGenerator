@@ -2,6 +2,7 @@
 #define _PSphere_H_
 
 #include "ObjectInfo.h"
+#include "Grid.h"
 #include "HeightMap.h"
 #include "ResourceParameter.h"
 #include "CollisionManager.h"
@@ -13,7 +14,7 @@ class PSphere
 public:
 	enum Direction {PSPHERE_GRID_YPLUS, PSPHERE_GRID_YMINUS, PSPHERE_GRID_XPLUS, PSPHERE_GRID_XMINUS};
 
-	void create(Ogre::uint32 iters, ResourceParameter resourceParameter);
+	void create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter);
 
 	void loadToBuffers(const std::string &meshName, const std::string &textureName);
 
@@ -45,7 +46,7 @@ public:
 
 	Ogre::Real getRadius();
 
-	bool getGridLocation(Ogre::Vector3 location, HeightMap **face, unsigned int &x, unsigned int &y);
+	bool getGridLocation(Ogre::Vector3 location, Grid **face, unsigned int &x, unsigned int &y);
 
 	Ogre::Vector3 nextPosition(Ogre::Vector3 location, PSphere::Direction dir);
 
@@ -75,6 +76,12 @@ private:
 	HeightMap			*faceXP;
 	HeightMap			*faceZP;
 	HeightMap			*faceZM;
+	Grid			*gridYP;
+	Grid			*gridXM;
+	Grid			*gridYM;
+	Grid			*gridXP;
+	Grid			*gridZP;
+	Grid			*gridZM;
 	ResourceParameter	RParameter;
 	Ogre::Vector3		randomTranslate;
 	vector<ObjectInfo>	objects;
@@ -89,6 +96,8 @@ private:
 	void smoothSeaArea();
 
 	void deform(HeightMap *map);
+
+	void setGridLandInfo(Grid *grid);
 
 	Ogre::Vector3 calculateSphereCoordsFromTexCoords(Ogre::Vector2 *texCoord);
 

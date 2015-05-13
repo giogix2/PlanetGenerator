@@ -146,7 +146,7 @@ void MainWindow::on_pushButton_clicked()
     }*/
 	
     mySphere = new PSphere();
-	mySphere->create(100, *params);
+	mySphere->create(100, 40, *params);
 	rendering = new initOgre();
 	rendering->start();
 	rendering->setSceneAndRun(mySphere);
