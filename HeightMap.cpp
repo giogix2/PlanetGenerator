@@ -4,25 +4,18 @@
 #include "Common.h"
 
 HeightMap::HeightMap(unsigned int size, const Ogre::Matrix3 face)
+	: Grid(size, face)
 {
 	height = allocate2DArray<float>(size, size);
 	memset(height[0], 0, sizeof(float)*size*size);
 
-	mapSize = size;
-	orientation = face;
-
 	minHeight =  1.0e9f;
 	maxHeight = -1.0e9f;
 
-	xplusNeighbour = NULL;
-	xminusNeighbour = NULL;
-	yplusNeighbour = NULL;
-	yminusNeighbour = NULL;
-
-	vertexes = new Ogre::Vector3[mapSize*mapSize];
-	verNorms = new Ogre::Vector3[mapSize*mapSize];
-	txCoords = new Ogre::Vector2[mapSize*mapSize];
-	indexes = new Ogre::uint32[(mapSize-1)*(mapSize-1)*6];
+	vertexes = new Ogre::Vector3[gridSize*gridSize];
+	verNorms = new Ogre::Vector3[gridSize*gridSize];
+	txCoords = new Ogre::Vector2[gridSize*gridSize];
+	indexes = new Ogre::uint32[(gridSize-1)*(gridSize-1)*6];
 }
 
 HeightMap::~HeightMap()
@@ -35,11 +28,6 @@ HeightMap::~HeightMap()
 	delete[] indexes;
 }
 
-unsigned int HeightMap::getSize()
-{
-	return mapSize;
-}
-
 void HeightMap::getHistogram(unsigned int histogram[], unsigned short brackets)
 {
 	unsigned int x, y, i;
@@ -47,9 +35,9 @@ void HeightMap::getHistogram(unsigned int histogram[], unsigned short brackets)
 	 * Add assert to catch possible overflows in the future. */
 	float divider = static_cast<float>(brackets) - 1.5f;
 
-	for(x=0; x < mapSize; x++)
+	for(x=0; x < gridSize; x++)
 	{
-		for(y=0; y < mapSize; y++)
+		for(y=0; y < gridSize; y++)
 		{
 			// Any better ways to create histograms?
 			i = 0;
@@ -87,8 +75,8 @@ void HeightMap::setToMinimumHeight(float minimumHeight)
 {
 	unsigned int x, y;
 
-	for(y=0; y < mapSize; y++)
-		for(x=0; x < mapSize; x++)
+	for(y=0; y < gridSize; y++)
+		for(x=0; x < gridSize; x++)
 			if(height[y][x] < minimumHeight)
 				height[y][x] = minimumHeight;
 
@@ -101,7 +89,7 @@ Ogre::Vector3 HeightMap::projectToSphere(unsigned int x, unsigned int y)
 	Ogre::Vector3 pos;
 	float mSizeFloat, xFloat, yFloat;
 
-	mSizeFloat = static_cast<float>(mapSize-1);
+	mSizeFloat = static_cast<float>(gridSize-1);
 	xFloat = static_cast<float>(x)/mSizeFloat;
 	yFloat = static_cast<float>(y)/mSizeFloat;
 
@@ -118,160 +106,15 @@ Ogre::Vector3 HeightMap::projectToSphere(unsigned int x, unsigned int y)
 	return pos;
 }
 
-/* Function to set neighboring HeightMaps */
-void HeightMap::setNeighbours(HeightMap *xPlus, HeightMap *xMinus, HeightMap *yPlus, HeightMap *yMinus)
-{
-	xplusNeighbour = xPlus;
-	xminusNeighbour = xMinus;
-	yplusNeighbour = yPlus;
-	yminusNeighbour = yMinus;
-}
-
-/* Get pointer for neighboring grid by using an enumerator */
-HeightMap *HeightMap::getNeighbourPtr(HeightMap_neighbour neighbour)
-{
-	if (neighbour == neighbour_XP)
-		return xplusNeighbour;
-
-	else if (neighbour == neighbour_XM)
-		return xminusNeighbour;
-
-	else if (neighbour == neighbour_YP)
-		return yplusNeighbour;
-
-	else if (neighbour == neighbour_YM)
-		return yminusNeighbour;
-	/* Currently else below can't be entered. Used to silence warning about
-	 * reaching end of non-void function */
-	else
-		return NULL;
-}
-
-/* When entry_x or entry_y, which are used to point positions on 2D-grids,
- * is on grid-boundary and switch to neighboring HeightMap is desired,
- * this can be used to output new values of entry_x and entry_y for referenced
- * HeightMap.
- * Return values:
- *	On success, returns new entry_x, entry_y and function return value true.
- *	On failure, entry_x, entry_y are not modified and function return value is false. */
-bool HeightMap::getNeighbourEntryCoordinates(HeightMap_neighbour neighbour
-											 , unsigned int &entry_x, unsigned int &entry_y)
-{
-	HeightMap *gridNeighbour;
-
-	// Is entry coordinates at the edge of map
-	if ( !( (entry_x == this->getSize()-1) || (entry_x == 0)
-			|| (entry_y == this->getSize()-1) || entry_y == 0 ) )
-		return false;
-
-	gridNeighbour = this->getNeighbourPtr(neighbour);
-
-	/* Assuming both square-grids face their frontface in same direction,
-	 * there are 16 different neighboring combinations. */
-
-	// If current HeightMap is x-minus neighbour for neighbour of interest
-	if (this == gridNeighbour->getNeighbourPtr(HeightMap::neighbour_XM))
-	{
-		// Check all 4 side-orientations for a square.
-		if (neighbour == neighbour_XP)
-		{
-			entry_x = 0;
-		}
-		else if (neighbour == neighbour_XM)
-		{
-			//entry_x == gridN->getSize()-1;
-			std::cerr << "This should not happen! XM and Neighbour XM" << std::endl;
-		}
-		else if (neighbour == neighbour_YP)
-		{
-			entry_y = gridNeighbour->getSize() - entry_x - 1;
-			entry_x = 0;
-		}
-		else if (neighbour == neighbour_YM)
-		{
-			entry_y = entry_x;
-			entry_x = 0;
-		}
-	}
-	else if (this == gridNeighbour->getNeighbourPtr(HeightMap::neighbour_XP))
-	{
-		if (neighbour == neighbour_XP)
-		{
-			//entry_x = gridN->getSize()-1;
-			std::cerr << "This should not happen! XP and Neighbour XP" << std::endl;
-		}
-		else if (neighbour == neighbour_XM)
-		{
-			entry_x = gridNeighbour->getSize()-1;
-		}
-		else if (neighbour == neighbour_YP)
-		{
-			entry_y = entry_x;
-			entry_x = gridNeighbour->getSize()-1;
-		}
-		else if (neighbour == neighbour_YM)
-		{
-			entry_y = gridNeighbour->getSize()-entry_x-1;
-			entry_x = gridNeighbour->getSize()-1;
-		}
-	}
-	else if (this == gridNeighbour->getNeighbourPtr(HeightMap::neighbour_YM))
-	{
-		if (neighbour == neighbour_XP)
-		{
-			entry_x = gridNeighbour->getSize() - entry_y -1;
-			entry_y = 0;
-		}
-		else if (neighbour == neighbour_XM)
-		{
-			entry_x = entry_y;
-			entry_y = 0;
-		}
-		else if (neighbour == neighbour_YP)
-		{
-			entry_y = 0;
-		}
-		else if (neighbour == neighbour_YM)
-		{
-			entry_x = gridNeighbour->getSize() - entry_x -1;
-			entry_y = 0;
-		}
-	}
-	else if (this == gridNeighbour->getNeighbourPtr(HeightMap::neighbour_YP))
-	{
-		if (neighbour == neighbour_XP)
-		{
-			entry_x = entry_y;
-			entry_y = gridNeighbour->getSize()-1;
-		}
-		else if (neighbour == neighbour_XM)
-		{
-			entry_x = gridNeighbour->getSize() - entry_y - 1;
-			entry_y = gridNeighbour->getSize() - 1;
-		}
-		else if (neighbour == neighbour_YP)
-		{
-			entry_x = gridNeighbour->getSize()-entry_x-1;
-			entry_y = gridNeighbour->getSize()-1;
-		}
-		else if (neighbour == neighbour_YM)
-		{
-			entry_y = gridNeighbour->getSize() - 1;
-		}
-	}
-
-	return true;
-}
-
 // scalingFactor scales size of the mesh
 void HeightMap::generateMeshData(float scalingFactor)
 {
 	unsigned int x, y, idx;
 
 	idx = 0;
-	for(x=0; x < mapSize; x++)
+	for(x=0; x < gridSize; x++)
 	{
-		for(y=0; y < mapSize; y++)
+		for(y=0; y < gridSize; y++)
 		{
 			// Project height-map location to a sphere
 			vertexes[idx] = projectToSphere(x, y) * scalingFactor;
@@ -284,24 +127,24 @@ void HeightMap::generateMeshData(float scalingFactor)
 
 	// Create indexes to build triangles.
 	idx = 0;
-	for(x=0; x < mapSize-1; x++)
+	for(x=0; x < gridSize-1; x++)
 	{
-		for(y=0; y < mapSize-1; y++)
+		for(y=0; y < gridSize-1; y++)
 		{
 			// Triangle 1
-			indexes[idx] = x*mapSize+y+mapSize+1;
+			indexes[idx] = x*gridSize+y+gridSize+1;
 			idx++;
-			indexes[idx] = x*mapSize+y;
+			indexes[idx] = x*gridSize+y;
 			idx++;
-			indexes[idx] = x*mapSize+y+mapSize;
+			indexes[idx] = x*gridSize+y+gridSize;
 			idx++;
 
 			// Triangle 2, in other words, a quad.
-			indexes[idx] = x*mapSize+y;
+			indexes[idx] = x*gridSize+y;
 			idx++;
-			indexes[idx] = x*mapSize+y+mapSize+1;
+			indexes[idx] = x*gridSize+y+gridSize+1;
 			idx++;
-			indexes[idx] = x*mapSize+y+1;
+			indexes[idx] = x*gridSize+y+1;
 			idx++;
 		}
 	}
@@ -317,7 +160,7 @@ void HeightMap::calculateNormals()
 
 	// Blended normals for a vertex
 	// first, zero our normals, so that we can use it as a accumulator
-	for(i=0; i < mapSize*mapSize; i++)
+	for(i=0; i < gridSize*gridSize; i++)
 	{
 		verNorms[i].x = 0.0f;
 		verNorms[i].y = 0.0f;
@@ -325,7 +168,7 @@ void HeightMap::calculateNormals()
 	}
 	/* calculate normals for every triangle. Multiple normals are added together
 	 * for each vertex, so result is average of all the normals. */
-	indexCount = (mapSize-1)*(mapSize-1)*6;
+	indexCount = (gridSize-1)*(gridSize-1)*6;
 	for(i=0; i < indexCount; i = i + 3)
 	{
 		p1 = vertexes[indexes[i]] - vertexes[indexes[i+1]];
@@ -337,7 +180,7 @@ void HeightMap::calculateNormals()
 		verNorms[indexes[i+2]] += normal;
 	}
 	// Normalization pass
-	for(i=0; i < mapSize*mapSize; i++)
+	for(i=0; i < gridSize*gridSize; i++)
 	{
 		verNorms[i].normalise();
 	}
@@ -351,11 +194,12 @@ void HeightMap::blendNormalsWithNeighbours()
 	HeightMap *neighbour;
 	Ogre::Vector3 norm, normNeighbour, blendedNorm;
 
-	// Get neighbours pointer
-	neighbour = getNeighbourPtr(neighbour_XM);
+	/* Get neighbours pointer. Needs a cast, because getNeighbourPtr
+	 * returns Grid *, but we need HeightMap * to manipulate normal-data */
+	neighbour = static_cast<HeightMap *>(getNeighbourPtr(neighbour_XM));
 	if (neighbour != NULL)
 	{
-		for(i=0; i < mapSize; i++)
+		for(i=0; i < gridSize; i++)
 		{
 			entry_x = 0;
 			entry_y = i;
@@ -374,29 +218,29 @@ void HeightMap::blendNormalsWithNeighbours()
 		}
 	}
 
-	neighbour = getNeighbourPtr(neighbour_XP);
+	neighbour = static_cast<HeightMap *>(getNeighbourPtr(neighbour_XP));
 	if (neighbour != NULL)
 	{
-		for(i=0; i < mapSize; i++)
+		for(i=0; i < gridSize; i++)
 		{
-			entry_x = mapSize-1;
+			entry_x = gridSize-1;
 			entry_y = i;
 			getNeighbourEntryCoordinates(neighbour_XP, entry_x, entry_y);
 
 			normNeighbour = neighbour->getNormal(entry_x, entry_y);
-			norm = getNormal(mapSize-1, i);
+			norm = getNormal(gridSize-1, i);
 
 			blendedNorm = norm+normNeighbour;
 			blendedNorm.normalise();
-			setNormal(blendedNorm, mapSize-1, i);
+			setNormal(blendedNorm, gridSize-1, i);
 			neighbour->setNormal(blendedNorm, entry_x, entry_y);
 		}
 	}
 
-	neighbour = getNeighbourPtr(neighbour_YM);
+	neighbour = static_cast<HeightMap *>(getNeighbourPtr(neighbour_YM));
 	if (neighbour != NULL)
 	{
-		for(i=0; i < mapSize; i++)
+		for(i=0; i < gridSize; i++)
 		{
 			entry_x = i;
 			entry_y = 0;
@@ -412,21 +256,21 @@ void HeightMap::blendNormalsWithNeighbours()
 		}
 	}
 
-	neighbour = getNeighbourPtr(neighbour_YP);
+	neighbour = static_cast<HeightMap *>(getNeighbourPtr(neighbour_YP));
 	if (neighbour != NULL)
 	{
-		for(i=0; i < mapSize; i++)
+		for(i=0; i < gridSize; i++)
 		{
 			entry_x = i;
-			entry_y = mapSize-1;
+			entry_y = gridSize-1;
 			getNeighbourEntryCoordinates(neighbour_YP, entry_x, entry_y);
 
 			normNeighbour = neighbour->getNormal(entry_x, entry_y);
-			norm = getNormal(i, mapSize-1);
+			norm = getNormal(i, gridSize-1);
 
 			blendedNorm = norm+normNeighbour;
 			blendedNorm.normalise();
-			setNormal(blendedNorm, i, mapSize-1);
+			setNormal(blendedNorm, i, gridSize-1);
 			neighbour->setNormal(blendedNorm, entry_x, entry_y);
 		}
 	}
@@ -434,12 +278,12 @@ void HeightMap::blendNormalsWithNeighbours()
 
 Ogre::Vector3 HeightMap::getNormal(unsigned short x,unsigned short y)
 {
-	return verNorms[x*mapSize+y];
+	return verNorms[x*gridSize+y];
 }
 
 void HeightMap::setNormal(Ogre::Vector3 normal, unsigned short x, unsigned short y)
 {
-	verNorms[x*mapSize+y] = normal;
+	verNorms[x*gridSize+y] = normal;
 }
 
 /* Returns vertex-, normal-, texture- and index-arrays through a pointer.
@@ -449,13 +293,13 @@ void HeightMap::outputMeshData(Ogre::Vector3 *verArray, Ogre::Vector3 *norArray,
 {
 	unsigned int i;
 
-	for(i=0; i < mapSize*mapSize; i++)
+	for(i=0; i < gridSize*gridSize; i++)
 	{
 		verArray[i] = vertexes[i];
 		norArray[i] = verNorms[i];
 		texArray[i] = txCoords[i];
 	}
-	for(i=0; i < (mapSize-1)*(mapSize-1)*6; i++)
+	for(i=0; i < (gridSize-1)*(gridSize-1)*6; i++)
 	{
 		idxArray[i] = indexes[i];
 	}

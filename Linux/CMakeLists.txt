@@ -79,6 +79,7 @@ set(HDRS
     ../PSphere.h
     ../GeneratorFrameListener.h
     ../initOgre.h
+    ../Grid.h
     ../HeightMap.h
     ../CollisionManager.h
     ../Common.h
@@ -95,6 +96,7 @@ set(SRCS
     ../GeneratorFrameListener.cpp
     ../initOgre.cpp
     ../main.cpp
+    ../Grid.cpp
     ../HeightMap.cpp
     ../CollisionManager.cpp
     ../Common.cpp
