@@ -100,7 +100,7 @@ int initOgre::start(){
 	//Ogre::ResourceGroupManager::getSingleton().declareResource("space rock tex 3.jpg", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
 
 	//Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(5);
-	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+	
 	//Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
 	// Check renderer availability
@@ -125,13 +125,14 @@ int initOgre::start(){
 	// Actual call to create window, bool value is fullscreen flag
 	Window = Root->createRenderWindow("My little planet", 800, 600, false, &renderParams);
 
-
 	// Start creating scene
 	Scene = Root->createSceneManager(Ogre::ST_EXTERIOR_CLOSE);
 	RootSceneNode = Scene->getRootSceneNode();
 
 	if(OverlaySystem)
 		Scene->addRenderQueueListener(OverlaySystem);
+
+	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
 	return 0;
 }

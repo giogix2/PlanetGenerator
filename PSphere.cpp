@@ -423,7 +423,7 @@ void PSphere::create(Ogre::uint32 iters, ResourceParameter resourceParameter)
 	float min, max;
 
 	calculateSeaLevel(min, max, waterFraction);
-	generateImage(max, min);
+	generateImage(max, min);//take longtime
 	smoothSeaArea();
 }
 
@@ -1007,6 +1007,31 @@ void PSphere::moveObject(const std::string &objectName, int direction, float pac
 					}
 					break;
 				case (LEFT):
+					cartesianCoord=Ogre::Vector2(asin(oldPosition.z ), atan2(oldPosition.y, oldPosition.x));
+					cartesianCoord = Ogre::Vector2(cartesianCoord.x*(180/Ogre::Math::PI), 360+cartesianCoord.y*(180/Ogre::Math::PI)-pace); // Convertion from radians to degrees
+					cart_coord = convertSphericalToCartesian(cartesianCoord.x, cartesianCoord.y);
+
+					//set on the ground
+					newPosition = cart_coord * ( getSurfaceHeight(cart_coord) / cart_coord.length()) ;
+
+					node->setPosition(newPosition);
+					objTemp.setPosition(newPosition);
+
+					//Collision Detection
+					if(CollisionDetectionManager->checkCollisionAABB(objTemp).collided)//collided,move back
+					{	
+						node->setPosition(oldPosition);
+						objTemp.setPosition(oldPosition);
+					}else{//not collided, change orientataion and position	
+						//change orientation
+						Ogre::Quaternion q;
+						q = Ogre::Vector3::UNIT_Y.getRotationTo(newPosition);
+						Ogre::Quaternion a;
+						node->setOrientation( q );
+						node->yaw ( Ogre::Math::Abs( (newPosition-oldPosition).getRotationTo(q*Ogre::Vector3::UNIT_Z).getYaw() ) );
+					}
+					break;
+				case (RIGHT):
 					cartesianCoord = Ogre::Vector2(asin(oldPosition.z ), atan2(oldPosition.y, oldPosition.x));
 					cartesianCoord = Ogre::Vector2(cartesianCoord.x*(180/Ogre::Math::PI), 360+cartesianCoord.y*(180/Ogre::Math::PI)+pace); // Convertion from radians to degrees
 					cart_coord = convertSphericalToCartesian(cartesianCoord.x, cartesianCoord.y);
@@ -1033,31 +1058,7 @@ void PSphere::moveObject(const std::string &objectName, int direction, float pac
 						//node->yaw ( ( (newPosition-oldPosition).getRotationTo(q*Ogre::Vector3::UNIT_Z).getYaw() ) );
 
 					}
-					break;
-				case (RIGHT):
-					cartesianCoord=Ogre::Vector2(asin(oldPosition.z ), atan2(oldPosition.y, oldPosition.x));
-					cartesianCoord = Ogre::Vector2(cartesianCoord.x*(180/Ogre::Math::PI), 360+cartesianCoord.y*(180/Ogre::Math::PI)-pace); // Convertion from radians to degrees
-					cart_coord = convertSphericalToCartesian(cartesianCoord.x, cartesianCoord.y);
-
-					//set on the ground
-					newPosition = cart_coord * ( getSurfaceHeight(cart_coord) / cart_coord.length()) ;
-
-					node->setPosition(newPosition);
-					objTemp.setPosition(newPosition);
-
-					//Collision Detection
-					if(CollisionDetectionManager->checkCollisionAABB(objTemp).collided)//collided,move back
-					{	
-						node->setPosition(oldPosition);
-						objTemp.setPosition(oldPosition);
-					}else{//not collided, change orientataion and position	
-						//change orientation
-						Ogre::Quaternion q;
-						q = Ogre::Vector3::UNIT_Y.getRotationTo(newPosition);
-						Ogre::Quaternion a;
-						node->setOrientation( q );
-						node->yaw ( Ogre::Math::Abs( (newPosition-oldPosition).getRotationTo(q*Ogre::Vector3::UNIT_Z).getYaw() ) );
-					}
+					
 					break;
 			}
 		}
