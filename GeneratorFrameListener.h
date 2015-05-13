@@ -30,7 +30,6 @@ D:        Step right
 #include "Ogre.h"
 #include "OgreStringConverter.h"
 #include "OgreException.h"
-#include "CollisionTools.h"
 #include "OgreStringConverter.h"
 #include "OgreException.h"
 #include "OgreOverlaySystem.h"
