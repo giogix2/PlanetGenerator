@@ -210,7 +210,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	// Set texture for the sphere
 	entity1->setMaterial(textureMap);
 
-	sphere1->setOrientation(1.3003361e-01f, -1.5604560e-01f, -7.5052901e-01f, 6.2884596e-01f);
+	sphere1->setOrientation(0.163149834f, -0.19578641f, -0.314332321f, -0.9144643269f);
 
 	//Collision Manager
 	CollisionDetectionManager = new CollisionManager(planet->getObjects(),Camera);
