@@ -376,7 +376,7 @@ bool GeneratorFrameListener::frameStarted(const Ogre::FrameEvent& evt)
 		//debug code
 
 		//RootSceneNode->getChild("planetSphere")->roll(Ogre::Radian(0.04));
-		pSphere->moveObject("Ramiro", 2, 0.1);
+		pSphere->moveObject("Ramiro", 3, 0.5);
 		//pSphere->moveObject("CK7", 2, 0.5);
 		//pSphere->getObserverDistanceToSurface();
 

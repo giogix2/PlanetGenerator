@@ -127,7 +127,7 @@ int initOgre::start(){
 
 
 	// Start creating scene
-	Scene = Root->createSceneManager(Ogre::ST_GENERIC);
+	Scene = Root->createSceneManager(Ogre::ST_EXTERIOR_CLOSE);
 	RootSceneNode = Scene->getRootSceneNode();
 
 	if(OverlaySystem)
@@ -148,6 +148,9 @@ void initOgre::CreateFrameListener(PSphere *pSphere){
 }
 
 void initOgre::setSceneAndRun(PSphere *planet){
+
+	//background
+	Scene->setSkyBox(true, "SpaceSkyBox",1000.0f,false);
 
 	// Create camera
 	Camera = Scene->createCamera("VertCamera");
@@ -218,6 +221,8 @@ void initOgre::setSceneAndRun(PSphere *planet){
 
 	//createFrameListener
 	CreateFrameListener(planet);
+
+	
 
 	//start Rendering
 	Root->startRendering();

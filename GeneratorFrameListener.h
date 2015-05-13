@@ -84,12 +84,6 @@ public:
 
 		pSphere = ps;
 		
-		// init the collision handler
-		//CollisionManager = new MOC::CollisionTools(Scene);
-		// set how far we want the camera to be above ground
-		//CollisionManager->setHeightAdjust(5);
-		
-
 		Ogre::OverlayManager &om = Ogre::OverlayManager::getSingleton();
 		mDebugOverlay = om.create("Core/DebugOverlay");
 		mDebugOverlay->setZOrder(500);
