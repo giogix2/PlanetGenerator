@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en-us">
+  <head>
+    <meta charset="UTF-8">
+    <title>Planetgenerator by giogix2</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="stylesheets/normalize.css" media="screen">
+    <link href='http://fonts.googleapis.com/css?family=Open+Sans:400,700' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="stylesheets/stylesheet.css" media="screen">
+    <link rel="stylesheet" type="text/css" href="stylesheets/github-light.css" media="screen">
+  </head>
+  <body>
+    <section class="page-header">
+      <h1 class="project-name">Planetgenerator</h1>
+      <h2 >Let's create a planet !</h2>
+      <h3 class="project-tagline">PlanetGenerator is software which randomly generater 3d planets. The aim of this project is to have a starting point, to create 3D environments, in which a planet is necessary (games, simulation tools, learning etc.).</h3>
+      <a href="https://github.com/giogix2/PlanetGenerator" class="btn">View on GitHub</a>
+      <a href="https://github.com/giogix2/PlanetGenerator/zipball/master" class="btn">Download .zip</a>
+      <a href="https://github.com/giogix2/PlanetGenerator/tarball/master" class="btn">Download .tar.gz</a>
+      <h4>
+      	<a href="index.html"><font color="black">Main &nbsp;</font></a>
+      	<a href="installing.html"><font color="black">Installing &nbsp;</font></a>
+        <a href="usage.html"><font color="black"> Usage &nbsp;</font></a>
+      	<a href="classes.html"><font color="black"> Classes</font></a>
+      </h4>
+    </section>
+
+    <section class="main-content">
+    <div style="text-align: center;"><img src="images/Workflow.jpg" alt="Planets" left: 30px; style="width:1280px;height:490px"></div>
+      <h3>
+<a id="welcome-to-planet-generator" class="anchor" href="#welcome-to-planet-generator" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to start</h3>
+
+<pre><code> mySphere = new PSphere();
+ mySphere->create(100, *params);
+ rendering = new initOgre();
+ rendering->start();
+ rendering->setSceneAndRun(mySphere);
+ delete mySphere;
+ rendering->cleanup();
+</code></pre>
+
+<p>The objects <b>PSphere</b> and <b>ResourceParameter</b> are the only things you need. To set up the Ogre 3D environment (as such the scene and the lights), the class initOgre can be used.<BR>
+  <ul>
+    <li><b>new PSphere():</b> The object PSphere is created. It's the class representing the planet itself.</li>
+    <li><b>create(100, *params):</b> The planet is set up. The first parameter indicates the number of vertices. The second paramenter is a ResourceParameter object, containing all the information of the planet (for example: water percentage, colors used, diameter, etc.)</li>
+    <li><b>new initOgre():</b> The object initOgre is created. </li>
+    <li><b>start():</b> It's set up the Ogre 3D environment, such the scene or the lights.</li>
+    <li><b>setSceneAndRun(mySphere):</b> The planet is passed to the Ogre's scene just created, and it starts to show it in the window.</li>
+    <li><b>delete mySphere:</b> The planet is destroid and memory is released.</li>
+    <li><b>rendering->cleanup():</b> Object relative to the Ogre's scene are destroid.</li>
+  </ul>
+</p>
+
+<h3>
+<a id="designer-templates" class="anchor" href="#designer-templates" aria-hidden="true"><span class="octicon octicon-link"></span></a>Designing the planet</h3>
+
+<p><b>ResourceParameter</b> is the class containing all the information of the planet. This object can come from a graphical user interface or it could be even be built inside of a main function. It's a simple object containing variables and getter/setter methods. It has been thought that it can be expanded, if someone need other information to build the planet. 
+<pre><code>string terrainFirstColor;
+string terrainSecondColor;
+string waterFirstColor;
+string waterSecondColor;
+string mountainFirstColor;
+string mountainSecondColor;
+float waterFraction;
+float radius;
+int seed;
+vector <float> frequency;
+vector <float> amplitude;
+</code></pre> 
+
+  <ul>
+    <li><b>terrainFirst/SecondColor- waterFirst/SecondColor - mountainFirst/SecondColor:</b> These indicate the color gradient which charaterizes the enities on the planet. The colors are in hexadecimal format. For example, the first color of the water could represent the deepest point on the sea. The color can be chosen, so the planet can appears in any way possible.</li>
+    <li><b>waterFraction:</b> Percentage of water on the planet (from 0.0 to 100.0). It could be any liquid, since the color is chosen according to the previous parameters.</li>
+    <li><b>radius:</b> Radius of the planet. </li>
+    <li><b>seed:</b> It's a unique number representing the planet. The same seed generate always the same planet.</li>
+    <li><b>frequency:</b> Indicates how much deformed the surface has to be. It is used by the simplex noise algorithm to generates montains and deformation. Higher values permit to have a more deformed suface.</li>
+    <li><b>amplitude:</b> It represents the hichest height of the mountains.</li>
+    <li><b>rendering->cleanup():</b> Object relative to the Ogre's scene are destroid.</li>
+  </ul>
+
+</p>
+
+<h3>
+<a id="rather-drive-stick" class="anchor" href="#rather-drive-stick" aria-hidden="true"><span class="octicon octicon-link"></span></a>Rather Drive Stick?</h3>
+
+<p>If you prefer to not use the automatic generator, push a branch named <code>gh-pages</code> to your repository to create a page manually. In addition to supporting regular HTML content, GitHub Pages support Jekyll, a simple, blog aware static site generator written by our own Tom Preston-Werner. Jekyll makes it easy to create site-wide headers and footers without having to copy them across every page. It also offers intelligent blog support and other advanced templating features.</p>
+
+<h3>
+<a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+
+<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+
+<h3>
+<a id="support-or-contact" class="anchor" href="#support-or-contact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+
+      <footer class="site-footer">
+        <span class="site-footer-owner"><a href="https://github.com/giogix2/PlanetGenerator">Planetgenerator</a> is maintained by <a href="https://github.com/giogix2">giogix2</a>.</span>
+
+      </footer>
+
+    </section>
+
+  
+  </body>
+</html>
+
