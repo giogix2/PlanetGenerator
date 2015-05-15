@@ -131,7 +131,7 @@ add_custom_command(TARGET PlanetGenerator POST_BUILD COMMAND ${CMAKE_COMMAND} -E
 # Add "_d" to debug-binary
 set_target_properties(PlanetGenerator PROPERTIES DEBUG_POSTFIX _d)
  
-target_link_libraries(PlanetGenerator ${OGRE_LIBRARIES} ${OIS_LIBRARIES} ${OGRE_Overlay_LIBRARIES} ${Qt5Libs})
+target_link_libraries(PlanetGenerator ${OGRE_LIBRARIES} ${OIS_LIBRARIES} ${OGRE_Overlay_LIBRARIES} ${Qt5Libs} ${FreeImageLib} freeimage)
 
 set(CMAKE_CXX_FLAGS "-Wall")
 
