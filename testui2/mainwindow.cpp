@@ -61,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	amplitude.push_back(0.02);
 	amplitude.push_back(0.006666);*/
 
-	std::string frequencyAmplitude = "0.4 0.02 0.06666 0.006666";
+	std::string frequencyAmplitude = "1.0 0.02 0.3 0.008 0.1 0.005 0.06666 0.006666";
     std::vector < std::pair < std::string, int > > meshlocs;
     meshlocs.push_back(std::make_pair("media/models/ram.mesh", 1));
     meshlocs.push_back(std::make_pair("media/models/asteroid.mesh", 1));
