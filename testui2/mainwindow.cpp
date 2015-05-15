@@ -150,6 +150,7 @@ void MainWindow::on_pushButton_clicked()
 	rendering = new initOgre();
 	rendering->start();
 	rendering->setSceneAndRun(mySphere);
+	mySphere->exportEquirectangularMap();
 	delete mySphere;
     rendering->cleanup();
 

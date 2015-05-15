@@ -14,6 +14,8 @@
 #include "Common.h"
 #include "ResourceParameter.h"
 #include <qdebug.h>
+#define FREEIMAGE_LIB
+#include "FreeImage.h"
 
 using namespace std;
 
@@ -985,6 +987,24 @@ vector<ObjectInfo> *PSphere::getObjects()
 void PSphere::setCollisionManager(CollisionManager	*CDM)
 {
 	CollisionDetectionManager = CDM;
+}
+
+
+void PSphere::exportEquirectangularMap() {
+	RGBQUAD color;
+	FreeImage_Initialise();
+	FIBITMAP *bitmap = FreeImage_Allocate(TEX_WIDTH, TEX_HEIGHT, 24);
+	for(int i=0; i < TEX_WIDTH; i++) {
+		for (int j=0; j < TEX_HEIGHT; j++) {
+			color.rgbRed = image[((TEX_WIDTH*j)+i)*3];
+			color.rgbGreen = image[((TEX_WIDTH*j)+i)*3+1];
+			color.rgbBlue = image[((TEX_WIDTH*j)+i)*3+2];
+			FreeImage_SetPixelColor(bitmap, i, j, &color);
+		}
+	}
+	FreeImage_Save(FIF_PNG, bitmap, "TestFile.png", 0);
+
+	FreeImage_DeInitialise();
 }
 
 void PSphere::moveObject(const std::string &objectName, int direction, float pace) {

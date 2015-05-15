@@ -54,6 +54,8 @@ public:
 
 	void setCollisionManager(CollisionManager	*CDM);
 
+	void exportEquirectangularMap();
+
 	PSphere();
 
 	~PSphere();
