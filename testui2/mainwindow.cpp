@@ -28,6 +28,7 @@
 #include <QColorDialog>
 #include <QVectorIterator>
 #include <QtMath>
+#include <QFileDialog>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -167,7 +168,7 @@ void MainWindow::on_pushButton_clicked()
         qDebug() << "Amount: " << *iter;
     }*/
 	
-    mySphere = new PSphere();
+/*    mySphere = new PSphere();
 	mySphere->create(100, 40, *params);
 	rendering = new initOgre();
 	rendering->start();
@@ -175,7 +176,7 @@ void MainWindow::on_pushButton_clicked()
 	mySphere->exportEquirectangularMap(512, 256, "TestFile.png");
 	delete mySphere;
     rendering->cleanup();
-
+*/
 	
 }
 
@@ -294,4 +295,38 @@ void MainWindow::setMeshes(QString p_path, int p_count)
     //alternate way:
     //params->setMeshLocation(p_path.toStdString());
     //params->setObjectAmount(p_count);
+}
+
+void MainWindow::on_pushButton_10_clicked()
+{
+    QString filename = QFileDialog::getSaveFileName(this, "Save image", "../", "*.png" )+".png";
+    qDebug() << "save as : " + filename;
+
+
+
+    //unsigned short
+    QString string = ui->comboBox->currentText();
+
+    QStringList values = string.split(" x ");
+
+    unsigned short width =  values[0].toUShort();
+    unsigned short height =  values[1].toUShort();
+
+    qDebug() << "width: " << width << ", height: " << height ;
+
+    //create planet
+    //push to pshere export-method with filename + resolution
+}
+
+void MainWindow::on_pushButton_11_clicked()
+{
+ /*   QImage image = QImage::fromData(unsigned char array, QImage::Format_RGB888);
+
+
+    QGraphicsScene scene;
+    scene.addItem(image);
+
+    ui->graphicsView->setScene(scene);
+    ui->graphicsView->show();
+*/
 }

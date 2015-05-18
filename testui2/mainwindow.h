@@ -26,8 +26,8 @@
 #include <QMainWindow>
 #include "freqampdialog.h"
 #include "meshdialog.h"
-#include "../PSphere.h"
-#include "../initOgre.h"
+//#include "../PSphere.h"
+//#include "../initOgre.h"
 
 #include "../ResourceParameter.h"
 
@@ -71,13 +71,17 @@ private slots:
 
     void on_pushButton_9_clicked();
 
+    void on_pushButton_10_clicked();
+
+    void on_pushButton_11_clicked();
+
 private:
     Ui::MainWindow *ui;   
     FreqAmpDialog *dialog;
     MeshDialog *meshdialog;
 	std::ResourceParameter *params;
-    PSphere *mySphere;
-    initOgre *rendering;
+   // PSphere *mySphere;
+    //initOgre *rendering;
 };
 
 #endif // MAINWINDOW_H
