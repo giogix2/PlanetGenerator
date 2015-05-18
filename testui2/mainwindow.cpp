@@ -168,7 +168,7 @@ void MainWindow::on_pushButton_clicked()
         qDebug() << "Amount: " << *iter;
     }*/
 	
-/*    mySphere = new PSphere();
+    mySphere = new PSphere();
 	mySphere->create(100, 40, *params);
 	rendering = new initOgre();
 	rendering->start();
@@ -176,7 +176,7 @@ void MainWindow::on_pushButton_clicked()
 	mySphere->exportEquirectangularMap(512, 256, "TestFile.png");
 	delete mySphere;
     rendering->cleanup();
-*/
+
 	
 }
 

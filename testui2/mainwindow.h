@@ -26,8 +26,8 @@
 #include <QMainWindow>
 #include "freqampdialog.h"
 #include "meshdialog.h"
-//#include "../PSphere.h"
-//#include "../initOgre.h"
+#include "../PSphere.h"
+#include "../initOgre.h"
 
 #include "../ResourceParameter.h"
 
@@ -80,8 +80,8 @@ private:
     FreqAmpDialog *dialog;
     MeshDialog *meshdialog;
 	std::ResourceParameter *params;
-   // PSphere *mySphere;
-    //initOgre *rendering;
+    PSphere *mySphere;
+    initOgre *rendering;
 };
 
 #endif // MAINWINDOW_H
