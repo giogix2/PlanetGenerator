@@ -38,7 +38,7 @@
 
 <!-- void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude)-->
 <h3>
-<a id="designer-templates" class="anchor" href="#designer-templates" aria-hidden="true"><span class="octicon octicon-link"></span></a>void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude)</h3>
+<a id="designer-templates" class="anchor" href="#designer-templates" aria-hidden="true" name="attachMesh"><span class="octicon octicon-link"></span></a>void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude)</h3>
 
 <p>With this function it's possible to attach objects to the planet. Such objects have to be in the format .mesh, and contained in the folder indicated in the resource.cfg file (e.g. FileSystem=media/models), or loaded manually.</p>
 
@@ -49,6 +49,26 @@
   <li><b>objectName:</b> It's the chosen name of the object. It can be any unique name, that will be useful to select the object in any moment.</li>
   <li><b>latitude:</b> (degrees between 0 and 360) Latitude in where the object has to be put.</li>
   <li><b>longitude:</b> (degrees between 0 and 180) Longitude in where the object has to be put.</li>
+</ul>
+
+<!-- bool checkAccessibility(Ogre::Vector3 location)-->
+<h3>
+<a id="designer-templates" class="anchor" href="#designer-templates" aria-hidden="true" name="checkAccessibility"><span class="octicon octicon-link"></span></a>bool checkAccessibility(Ogre::Vector3 location)</h3>
+
+<p> It tells if there's water or if there's already another object in a certain position. If the returned value is true there are no objects or water in that position.</p>
+
+ <ul>
+  <li><b>location:</b> Position of which we want to check the accessibility (if there's already something on it)</li>
+</ul>
+
+<!-- bool checkIfObjectIsIn (std::string &objectName)-->
+<h3>
+<a id="designer-templates" class="anchor" href="#designer-templates" aria-hidden="true" name="checkIfObjectIsIn"><span class="octicon octicon-link"></span></a>bool checkIfObjectIsIn (std::string &objectName)</h3>
+
+<p> It tells if an object with a certain name as already been put on the planet. If the returned value is true, an object with that name is already on the planet.</p>
+
+ <ul>
+  <li><b>objectName:</b> Name of the object</li>
 </ul>
 
 <!-- void create(Ogre::uint32 iters, ResourceParameter resourceParameter)-->
@@ -94,6 +114,16 @@
   <li><b>position:</b> Vector representing the position of the observer</li>
 </ul> 
 
+<!-- void moveObject(const std::string &objectName, int direction, float pace)-->
+<h3>
+<a id="designer-templates" class="anchor" href="#designer-templates" aria-hidden="true" name="moveObject"><span class="octicon octicon-link"></span></a>void moveObject(const std::string &objectName, int direction, float pace)</h3>
+
+<p>It moves a specified object in a certain direction.</p>
+
+ <ul>
+  <li><b>objectName:</b> Name of the object that we want to move</li>
+  <li><b>direction:</b> Direction of the movemet (1=)</li>
+</ul> 
 
 
 

@@ -91,6 +91,17 @@ vector <float> amplitude;
 
   <div style="text-align: center;"><img src="images/PutOnPlanet.jpg" alt="Planets" left: 30px; style="width:1280px;height:490px"></div>
 
+<p>The function which let you put 3D objects (.MESH files) on the planet is <a href="classes.html#attachMesh">attachMesh()</a> of the class <b>PSphere</b>. You can check in any moment if an object with the same name has already been put on the planet with the function <a href="classes.html#checkIfObjectIsIn">checkIfObjectIsIn()</a>. </p>
+
+<h3>
+<a id="accessibility" class="anchor" href="#accessibility" aria-hidden="true"><span class="octicon octicon-link"></span></a>Accessibility</h3>
+
+<p> The planet provides a functionality to know where the liquid part (usually water) is. This is usefull if someone want to interact with the planet, and need to know where the water is, for example to move objects on the surface (animals, vehicles etc.). The accessibility system is made through a binary grid, which says where the water is. </p>
+
+<div style="text-align: center;"><img src="images/GridSystem.jpg" alt="Planets" left: 30px; style="width:1280px;height:490px"></div>
+
+<p> As in the previous image, the grid can be thought black and white, where the black part represents the water. To ask the planet where the water it has been provided the function <a href="classes.html#checkAccessibility">checkAccessibility()</a> where you can specify the position, and it returns a boolean value which indicates if there's water or not. Not only that ! The previous function says also if in a certain position there's already another object, so there's no possibility to put another one. So the returned value is true if there are no objects in the specified position. </p>
+
 <h3>
 <a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
 
