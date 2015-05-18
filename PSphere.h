@@ -78,6 +78,8 @@ public:
 
 	void exportEquirectangularMap(unsigned short width, unsigned short height, string fileName);
 
+	unsigned char *exportEquirectangularMap(unsigned short width, unsigned short height);
+
 	PSphere();
 
 	~PSphere();
@@ -92,6 +94,7 @@ private:
 	Ogre::Real			radius;
 	Ogre::Real			seaHeight;
 	unsigned char		*surfaceTexture;
+	unsigned char		*exportImage;
 	Ogre::MeshPtr		mesh;
 	Ogre::Vector3		observer;
 	HeightMap			*faceYP;

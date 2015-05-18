@@ -55,6 +55,7 @@ PSphere::PSphere(){
 	texCoords =	NULL;
 	indexes =	NULL;
 	surfaceTexture =		NULL;
+	exportImage =	NULL;
 	observer =	Ogre::Vector3(0.0f, 0.0f, 0.0f);
 }
 
@@ -65,6 +66,7 @@ PSphere::~PSphere()
 	delete[] vertexes;
 	delete[] vNorms;
 	delete[] surfaceTexture;
+	delete[] exportImage;
 
 	delete faceXM;
 	delete faceXP;
@@ -1007,13 +1009,28 @@ void PSphere::setCollisionManager(CollisionManager	*CDM)
 	CollisionDetectionManager = CDM;
 }
 
+unsigned char *PSphere::exportEquirectangularMap(unsigned short width, unsigned short height) {
+
+	// Check if exportImage is already allocated
+	if (exportImage != NULL)
+		delete[] exportImage;
+	exportImage = new unsigned char[width*height*3];
+
+	// Generates the map. exportImage points to it.
+	generateImage(width, height, exportImage);
+
+	return exportImage;
+}
 
 void PSphere::exportEquirectangularMap(unsigned short width, unsigned short height, std::string fileName) {
 	RGBQUAD color;
-	unsigned char *exportImage;
+//	unsigned char *exportImage;
 
-	exportImage = new unsigned char[width*height*3];
-	generateImage(width, height, exportImage);
+	/* Create map to memory location pointed by exportImage.
+	 * It is class private variable. */
+	exportEquirectangularMap(width, height);
+
+	// Use freeimage to save the map as a file
 	FreeImage_Initialise();
 	FIBITMAP *bitmap = FreeImage_Allocate(width, height, 24);
 	for(int i=0; i < width; i++) {
@@ -1027,7 +1044,6 @@ void PSphere::exportEquirectangularMap(unsigned short width, unsigned short heig
 	FreeImage_Save(FIF_PNG, bitmap, fileName.c_str(), 0);
 
 	FreeImage_DeInitialise();
-	delete[] exportImage;
 }
 
 void PSphere::moveObject(const std::string &objectName, int direction, float pace) {
