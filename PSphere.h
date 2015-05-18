@@ -76,7 +76,7 @@ public:
 
 	void setCollisionManager(CollisionManager	*CDM);
 
-	void exportEquirectangularMap();
+	void exportEquirectangularMap(unsigned short width, unsigned short height, string fileName);
 
 	PSphere();
 
@@ -91,7 +91,7 @@ private:
 	Ogre::uint32		indexCount;
 	Ogre::Real			radius;
 	Ogre::Real			seaHeight;
-	unsigned char		*image;
+	unsigned char		*surfaceTexture;
 	Ogre::MeshPtr		mesh;
 	Ogre::Vector3		observer;
 	HeightMap			*faceYP;
@@ -110,6 +110,8 @@ private:
 	Ogre::Vector3		randomTranslate;
 	vector<ObjectInfo>	objects;
 	CollisionManager	*CollisionDetectionManager;
+	Ogre::Real			maximumHeight;
+	Ogre::Real			minimumHeight;
 
 	void calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour);
 
@@ -128,7 +130,7 @@ private:
 	Ogre::Real heightNoise(vector<float> amplitude,
 						   vector<float> frequency, Ogre::Vector3 Point);
 
-	void generateImage(Ogre::Real top, Ogre::Real bottom);
+	void generateImage(unsigned short width, unsigned short height, unsigned char *image);
 
 	void generateMeshData();
 

@@ -54,7 +54,7 @@ PSphere::PSphere(){
 	vNorms =	NULL;
 	texCoords =	NULL;
 	indexes =	NULL;
-	image =		NULL;
+	surfaceTexture =		NULL;
 	observer =	Ogre::Vector3(0.0f, 0.0f, 0.0f);
 }
 
@@ -64,7 +64,7 @@ PSphere::~PSphere()
 	delete[] texCoords;
 	delete[] vertexes;
 	delete[] vNorms;
-	delete[] image;
+	delete[] surfaceTexture;
 
 	delete faceXM;
 	delete faceXP;
@@ -204,8 +204,10 @@ Ogre::Real PSphere::getRadius()
 {
 	return radius;
 }
-/* Example that shows procedural generation of textures */
-void PSphere::generateImage(Ogre::Real top, Ogre::Real bottom)
+
+/* Generates surface-texturemap using noise-generated height differences.
+ * Expects pointer to be already correctly allocated. */
+void PSphere::generateImage(unsigned short textureWidth, unsigned short textureHeight, unsigned char *image)
 {
 	Ogre::Vector3 spherePoint;
 	Ogre::Real latitude, longitude;
@@ -243,18 +245,12 @@ void PSphere::generateImage(Ogre::Real top, Ogre::Real bottom)
 	RParameter.getMountainFirstColor(mountainFirstColorred,mountainFirstColorgreen,mountainFirstColorblue);
 	RParameter.getMountainSecondColor(mountainSecondColorred,mountainSecondColorgreen,mountainSecondColorblue);
 
-	// Guard against multiple memory allocations to avoid memory leaks
-	if(image != NULL)
-		delete[] image;
-
-	image = new unsigned char[TEX_WIDTH*TEX_HEIGHT*3];
-
-	for(y=0; y < TEX_HEIGHT; y++)
+	for(y=0; y < textureHeight; y++)
 	{
-		for(x=0; x < TEX_WIDTH; x++)
+		for(x=0; x < textureWidth; x++)
 		{
-			longitude = (Ogre::Real(x)+0.5f)/TEX_WIDTH*360.0f;
-			latitude = (90.0f-0.5f/TEX_HEIGHT) - (Ogre::Real(y)+0.5f)/TEX_HEIGHT*180.0f;
+			longitude = (Ogre::Real(x)+0.5f)/textureWidth*360.0f;
+			latitude = (90.0f-0.5f/textureHeight) - (Ogre::Real(y)+0.5f)/textureHeight*180.0f;
 
 			// Get a point that corresponds to a given pixel
 			spherePoint = convertSphericalToCartesian(latitude, longitude);
@@ -265,23 +261,23 @@ void PSphere::generateImage(Ogre::Real top, Ogre::Real bottom)
 			// Set sea-colors, deeper part is slighly deeper blue.
 			if(height < seaHeight)
 			{
-				red =  waterFirstColorred + (waterSecondColorred-waterFirstColorred)*(height-bottom)/(seaHeight-bottom);
-				green =  waterFirstColorgreen + (waterSecondColorgreen-waterFirstColorgreen)*(height-bottom)/(seaHeight-bottom);
-				blue =  waterFirstColorblue + (waterSecondColorblue-waterFirstColorblue)*(height-bottom)/(seaHeight-bottom);
+				red =  waterFirstColorred + (waterSecondColorred-waterFirstColorred)*(height-minimumHeight)/(seaHeight-minimumHeight);
+				green =  waterFirstColorgreen + (waterSecondColorgreen-waterFirstColorgreen)*(height-minimumHeight)/(seaHeight-minimumHeight);
+				blue =  waterFirstColorblue + (waterSecondColorblue-waterFirstColorblue)*(height-minimumHeight)/(seaHeight-minimumHeight);
 			}
 			else
 			{
 				// Set low elevations green and higher brown
-				red =  terrainFirstColorred + (terrainSecondColorred-terrainFirstColorred)*(height-seaHeight)/(top*multiplyer-seaHeight);
-				green =  terrainFirstColorgreen + (terrainSecondColorgreen-terrainFirstColorgreen)*(height-seaHeight)/(top*multiplyer-seaHeight);
-				blue =  terrainFirstColorblue + (terrainSecondColorblue-terrainFirstColorblue)*(height-seaHeight)/(top*multiplyer-seaHeight);
+				red =  terrainFirstColorred + (terrainSecondColorred-terrainFirstColorred)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
+				green =  terrainFirstColorgreen + (terrainSecondColorgreen-terrainFirstColorgreen)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
+				blue =  terrainFirstColorblue + (terrainSecondColorblue-terrainFirstColorblue)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
 				// Highest elevations are bright grey and go toward white
-				if(height > top * multiplyer)
+				if(height > maximumHeight * multiplyer)
 				{
 					// to avoid unsigned char overflow
-					float substractred = (float)mountainSecondColorred - (mountainSecondColorred-mountainFirstColorred)*(top-height)/(top);
-					float substractgreen = (float)mountainSecondColorgreen - (mountainSecondColorgreen-mountainFirstColorgreen)*(top-height)/(top);
-					float substractblue = (float)mountainSecondColorblue - (mountainSecondColorblue-mountainFirstColorblue)*(top-height)/(top);
+					float substractred = (float)mountainSecondColorred - (mountainSecondColorred-mountainFirstColorred)*(maximumHeight-height)/(maximumHeight);
+					float substractgreen = (float)mountainSecondColorgreen - (mountainSecondColorgreen-mountainFirstColorgreen)*(maximumHeight-height)/(maximumHeight);
+					float substractblue = (float)mountainSecondColorblue - (mountainSecondColorblue-mountainFirstColorblue)*(maximumHeight-height)/(maximumHeight);
 					substractred < 0.0f ? substractred = 0.0f : (substractred >= 256.0f ? substractred = 255.0f : substractred);
 					substractgreen < 0.0f ? substractgreen = 0.0f : (substractgreen >= 256.0f ? substractgreen = 255.0f : substractgreen);
 					substractblue < 0.0f ? substractblue = 0.0f : (substractblue >= 256.0f ? substractblue = 255.0f : substractblue);
@@ -292,9 +288,9 @@ void PSphere::generateImage(Ogre::Real top, Ogre::Real bottom)
 			}
 
 			// Write pixel to image
-			image[((TEX_HEIGHT-1-y)*TEX_WIDTH+x)*3] = red;
-			image[((TEX_HEIGHT-1-y)*TEX_WIDTH+x)*3+1] = green;
-			image[((TEX_HEIGHT-1-y)*TEX_WIDTH+x)*3+2] = blue;
+			image[((textureHeight-1-y)*textureWidth+x)*3] = red;
+			image[((textureHeight-1-y)*textureWidth+x)*3+1] = green;
+			image[((textureHeight-1-y)*textureWidth+x)*3+2] = blue;
 		}
 	}
 }
@@ -489,10 +485,10 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
 	deform(faceZP);
 	deform(faceZM);
 
-	float min, max;
+	calculateSeaLevel(minimumHeight, maximumHeight, waterFraction);
 
-	calculateSeaLevel(min, max, waterFraction);
-	generateImage(max, min);//take longtime
+	surfaceTexture = new unsigned char[TEX_WIDTH*TEX_HEIGHT*3];
+	generateImage(TEX_WIDTH, TEX_HEIGHT, surfaceTexture);//take longtime
 
 	// Requires variable seaHeight that is set by calculateSeaLevel
 	setGridLandInfo(gridYP);
@@ -648,9 +644,9 @@ void PSphere::loadToBuffers(const std::string &meshName, const std::string &text
 			/* FIXME: Might be unnecessary memory copy, but was convenient. */
 			/* TextureManager did not honor Ogre::PF_R8G8B8, so need to swap red and blue,
 			 * plus hardware wants alfa channel values too */
-			surfaceTexture[(i*TEX_WIDTH+j)*4]   = image[(i*TEX_WIDTH+j)*3+2];   // blue
-			surfaceTexture[(i*TEX_WIDTH+j)*4+1] = image[(i*TEX_WIDTH+j)*3+1];   // green
-			surfaceTexture[(i*TEX_WIDTH+j)*4+2] = image[(i*TEX_WIDTH+j)*3];     // red
+			surfaceTexture[(i*TEX_WIDTH+j)*4]   = surfaceTexture[(i*TEX_WIDTH+j)*3+2];   // blue
+			surfaceTexture[(i*TEX_WIDTH+j)*4+1] = surfaceTexture[(i*TEX_WIDTH+j)*3+1];   // green
+			surfaceTexture[(i*TEX_WIDTH+j)*4+2] = surfaceTexture[(i*TEX_WIDTH+j)*3];     // red
 			surfaceTexture[(i*TEX_WIDTH+j)*4+3] = 255;                          // Alfa
 		}
 	}
@@ -1012,21 +1008,26 @@ void PSphere::setCollisionManager(CollisionManager	*CDM)
 }
 
 
-void PSphere::exportEquirectangularMap() {
+void PSphere::exportEquirectangularMap(unsigned short width, unsigned short height, std::string fileName) {
 	RGBQUAD color;
+	unsigned char *exportImage;
+
+	exportImage = new unsigned char[width*height*3];
+	generateImage(width, height, exportImage);
 	FreeImage_Initialise();
-	FIBITMAP *bitmap = FreeImage_Allocate(TEX_WIDTH, TEX_HEIGHT, 24);
-	for(int i=0; i < TEX_WIDTH; i++) {
-		for (int j=0; j < TEX_HEIGHT; j++) {
-			color.rgbRed = image[((TEX_WIDTH*j)+i)*3];
-			color.rgbGreen = image[((TEX_WIDTH*j)+i)*3+1];
-			color.rgbBlue = image[((TEX_WIDTH*j)+i)*3+2];
+	FIBITMAP *bitmap = FreeImage_Allocate(width, height, 24);
+	for(int i=0; i < width; i++) {
+		for (int j=0; j < height; j++) {
+			color.rgbRed = exportImage[((width*j)+i)*3];
+			color.rgbGreen = exportImage[((width*j)+i)*3+1];
+			color.rgbBlue = exportImage[((width*j)+i)*3+2];
 			FreeImage_SetPixelColor(bitmap, i, j, &color);
 		}
 	}
-	FreeImage_Save(FIF_PNG, bitmap, "TestFile.png", 0);
+	FreeImage_Save(FIF_PNG, bitmap, fileName.c_str(), 0);
 
 	FreeImage_DeInitialise();
+	delete[] exportImage;
 }
 
 void PSphere::moveObject(const std::string &objectName, int direction, float pace) {

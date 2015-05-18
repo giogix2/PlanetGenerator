@@ -172,7 +172,7 @@ void MainWindow::on_pushButton_clicked()
 	rendering = new initOgre();
 	rendering->start();
 	rendering->setSceneAndRun(mySphere);
-	mySphere->exportEquirectangularMap();
+	mySphere->exportEquirectangularMap(512, 256, "TestFile.png");
 	delete mySphere;
     rendering->cleanup();
 
