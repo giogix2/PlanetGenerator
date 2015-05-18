@@ -83,7 +83,8 @@ vector <float> amplitude;
 <h3>
 <a id="put-objects-on-the-planet" class="anchor" href="#put-objects-on-the-planet" aria-hidden="true"><span class="octicon octicon-link"></span></a>Put objects on the planet</h3>
 
-<p>The planet offers a functionality that permits to put and manage objects on the planet. These objects can be virtual, that is objects that can not be seen (such resources like gas, really small things, ghosts or even big things that we don't want to show). Otherwise it's also possible to load already made 3D objects, in .MESH format, with the relative materials (.material files) and textures.<BR> The <b>PHspere</b> class contains a list of <b>ObjectInfo</b> objects, and each of these objects, contain the following informations:<ul>
+<p>The planet offers a functionality that permits to put and manage objects on the planet. These objects can be virtual, that is objects that can not be seen (such resources like gas, really small things, ghosts or even big things that we don't want to show). Otherwise it's also possible to load already made 3D objects, in .MESH format, with the relative materials (.material files) and textures.<BR> The <b>PHspere</b> class contains a list of <b>ObjectInfo</b> objects, and each of these objects, contain the following informations:
+  <ul>
     <li>Position of the object</li>
     <li>Name of the object</li>
     <li>Node to which the object is attached (only in the case of imported 3D objects)</li>
@@ -103,15 +104,28 @@ vector <float> amplitude;
 <p> As in the previous image, the grid can be thought black and white, where the black part represents the water. To ask the planet where the water it has been provided the function <a href="classes.html#checkAccessibility">checkAccessibility()</a> where you can specify the position, and it returns a boolean value which indicates if there's water or not. Not only that ! The previous function says also if in a certain position there's already another object, so there's no possibility to put another one. So the returned value is true if there are no objects in the specified position. </p>
 
 <h3>
-<a id="authors-and-contributors" class="anchor" href="#authors-and-contributors" aria-hidden="true"><span class="octicon octicon-link"></span></a>Authors and Contributors</h3>
+<a id="GUI" class="anchor" href="#GUI" aria-hidden="true"><span class="octicon octicon-link"></span></a>Graphical User Interface</h3>
 
-<p>You can <a href="https://github.com/blog/821" class="user-mention">@mention</a> a GitHub username to generate a link to their profile. The resulting <code>&lt;a&gt;</code> element will link to the contributor's GitHub Profile. For example: In 2007, Chris Wanstrath (<a href="https://github.com/defunkt" class="user-mention">@defunkt</a>), PJ Hyett (<a href="https://github.com/pjhyett" class="user-mention">@pjhyett</a>), and Tom Preston-Werner (<a href="https://github.com/mojombo" class="user-mention">@mojombo</a>) founded GitHub.</p>
+<p> This project provides also a GUI which gives a user-frindly way to specify planet's parameters. This GUI has been created using <b>QT</b>. As the project is developed at the moment, the GUI starts immediately before generating the planet. So the code which starts the planet's rendering it's inside of the GUI main code. It can simply moved to another position if the use of the GUI is not desired. </p>
 
-<h3>
-<a id="support-or-contact" class="anchor" href="#support-or-contact" aria-hidden="true"><span class="octicon octicon-link"></span></a>Support or Contact</h3>
+<div style="text-align: center;"><img src="images/GUI.jpg" alt="Planets" left: 30px; style="width:1280px;height:490px"></div>
+
+<p> Main GUI's values are: </p>
+<ul>
+    <li><b>A:</b> Radius of the planet.</li>
+    <li><b>B:</b> Percentage of water in the planet.</li>
+    <li><b>C:</b> Unique number identifying the planet. If the same number is used, then the same land shape of the planet is generated.</li>
+    <li><b>D:</b> Valued of the water's color in the deepest point and the highest point.</li>
+    <li><b>E:</b> Valued of the terrain's color in the deepest point and the highest point.</li>
+    <li><b>F:</b> Valued of the montain's color in the deepest point and the highest point.</li>
+    <li><b>G:</b> Window where is possible to specify the path of the .mesh objects we want to put on the planet.</li>
+    <li><b>H:</b> Window where is possible to specify the amplitude (basically the height of the mountains) and the frequency (its a simplex's noise parameter and it affects the shape of the land).</li>
+  </ul>
+
+
 
       <footer class="site-footer">
-        <span class="site-footer-owner"><a href="https://github.com/giogix2/PlanetGenerator">Planetgenerator</a> is maintained by <a href="https://github.com/giogix2">giogix2</a>.</span>
+        <span class="site-footer-owner"><a href="https://github.com/giogix2/PlanetGenerator">Planetgenerator</a> is maintained by <a href="https://github.com/giogix2">giogix2</a>, <a href="https://github.com/latami">latami</a>, <a href="https://github.com/LiPingjiang">LiPingjiang</a>, <a href="https://github.com/tommipu">tommipu</a>, <a href="https://github.com/mvahida">mvahida</a></span>
 
       </footer>
 
