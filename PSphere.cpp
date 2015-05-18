@@ -635,7 +635,7 @@ void PSphere::loadToBuffers(const std::string &meshName, const std::string &text
 	pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
 
 	const Ogre::PixelBox &pixelBox = pixelBuffer->getCurrentLock();
-	Ogre::uint8 *surfaceTexture = static_cast<Ogre::uint8*>(pixelBox.data);
+	Ogre::uint8 *exteriorTexture = static_cast<Ogre::uint8*>(pixelBox.data);
 
 	for(i=0; i < TEX_HEIGHT; i++)
 	{
@@ -644,10 +644,10 @@ void PSphere::loadToBuffers(const std::string &meshName, const std::string &text
 			/* FIXME: Might be unnecessary memory copy, but was convenient. */
 			/* TextureManager did not honor Ogre::PF_R8G8B8, so need to swap red and blue,
 			 * plus hardware wants alfa channel values too */
-			surfaceTexture[(i*TEX_WIDTH+j)*4]   = surfaceTexture[(i*TEX_WIDTH+j)*3+2];   // blue
-			surfaceTexture[(i*TEX_WIDTH+j)*4+1] = surfaceTexture[(i*TEX_WIDTH+j)*3+1];   // green
-			surfaceTexture[(i*TEX_WIDTH+j)*4+2] = surfaceTexture[(i*TEX_WIDTH+j)*3];     // red
-			surfaceTexture[(i*TEX_WIDTH+j)*4+3] = 255;                          // Alfa
+			exteriorTexture[(i*TEX_WIDTH+j)*4]   = surfaceTexture[(i*TEX_WIDTH+j)*3+2];   // blue
+			exteriorTexture[(i*TEX_WIDTH+j)*4+1] = surfaceTexture[(i*TEX_WIDTH+j)*3+1];   // green
+			exteriorTexture[(i*TEX_WIDTH+j)*4+2] = surfaceTexture[(i*TEX_WIDTH+j)*3];     // red
+			exteriorTexture[(i*TEX_WIDTH+j)*4+3] = 255;                          // Alfa
 		}
 	}
 
