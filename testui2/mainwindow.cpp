@@ -255,13 +255,15 @@ void MainWindow::on_pushButton_11_clicked()
     unsigned short width =  values[0].toUShort();
     unsigned short height =  values[1].toUShort();
 
-    QImage image = QImage::fromData(mySphere->exportEquirectangularMap(150, 75), 150*75*3, QImage::Format_RGB888);
-    QPixmap pixmap = QPixmap::convertFromImage(image);
+	uchar *array = mySphere->exportEquirectangularMap(250, 125);
+	QImage image = QImage(array, 250,150, QImage::Format_RGB888);
 
-    QGraphicsScene scene;
-    scene.addPixmap(pixmap);
-    delete mySphere;
-    ui->graphicsView->setScene(scene);
+	QGraphicsScene *scene = new QGraphicsScene();
+	scene->addPixmap(QPixmap::fromImage(image));
+
+	delete mySphere;
+	ui->graphicsView->setScene(scene);
+
     ui->graphicsView->show();
 
 }
