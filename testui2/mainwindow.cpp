@@ -235,7 +235,7 @@ void MainWindow::on_pushButton_10_clicked()
 
     //create planet
     addParameters();
-    mySphere = new PSphere(3, 3, *params);
+    mySphere = new PSphere(100, 3, *params);
     //push to pshere export-method with filename + resolution
     mySphere->exportEquirectangularMap(width, height, filename.toStdString());
 
