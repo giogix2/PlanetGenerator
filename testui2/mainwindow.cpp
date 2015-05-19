@@ -172,7 +172,7 @@ void MainWindow::on_pushButton_clicked()
 	rendering = new initOgre();
 	rendering->start();
 	rendering->setSceneAndRun(mySphere);
-	mySphere->exportEquirectangularMap(512, 256, "TestFile.png");
+    //mySphere->exportEquirectangularMap(512, 256, "TestFile.png");
 	delete mySphere;
     rendering->cleanup();
 
@@ -314,7 +314,10 @@ void MainWindow::on_pushButton_10_clicked()
     qDebug() << "width: " << width << ", height: " << height ;
 
     //create planet
+    mySphere = new PSphere(100, 40, *params);
     //push to pshere export-method with filename + resolution
+    mySphere->exportEquirectangularMap(width, height, filename);
+
 }
 
 void MainWindow::on_pushButton_11_clicked()
