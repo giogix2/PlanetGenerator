@@ -168,8 +168,7 @@ void MainWindow::on_pushButton_clicked()
         qDebug() << "Amount: " << *iter;
     }*/
 	
-    mySphere = new PSphere();
-	mySphere->create(100, 40, *params);
+	mySphere = new PSphere(100, 40, *params);
 	rendering = new initOgre();
 	rendering->start();
 	rendering->setSceneAndRun(mySphere);

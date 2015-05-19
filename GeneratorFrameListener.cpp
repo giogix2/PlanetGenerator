@@ -43,6 +43,8 @@ GeneratorFrameListener::GeneratorFrameListener(	Ogre::RenderWindow* win, Ogre::C
 
 	pSphere = ps;
 
+	selectedObject=NULL;
+
 	Ogre::LogManager::getSingletonPtr()->logMessage("*** Initializing OIS ***");
 	OIS::ParamList pl;
 	size_t windowHnd = 0;
@@ -70,34 +72,36 @@ GeneratorFrameListener::GeneratorFrameListener(	Ogre::RenderWindow* win, Ogre::C
 	//overlay ststem
 	Ogre::OverlayManager &overlayManager = Ogre::OverlayManager::getSingleton();
 	mDebugOverlay = overlayManager.getByName("Core/DebugOverlay");
-	//mDebugOverlay->setZOrder(500);
-	//mDebugOverlay = Ogre::OverlayManager::getSingleton().getByName("Core/DebugOverlay");
+	showDebugOverlay(true);
 
-	//Ogre::OverlayContainer* border = static_cast<Ogre::OverlayContainer*>  (overlayManager.createOverlayElement( "Panel", "NormalPanel" ) );
-	//Ogre::OverlayContainer *border = static_cast<Ogre::OverlayContainer *> (overlayManager.getOverlayElement("Core/StatPanel"));
-	//border->setMetricsMode(Ogre::GMM_PIXELS);
-	//border->setVerticalAlignment(Ogre::GVA_BOTTOM);
-	//border->setPosition(0, 0);
-	//border->setDimensions(0.1, 0.1);
+	//Information overlay
+    mInformationOverlay = overlayManager.create( "InformationOverlay" );
+
+	Ogre::OverlayContainer* border = static_cast<Ogre::OverlayContainer*>  (overlayManager.createOverlayElement( "Panel", "InformationPanel" ) );
+	border->setMetricsMode(Ogre::GMM_PIXELS);
+	border->setPosition(0, 0);
+	border->setDimensions(100, 100);
 	//border->setMaterialName( "BaseWhite" );
 	//border->setMaterialName("Examples/Rockwall");
 
 	// Create a text area
-	/*Ogre::TextAreaOverlayElement* textArea = static_cast<Ogre::TextAreaOverlayElement*>(
-		om.createOverlayElement("TextArea", "TextAreaName"));
+	Ogre::TextAreaOverlayElement* textArea = static_cast<Ogre::TextAreaOverlayElement*>(
+    overlayManager.createOverlayElement("TextArea", "InformationText"));
 	textArea->setMetricsMode(Ogre::GMM_PIXELS);
-	textArea->setPosition(0, 0);
+	textArea->setPosition(250, 570);
 	textArea->setDimensions(100, 100);
-	textArea->setCaption("Hello, World!");
-	textArea->setCharHeight(16);
-	//textArea->setFontName("TrebuchetMSBold");
-	textArea->setColourBottom(Ogre::ColourValue(0.3, 0.5, 0.3));
-	textArea->setColourTop(Ogre::ColourValue(0.5, 0.7, 0.5));
+	textArea->setCaption("Hello, This is planet generator!");
+	textArea->setCharHeight(25);
+	//textArea->setFontName("Garamond");
+	textArea->setFontName("BlueHighway");
+	//textArea->setColourBottom(Ogre::ColourValue(1, 0.843, 0));
+	//textArea->setColourTop(Ogre::ColourValue(0, 0, 0));
+	textArea->setColour(Ogre::ColourValue(1, 0.843, 0));
 
 	// Add the text area to the panel
-	border->addChild(textArea);*/
-	//mDebugOverlay->add2D(border);
-	showDebugOverlay(true);
+	border->addChild(textArea);
+	mInformationOverlay->add2D(border);
+	mInformationOverlay->show();
 
 		
 	//mWindow->resize(800, 700);
@@ -347,6 +351,135 @@ bool GeneratorFrameListener::processUnbufferedKeyInput(const Ogre::FrameEvent& e
 		mDebugText = "P: " + Ogre::StringConverter::toString(mCamera->getDerivedPosition()) +
 						" " + "O: " + Ogre::StringConverter::toString(mCamera->getDerivedOrientation());
 
+	//Choose previous object
+	if (mKeyboard->isKeyDown(OIS::KC_U) && mTimeUntilNextToggle <= 0)
+	{
+		if(selectedObject==NULL)
+		{
+			selectedObject=&(*(pSphere->getObjects()->begin()));
+			//text
+			if(selectedObject!=NULL){
+				mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Now select object: "+selectedObject->getObjectName());
+				return true;
+			}
+		}
+
+		ObjectInfo*			preObject=NULL;
+		typedef vector<ObjectInfo>:: iterator VIntIterator;
+		VIntIterator end = pSphere->getObjects()->end();
+		for( VIntIterator i=pSphere->getObjects()->begin(); i != end; ++i )
+		{
+			if( i->getObjectName() == selectedObject->getObjectName() && preObject!=NULL)
+				break;
+			preObject= &(*(i));
+		}
+		selectedObject=preObject;
+
+		mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Now select object: "+selectedObject->getObjectName());
+
+		mTimeUntilNextToggle = 1;
+		return true;
+	}
+	//Choose next object
+	if (mKeyboard->isKeyDown(OIS::KC_O) && mTimeUntilNextToggle <= 0)
+	{
+		if(selectedObject==NULL)
+		{
+			selectedObject=&(*(pSphere->getObjects()->begin()));
+			//text
+			if(selectedObject!=NULL){
+				mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Now select object: "+selectedObject->getObjectName());
+				return true;
+			}
+		}
+
+		ObjectInfo*			nextObject=NULL;
+		vector<ObjectInfo>::reverse_iterator r_iter;
+		for (r_iter = pSphere->getObjects()->rbegin(); // binds r_iter to last element
+				r_iter != pSphere->getObjects()->rend(); // rend refers 1 before 1st element
+				++r_iter) // decrements iterator one element
+		{
+			if( r_iter->getObjectName() == selectedObject->getObjectName() && nextObject!=NULL)
+				break;
+			nextObject= &(*(r_iter));
+		}
+		selectedObject=nextObject;
+		
+
+		mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Now select object: "+selectedObject->getObjectName());
+
+		mTimeUntilNextToggle = 1;
+		return true;
+	}
+
+	//move selected object up
+	if (mKeyboard->isKeyDown(OIS::KC_I))
+	{
+		if(selectedObject==NULL)
+				return true;
+		Ogre::String name=selectedObject->getObjectName();
+		//Unmovable object
+		if(name == "CK7"){
+			mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Selected object: "+selectedObject->getObjectName()+" is not movable.");
+			return true;
+		}
+		if(name!=""){
+			mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Move selected object: "+selectedObject->getObjectName()+" .");
+			pSphere->moveObject(name, 1, 0.5);
+		}
+	}
+	//move selected object down
+	if (mKeyboard->isKeyDown(OIS::KC_K))
+	{
+		if(selectedObject==NULL)
+				return true;
+		Ogre::String name=selectedObject->getObjectName();
+		//Unmovable object
+		if(name == "CK7"){
+			mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Selected object: "+selectedObject->getObjectName()+" is not movable.");
+			return true;
+		}
+		if(name!=""){
+			mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Move selected object: "+selectedObject->getObjectName()+" .");
+			pSphere->moveObject(name, 2, 0.5);
+		}
+	}
+	//move selected object to left
+	//if (mKeyboard->isKeyDown(OIS::KC_J))
+	//{
+	//	
+	//	if(selectedObject==NULL)
+	//		return true;
+	//	Ogre::String name=selectedObject->getObjectName();
+	//	//Unmovable object
+	//	if(name == "CK7"){
+	//		mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Selected object: "+selectedObject->getObjectName()+" is not movable.");
+	//		return true;
+	//	}
+	//	if(name!=""){
+	//		mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Move selected object: "+selectedObject->getObjectName()+" .");
+	//		//mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption(selectedObject->getPosition()."Move selected object: "+selectedObject->getObjectName()+" .");
+	//		pSphere->moveObject(name, 3, 0.5);
+	//	}
+	//	//pSphere->moveObject("Ramiro", 3, 0.5);
+	//}
+	////move selected object to right
+	//if (mKeyboard->isKeyDown(OIS::KC_L) )
+	//{
+	//	if(selectedObject==NULL)
+	//		return true;
+	//	Ogre::String name=selectedObject->getObjectName();
+	//	//Unmovable object
+	//	if(name == "CK7"){
+	//		mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Selected object: "+selectedObject->getObjectName()+" is not movable.");
+	//		return true;
+	//	}
+	//	if(name!=""){
+	//		mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Move selected object: "+selectedObject->getObjectName()+" .");
+	//		pSphere->moveObject(name, 4, 0.5);
+	//	}
+	//}
+
 	// Return true to continue rendering
 	return true;
 }
@@ -433,7 +566,7 @@ bool GeneratorFrameListener::frameStarted(const Ogre::FrameEvent& evt)
 	//debug code
 
 	//RootSceneNode->getChild("planetSphere")->roll(Ogre::Radian(0.04));
-	pSphere->moveObject("Ramiro", 3, 0.5);
+	//pSphere->moveObject("Ramiro", 3, 0.5);
 	//pSphere->moveObject("CK7", 2, 0.5);
 	//pSphere->getObserverDistanceToSurface();
 

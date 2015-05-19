@@ -36,8 +36,6 @@ class PSphere
 public:
 	enum Direction {PSPHERE_GRID_YPLUS, PSPHERE_GRID_YMINUS, PSPHERE_GRID_XPLUS, PSPHERE_GRID_XMINUS};
 
-	void create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter);
-
 	void loadToBuffers(const std::string &meshName, const std::string &textureName);
 
 	void loadMeshFile(const std::string &path, const std::string &meshName);
@@ -80,7 +78,7 @@ public:
 
 	unsigned char *exportEquirectangularMap(unsigned short width, unsigned short height);
 
-	PSphere();
+	PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter);
 
 	~PSphere();
 
@@ -115,6 +113,8 @@ private:
 	CollisionManager	*CollisionDetectionManager;
 	Ogre::Real			maximumHeight;
 	Ogre::Real			minimumHeight;
+
+	void create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter);
 
 	void calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour);
 
