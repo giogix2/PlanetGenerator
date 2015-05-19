@@ -195,9 +195,6 @@ protected:
 	Ogre::Real			mMoveSpeed;
 	Ogre::Degree		mRotateSpeed;
 	Ogre::Overlay*		mDebugOverlay;
-	Ogre::Overlay*		mInformationOverlay;//show information
-
-	ObjectInfo*			selectedObject;
 
 	//OIS Input devices
 	OIS::InputManager*	mInputManager;
