@@ -235,7 +235,7 @@ void MainWindow::on_pushButton_10_clicked()
 
     //create planet
     addParameters();
-    mySphere = new PSphere(3, 3, *params);
+    mySphere = new PSphere(100, 3, *params);
     //push to pshere export-method with filename + resolution
     mySphere->exportEquirectangularMap(width, height, filename.toStdString());
 
@@ -245,16 +245,25 @@ void MainWindow::on_pushButton_10_clicked()
 void MainWindow::on_pushButton_11_clicked()
 {
     //Todo:: refresh-button
+    addParameters();
+    mySphere = new PSphere(100, 3, *params);
 
- /*   QImage image = QImage::fromData(unsigned char array, QImage::Format_RGB888);
+    QString string = ui->comboBox->currentText();
 
+    QStringList values = string.split(" x ");
+
+    unsigned short width =  values[0].toUShort();
+    unsigned short height =  values[1].toUShort();
+
+    QImage image = QImage::fromData(mySphere->exportEquirectangularMap(150, 75), 150*75*3, QImage::Format_RGB888);
+    QPixmap pixmap = QPixmap::convertFromImage(image);
 
     QGraphicsScene scene;
-    scene.addItem(image);
-
+    scene.addPixmap(pixmap);
+    delete mySphere;
     ui->graphicsView->setScene(scene);
     ui->graphicsView->show();
-*/
+
 }
 
 void MainWindow::addParameters()
