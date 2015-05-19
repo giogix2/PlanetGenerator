@@ -237,7 +237,7 @@ void MainWindow::on_pushButton_10_clicked()
     addParameters();
     mySphere = new PSphere(100, 3, *params);
     //push to pshere export-method with filename + resolution
-    mySphere->exportEquirectangularMap(width, height, filename.toStdString());
+	mySphere->exportMap(width, height, filename.toStdString(), PSphere::MAP_EQUIRECTANGULAR);
 
     delete mySphere;
 }
@@ -256,7 +256,7 @@ void MainWindow::on_pushButton_11_clicked()
     unsigned short height =  values[1].toUShort();
 
 	// One scanline must be divisible by 4 bytes
-	uchar *array = mySphere->exportEquirectangularMap(248, 124);
+	uchar *array = mySphere->exportMap(248, 124, PSphere::MAP_EQUIRECTANGULAR);
 	QImage image = QImage(array, 248,124, QImage::Format_RGB888);
 	image = image.mirrored();
 

@@ -209,6 +209,53 @@ Ogre::Real PSphere::getRadius()
 	return radius;
 }
 
+void PSphere::generatePixel(unsigned short textureHeight, unsigned short stride, unsigned char *image, unsigned short x, unsigned short y, Ogre::Real height,
+								   unsigned char water1stblue, unsigned char water1stgreen, unsigned char water1stred,
+								   unsigned char water2ndblue, unsigned char water2ndgreen, unsigned char water2ndred,
+								   unsigned char terrain1stblue, unsigned char terrain1stgreen, unsigned char terrain1stred,
+								   unsigned char terrain2ndblue, unsigned char terrain2ndgreen, unsigned char terrain2ndred,
+								   unsigned char mountain1stblue, unsigned char mountain1stgreen, unsigned char mountain1stred,
+								   unsigned char mountain2ndblue, unsigned char mountain2ndgreen, unsigned char mountain2ndred)
+{
+	Ogre::uint8 red, green, blue;
+	float const multiplyer = 0.6;
+
+	// Set sea-colors, deeper part is slighly deeper blue.
+	if(height < seaHeight)
+	{
+		red =  water1stred + (water2ndred-water1stred)*(height-minimumHeight)/(seaHeight-minimumHeight);
+		green =  water1stgreen + (water2ndgreen-water1stgreen)*(height-minimumHeight)/(seaHeight-minimumHeight);
+		blue =  water1stblue + (water2ndblue-water1stblue)*(height-minimumHeight)/(seaHeight-minimumHeight);
+	}
+	else
+	{
+		// Set low elevations green and higher brown
+		red =  terrain1stred + (terrain2ndred-terrain1stred)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
+		green =  terrain1stgreen + (terrain2ndgreen-terrain1stgreen)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
+		blue =  terrain1stblue + (terrain2ndblue-terrain1stblue)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
+		// Highest elevations are bright grey and go toward white
+		if(height > maximumHeight * multiplyer)
+		{
+			// to avoid unsigned char overflow
+			float substractred = (float)mountain2ndred - (mountain2ndred-mountain1stred)*(maximumHeight-height)/(maximumHeight);
+			float substractgreen = (float)mountain2ndgreen - (mountain2ndgreen-mountain1stgreen)*(maximumHeight-height)/(maximumHeight);
+			float substractblue = (float)mountain2ndblue - (mountain2ndblue-mountain1stblue)*(maximumHeight-height)/(maximumHeight);
+			substractred < 0.0f ? substractred = 0.0f : (substractred >= 256.0f ? substractred = 255.0f : substractred);
+			substractgreen < 0.0f ? substractgreen = 0.0f : (substractgreen >= 256.0f ? substractgreen = 255.0f : substractgreen);
+			substractblue < 0.0f ? substractblue = 0.0f : (substractblue >= 256.0f ? substractblue = 255.0f : substractblue);
+			red =  substractred;
+			green =  substractgreen;
+			blue =  substractblue;
+		}
+	}
+
+	// Write pixel to image
+	image[((textureHeight-1-y)*stride+x)*3] = red;
+	image[((textureHeight-1-y)*stride+x)*3+1] = green;
+	image[((textureHeight-1-y)*stride+x)*3+2] = blue;
+
+}
+
 /* Generates surface-texturemap using noise-generated height differences.
  * Expects pointer to be already correctly allocated. */
 void PSphere::generateImage(unsigned short textureWidth, unsigned short textureHeight, unsigned char *image)
@@ -217,10 +264,8 @@ void PSphere::generateImage(unsigned short textureWidth, unsigned short textureH
 	Ogre::Real latitude, longitude;
 	Ogre::Real height;
 	Ogre::uint32 x, y;
-	Ogre::uint8 red, green, blue;
 	vector <float> frequency = RParameter.getFrequency();
 	vector <float> amplitude = RParameter.getAmplitude();
-	float const multiplyer = 0.6;
 
 	unsigned char waterFirstColorblue = 0;
 	unsigned char waterFirstColorgreen = 0;
@@ -262,39 +307,13 @@ void PSphere::generateImage(unsigned short textureWidth, unsigned short textureH
 			// Get height of a point
 			height = heightNoise(amplitude, frequency, spherePoint + randomTranslate);
 
-			// Set sea-colors, deeper part is slighly deeper blue.
-			if(height < seaHeight)
-			{
-				red =  waterFirstColorred + (waterSecondColorred-waterFirstColorred)*(height-minimumHeight)/(seaHeight-minimumHeight);
-				green =  waterFirstColorgreen + (waterSecondColorgreen-waterFirstColorgreen)*(height-minimumHeight)/(seaHeight-minimumHeight);
-				blue =  waterFirstColorblue + (waterSecondColorblue-waterFirstColorblue)*(height-minimumHeight)/(seaHeight-minimumHeight);
-			}
-			else
-			{
-				// Set low elevations green and higher brown
-				red =  terrainFirstColorred + (terrainSecondColorred-terrainFirstColorred)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
-				green =  terrainFirstColorgreen + (terrainSecondColorgreen-terrainFirstColorgreen)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
-				blue =  terrainFirstColorblue + (terrainSecondColorblue-terrainFirstColorblue)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
-				// Highest elevations are bright grey and go toward white
-				if(height > maximumHeight * multiplyer)
-				{
-					// to avoid unsigned char overflow
-					float substractred = (float)mountainSecondColorred - (mountainSecondColorred-mountainFirstColorred)*(maximumHeight-height)/(maximumHeight);
-					float substractgreen = (float)mountainSecondColorgreen - (mountainSecondColorgreen-mountainFirstColorgreen)*(maximumHeight-height)/(maximumHeight);
-					float substractblue = (float)mountainSecondColorblue - (mountainSecondColorblue-mountainFirstColorblue)*(maximumHeight-height)/(maximumHeight);
-					substractred < 0.0f ? substractred = 0.0f : (substractred >= 256.0f ? substractred = 255.0f : substractred);
-					substractgreen < 0.0f ? substractgreen = 0.0f : (substractgreen >= 256.0f ? substractgreen = 255.0f : substractgreen);
-					substractblue < 0.0f ? substractblue = 0.0f : (substractblue >= 256.0f ? substractblue = 255.0f : substractblue);
-					red =  substractred;
-					green =  substractgreen;
-					blue =  substractblue;
-				}
-			}
-
-			// Write pixel to image
-			image[((textureHeight-1-y)*textureWidth+x)*3] = red;
-			image[((textureHeight-1-y)*textureWidth+x)*3+1] = green;
-			image[((textureHeight-1-y)*textureWidth+x)*3+2] = blue;
+			generatePixel(textureHeight, textureWidth, image, x, y, height,
+						  waterFirstColorblue, waterFirstColorgreen, waterFirstColorred,
+						  waterSecondColorblue, waterSecondColorgreen, waterSecondColorred,
+						  terrainFirstColorblue, terrainFirstColorgreen, terrainFirstColorred,
+						  terrainSecondColorblue, terrainSecondColorgreen, terrainSecondColorred,
+						  mountainFirstColorblue, mountainFirstColorgreen, mountainFirstColorred,
+						  mountainSecondColorblue, mountainSecondColorgreen, mountainSecondColorred);
 		}
 	}
 }
@@ -1011,26 +1030,127 @@ void PSphere::setCollisionManager(CollisionManager	*CDM)
 	CollisionDetectionManager = CDM;
 }
 
-unsigned char *PSphere::exportEquirectangularMap(unsigned short width, unsigned short height) {
+/* Generates a map and gives pointer to array that has rgb-image
+ * information. Then MapType is MAP_CUBE, ignores height variable.
+ * With wrong type, returns NULL-pointer. */
+unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, MapType type) {
 
 	// Check if exportImage is already allocated
 	if (exportImage != NULL)
 		delete[] exportImage;
-	exportImage = new unsigned char[width*height*3];
 
-	// Generates the map. exportImage points to it.
-	generateImage(width, height, exportImage);
+	if (type == MAP_EQUIRECTANGULAR)
+	{
+		exportImage = new unsigned char[width*height*3];
+
+		// Generates the map. exportImage points to it.
+		generateImage(width, height, exportImage);
+	}
+	else if (type == MAP_CUBE)
+	{
+		unsigned short x, y, i, gSize;
+		Ogre::Real elev;
+		Grid *temp[6];
+		unsigned char water1stblue, water1stgreen, water1stred,
+				water2ndblue, water2ndgreen, water2ndred;
+		RParameter.getWaterFirstColor(water1stred,water1stgreen,water1stblue);
+		RParameter.getWaterSecondColor(water2ndred,water2ndgreen,water2ndblue);
+
+		unsigned char terrain1stblue, terrain1stgreen, terrain1stred,
+				terrain2ndblue, terrain2ndgreen, terrain2ndred;
+		RParameter.getTerrainFirstColor(terrain1stred,terrain1stgreen,terrain1stblue);
+		RParameter.getTerrainSecondColor(terrain2ndred,terrain2ndgreen,terrain2ndblue);
+
+		unsigned char mountain1stblue, mountain1stgreen, mountain1stred,
+				mountain2ndblue, mountain2ndgreen, mountain2ndred;
+		RParameter.getMountainFirstColor(mountain1stred,mountain1stgreen,mountain1stblue);
+		RParameter.getMountainSecondColor(mountain2ndred,mountain2ndgreen,mountain2ndblue);
+
+		exportImage = new unsigned char[width*(width/4*3)*3];
+
+		gSize = width/4;
+		temp[0] = new Grid(gSize, gridYP->getOrientation());
+		temp[1] = new Grid(gSize, gridXM->getOrientation());
+		temp[2] = new Grid(gSize, gridYM->getOrientation());
+		temp[3] = new Grid(gSize, gridXP->getOrientation());
+		temp[4] = new Grid(gSize, gridZP->getOrientation());
+		temp[5] = new Grid(gSize, gridZM->getOrientation());
+
+		// 4 equatorial tiles
+		for(i=0; i < 4; i++)
+		{
+			for(y=0; y < gSize; y++)
+			{
+				for(x=0; x < gSize; x++)
+				{
+					elev = heightNoise(RParameter.getAmplitude(), RParameter.getFrequency(), temp[i]->projectToSphere(x, y)+randomTranslate);
+					generatePixel(gSize*2, width, exportImage, x+i*gSize, gSize-1-y, elev,
+								  water1stblue, water1stgreen, water1stred,
+								  water2ndblue, water2ndgreen, water2ndred,
+								  terrain1stblue, terrain1stgreen, terrain1stred,
+								  terrain2ndblue, terrain2ndgreen, terrain2ndred,
+								  mountain1stblue, mountain1stgreen, mountain1stred,
+								  mountain2ndblue, mountain2ndgreen, mountain2ndred);
+				}
+			}
+		}
+		// +Z tile
+		for(y=0; y < gSize; y++)
+		{
+			for(x=0; x < gSize; x++)
+			{
+				elev = heightNoise(RParameter.getAmplitude(), RParameter.getFrequency(), temp[4]->projectToSphere(x, y)+randomTranslate);
+				generatePixel(gSize*3, width, exportImage, x, gSize-1-y, elev,
+							  water1stblue, water1stgreen, water1stred,
+							  water2ndblue, water2ndgreen, water2ndred,
+							  terrain1stblue, terrain1stgreen, terrain1stred,
+							  terrain2ndblue, terrain2ndgreen, terrain2ndred,
+							  mountain1stblue, mountain1stgreen, mountain1stred,
+							  mountain2ndblue, mountain2ndgreen, mountain2ndred);
+			}
+		}
+		// -Z tile
+		for(y=0; y < gSize; y++)
+		{
+			for(x=0; x < gSize; x++)
+			{
+				elev = heightNoise(RParameter.getAmplitude(), RParameter.getFrequency(), temp[5]->projectToSphere(x, y)+randomTranslate);
+				generatePixel(gSize, width, exportImage, x, gSize-1-y, elev,
+							  water1stblue, water1stgreen, water1stred,
+							  water2ndblue, water2ndgreen, water2ndred,
+							  terrain1stblue, terrain1stgreen, terrain1stred,
+							  terrain2ndblue, terrain2ndgreen, terrain2ndred,
+							  mountain1stblue, mountain1stgreen, mountain1stred,
+							  mountain2ndblue, mountain2ndgreen, mountain2ndred);
+			}
+		}
+		// Delete temporary grids
+		for(i=0; i < 6; i++)
+		{
+			delete temp[i];
+		}
+	}
+	else
+	{
+		std::cerr << "Type not recognized!" << std::endl;
+		// memory was deleted.
+		exportImage = NULL;
+	}
 
 	return exportImage;
 }
 
-void PSphere::exportEquirectangularMap(unsigned short width, unsigned short height, std::string fileName) {
+/* Saves map to the given filename. With MapType MAP_CUBE ignores height-variable */
+void PSphere::exportMap(unsigned short width, unsigned short height, std::string fileName, MapType type) {
 	RGBQUAD color;
-//	unsigned char *exportImage;
 
 	/* Create map to memory location pointed by exportImage.
 	 * It is class private variable. */
-	exportEquirectangularMap(width, height);
+	exportMap(width, height, type);
+
+	// Ignore given height with Cubemap
+	if (type == MAP_CUBE)
+		height = width/4*3;
 
 	// Use freeimage to save the map as a file
 	FreeImage_Initialise();

@@ -47,6 +47,11 @@ unsigned int Grid::getSize()
 	return gridSize;
 }
 
+Ogre::Matrix3 Grid::getOrientation()
+{
+	return orientation;
+}
+
 void Grid::setValue(unsigned int x, unsigned y, int val)
 {
 	value[y][x] = val;

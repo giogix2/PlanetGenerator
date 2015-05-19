@@ -35,6 +35,7 @@ public:
 	Grid(unsigned int size, const Ogre::Matrix3 face);
 	~Grid();
 	unsigned int getSize();
+	Ogre::Matrix3 getOrientation();
 	void setValue(unsigned int x, unsigned int y, int val);
 	int getValue(unsigned int x, unsigned int y);
 	Ogre::Vector3 projectToSphere(unsigned int x, unsigned int y);
