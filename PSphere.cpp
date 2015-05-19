@@ -49,7 +49,7 @@ using namespace std;
 #define LEFT 3
 #define RIGHT 4
 
-PSphere::PSphere(){
+PSphere::PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter){
 	vertexes =	NULL;
 	vNorms =	NULL;
 	texCoords =	NULL;
@@ -57,6 +57,8 @@ PSphere::PSphere(){
 	surfaceTexture =		NULL;
 	exportImage =	NULL;
 	observer =	Ogre::Vector3(0.0f, 0.0f, 0.0f);
+
+	create(iters, gridSize, resourceParameter);
 }
 
 PSphere::~PSphere()
