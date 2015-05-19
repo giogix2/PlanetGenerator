@@ -258,6 +258,7 @@ void MainWindow::on_pushButton_11_clicked()
 	// One scanline must be divisible by 4 bytes
 	uchar *array = mySphere->exportEquirectangularMap(248, 124);
 	QImage image = QImage(array, 248,124, QImage::Format_RGB888);
+	image = image.mirrored();
 
 	QGraphicsScene *scene = new QGraphicsScene();
 	scene->addPixmap(QPixmap::fromImage(image));
