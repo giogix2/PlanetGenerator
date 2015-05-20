@@ -80,7 +80,7 @@ public:
 
 	unsigned char *exportMap(unsigned short width, unsigned short height, MapType type);
 
-	PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter);
+	PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, Ogre::uint16 textureWidth, Ogre::uint16 textureHeight, ResourceParameter resourceParameter);
 
 	~PSphere();
 
@@ -94,6 +94,8 @@ private:
 	Ogre::Real			radius;
 	Ogre::Real			seaHeight;
 	unsigned char		*surfaceTexture;
+	unsigned short		surfaceTextureWidth;
+	unsigned short		surfaceTextureHeight;
 	unsigned char		*exportImage;
 	Ogre::MeshPtr		mesh;
 	Ogre::Vector3		observer;

@@ -41,20 +41,19 @@
 
 using namespace std;
 
-// Let's set texture dimensions this way for a time being
-#define TEX_WIDTH 1024
-#define TEX_HEIGHT 512
 #define UP 1
 #define DOWN 2
 #define LEFT 3
 #define RIGHT 4
 
-PSphere::PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter){
+PSphere::PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, Ogre::uint16 textureWidth, Ogre::uint16 textureHeight, ResourceParameter resourceParameter){
 	vertexes =	NULL;
 	vNorms =	NULL;
 	texCoords =	NULL;
 	indexes =	NULL;
-	surfaceTexture =		NULL;
+	surfaceTexture =NULL;
+	surfaceTextureWidth = textureWidth;
+	surfaceTextureHeight = textureHeight;
 	exportImage =	NULL;
 	observer =	Ogre::Vector3(0.0f, 0.0f, 0.0f);
 
@@ -76,6 +75,13 @@ PSphere::~PSphere()
 	delete faceYP;
 	delete faceZM;
 	delete faceZP;
+
+	delete gridXM;
+	delete gridXP;
+	delete gridYM;
+	delete gridYP;
+	delete gridZM;
+	delete gridZP;
 }
 
 /* Set position for the observer. This must be position vector in modelspace,
@@ -299,7 +305,7 @@ void PSphere::generateImage(unsigned short textureWidth, unsigned short textureH
 		for(x=0; x < textureWidth; x++)
 		{
 			longitude = (Ogre::Real(x)+0.5f)/textureWidth*360.0f;
-			latitude = (90.0f-0.5f/textureHeight) - (Ogre::Real(y)+0.5f)/textureHeight*180.0f;
+			latitude = 90.0f - (Ogre::Real(y)+0.5f)/textureHeight*180.0f;
 
 			// Get a point that corresponds to a given pixel
 			spherePoint = convertSphericalToCartesian(latitude, longitude);
@@ -430,6 +436,19 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
 		iters = 3;
 		std::cout << "Sphere needs atleast 3 iters" << std::endl;
 	}
+	// Creating 2D texture with zeros would fail when creating texture with Ogre
+	if (surfaceTextureWidth == 0)
+	{
+		surfaceTextureWidth = 1;
+	}
+	if (surfaceTextureHeight == 0)
+	{
+		surfaceTextureHeight = 1;
+	}
+	/* Make grid big enough, so that so that grid-depending code doesn't make
+	 * anything nasty. Probably need to be tested. */
+	if (gridSize < 2)
+		gridSize = 2;
 
 	radius = resourceParameter.getRadius();
 
@@ -510,8 +529,8 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
 
 	calculateSeaLevel(minimumHeight, maximumHeight, waterFraction);
 
-	surfaceTexture = new unsigned char[TEX_WIDTH*TEX_HEIGHT*3];
-	generateImage(TEX_WIDTH, TEX_HEIGHT, surfaceTexture);//take longtime
+	surfaceTexture = new unsigned char[surfaceTextureWidth*surfaceTextureHeight*3];
+	generateImage(surfaceTextureWidth, surfaceTextureHeight, surfaceTexture);//take longtime
 
 	// Requires variable seaHeight that is set by calculateSeaLevel
 	setGridLandInfo(gridYP);
@@ -653,24 +672,24 @@ void PSphere::loadToBuffers(const std::string &meshName, const std::string &text
 	// Texture stuff
 	Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton()
 			.createManual(textureName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-						  Ogre::TEX_TYPE_2D, TEX_WIDTH, TEX_HEIGHT, 0, Ogre::PF_R8G8B8, Ogre:: TU_DYNAMIC);
+						  Ogre::TEX_TYPE_2D, surfaceTextureWidth, surfaceTextureHeight, 0, Ogre::PF_R8G8B8, Ogre:: TU_DYNAMIC);
 	Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
 	pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
 
 	const Ogre::PixelBox &pixelBox = pixelBuffer->getCurrentLock();
 	Ogre::uint8 *exteriorTexture = static_cast<Ogre::uint8*>(pixelBox.data);
 
-	for(i=0; i < TEX_HEIGHT; i++)
+	for(i=0; i < surfaceTextureHeight; i++)
 	{
-		for(j=0; j < TEX_WIDTH; j++)
+		for(j=0; j < surfaceTextureWidth; j++)
 		{
 			/* FIXME: Might be unnecessary memory copy, but was convenient. */
 			/* TextureManager did not honor Ogre::PF_R8G8B8, so need to swap red and blue,
 			 * plus hardware wants alfa channel values too */
-			exteriorTexture[(i*TEX_WIDTH+j)*4]   = surfaceTexture[(i*TEX_WIDTH+j)*3+2];   // blue
-			exteriorTexture[(i*TEX_WIDTH+j)*4+1] = surfaceTexture[(i*TEX_WIDTH+j)*3+1];   // green
-			exteriorTexture[(i*TEX_WIDTH+j)*4+2] = surfaceTexture[(i*TEX_WIDTH+j)*3];     // red
-			exteriorTexture[(i*TEX_WIDTH+j)*4+3] = 255;                          // Alfa
+			exteriorTexture[(i*surfaceTextureWidth+j)*4]   = surfaceTexture[(i*surfaceTextureWidth+j)*3+2];   // blue
+			exteriorTexture[(i*surfaceTextureWidth+j)*4+1] = surfaceTexture[(i*surfaceTextureWidth+j)*3+1];   // green
+			exteriorTexture[(i*surfaceTextureWidth+j)*4+2] = surfaceTexture[(i*surfaceTextureWidth+j)*3];     // red
+			exteriorTexture[(i*surfaceTextureWidth+j)*4+3] = 255;                          // Alfa
 		}
 	}
 

@@ -88,11 +88,10 @@ void MainWindow::on_pushButton_clicked()
 {
     addParameters();
 
-    mySphere = new PSphere(100, 40, *params);
+	mySphere = new PSphere(100, 40, 1024, 512, *params);
 	rendering = new initOgre();
 	rendering->start();
 	rendering->setSceneAndRun(mySphere);
-    //mySphere->exportEquirectangularMap(512, 256, "TestFile.png");
 	delete mySphere;
     rendering->cleanup();
 
@@ -235,7 +234,7 @@ void MainWindow::on_pushButton_10_clicked()
 
     //create planet
     addParameters();
-    mySphere = new PSphere(100, 3, *params);
+	mySphere = new PSphere(100, 0, 0, 0, *params);
     //push to pshere export-method with filename + resolution
 	mySphere->exportMap(width, height, filename.toStdString(), PSphere::MAP_EQUIRECTANGULAR);
 
@@ -246,11 +245,7 @@ void MainWindow::on_pushButton_11_clicked()
 {
     //Todo:: refresh-button
     addParameters();
-    mySphere = new PSphere(100, 3, *params);
-
-    QString string = ui->comboBox->currentText();
-
-    QStringList values = string.split(" x ");
+	mySphere = new PSphere(100, 0, 0, 0, *params);
 
 	unsigned short width =  196;
 	unsigned short height =  98;
