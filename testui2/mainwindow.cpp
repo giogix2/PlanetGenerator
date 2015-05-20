@@ -252,12 +252,12 @@ void MainWindow::on_pushButton_11_clicked()
 
     QStringList values = string.split(" x ");
 
-    unsigned short width =  values[0].toUShort();
-    unsigned short height =  values[1].toUShort();
+	unsigned short width =  196;
+	unsigned short height =  98;
 
 	// One scanline must be divisible by 4 bytes
-	uchar *array = mySphere->exportMap(248, 124, PSphere::MAP_EQUIRECTANGULAR);
-	QImage image = QImage(array, 248,124, QImage::Format_RGB888);
+	uchar *array = mySphere->exportMap(width, height, PSphere::MAP_EQUIRECTANGULAR);
+	QImage image = QImage(array, width, height, QImage::Format_RGB888);
 	image = image.mirrored();
 
 	QGraphicsScene *scene = new QGraphicsScene();
