@@ -24,6 +24,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QGraphicsScene>
 #include "freqampdialog.h"
 #include "meshdialog.h"
 #include "../PSphere.h"
