@@ -77,10 +77,13 @@ MainWindow::MainWindow(QWidget *parent) :
 
     params = new std::ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#32CDFF"
         ,(std::string)"#64FFFF",(std::string)"#B4B4B4",(std::string)"#FFFFFF",waterfraction,radius,seed,frequencyAmplitude, meshlocs);
+
+    scene = new QGraphicsScene();
 }
 
 MainWindow::~MainWindow()
 {
+    delete scene;
     delete ui;
 }
 
@@ -220,8 +223,6 @@ void MainWindow::on_pushButton_10_clicked()
     QString filename = QFileDialog::getSaveFileName(this, "Save image", "../", "*.png" )+".png";
     qDebug() << "save as : " + filename;
 
-
-
     //unsigned short
     QString string = ui->comboBox->currentText();
 
@@ -236,7 +237,18 @@ void MainWindow::on_pushButton_10_clicked()
     addParameters();
 	mySphere = new PSphere(100, 0, 0, 0, *params);
     //push to pshere export-method with filename + resolution
-	mySphere->exportMap(width, height, filename.toStdString(), PSphere::MAP_EQUIRECTANGULAR);
+    if(ui->comboBox_2->currentIndex() == 0)
+    {
+        mySphere->exportMap(width, height, filename.toStdString(), PSphere::MAP_EQUIRECTANGULAR);
+    }
+    else if(ui->comboBox_2->currentIndex() == 1)
+    {
+        mySphere->exportMap(width, height, filename.toStdString(), PSphere::MAP_CUBE);
+    }
+    else
+    {
+        qDebug() << "Something went wrong in saving image";
+    }
 
     delete mySphere;
 }
@@ -255,7 +267,7 @@ void MainWindow::on_pushButton_11_clicked()
 	QImage image = QImage(array, width, height, QImage::Format_RGB888);
 	image = image.mirrored();
 
-	QGraphicsScene *scene = new QGraphicsScene();
+
 	scene->addPixmap(QPixmap::fromImage(image));
 
 	delete mySphere;

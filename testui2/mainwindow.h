@@ -82,6 +82,7 @@ private:
 	std::ResourceParameter *params;
     PSphere *mySphere;
     initOgre *rendering;
+    QGraphicsScene *scene;
 };
 
 #endif // MAINWINDOW_H
