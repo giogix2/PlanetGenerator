@@ -21,6 +21,7 @@
  * THE SOFTWARE. */
 
 #include "initOgre.h"
+#include "Common.h"
 
 #include "OgreConfigFile.h"
 #include <OgreMeshSerializer.h>
@@ -226,9 +227,18 @@ void initOgre::setSceneAndRun(PSphere *planet){
         //qDebug() << QString::fromStdString(iter->first) <<", " << iter->second;
 		for(int i=0; i<iter->second; i++) {
 			
-			double latitude = rand() % 90;
+			double latitude = 90 - rand() % 180;
 			double longitude = rand() % 360;
-			planet->attachMeshOnGround(sphere1, Scene, iter->first, iter->first, latitude, longitude);
+			// Check if location is on land
+			if (planet->checkAccessibility(convertSphericalToCartesian(latitude, longitude)) == true)
+			{
+				planet->attachMeshOnGround(sphere1, Scene, iter->first, iter->first, latitude, longitude);
+			}
+			// Try same iteration again
+			else
+			{
+				i--;
+			}
 		}
 		
 
