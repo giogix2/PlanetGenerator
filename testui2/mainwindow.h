@@ -24,6 +24,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QGraphicsScene>
 #include "freqampdialog.h"
 #include "meshdialog.h"
 #include "../PSphere.h"
@@ -82,7 +83,7 @@ private:
 	std::ResourceParameter *params;
     PSphere *mySphere;
     initOgre *rendering;
-    QGraphicsScene *scene;
+	QGraphicsScene *scene;
 };
 
 #endif // MAINWINDOW_H
