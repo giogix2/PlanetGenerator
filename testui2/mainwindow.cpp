@@ -49,8 +49,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui->lineEdit_2->setValidator( watervalidator );
 
-    //regex to handle max value for lineEdit to be 2*32-1 (UINT_MAX)
-    QRegExp rx("^(\\d|\\d{1,9}|[0-3]\\d{1,9}|4[0-1]\\d{8}|42[0-8]\\d{7}|429[0-3]\\d{6}|4294[0-8]\\d{5}|42949[0-5]\\d{4}|429496[0-6]\\d{3}|4294967[0-1]\\d{2}|429496729[0-5])$");
+    //regex to handle max value for lineEdit to be 2147483647 (2^31 − 1) (INT_MAX)
+    QRegExp rx("^(\\d|\\d{1,9}|[0-1]\\d{1,9}|2[0]\\d{8}|21[0-3]\\d{7}|214[0-6]\\d{6}|2147[0-3]\\d{5}|21474[0-7]\\d{4}|214748[0-2]\\d{3}|2147483[0-5]\\d{2}|21474836[0-3]\\d{1}|214748364[0-7])$");
     validator = new QRegExpValidator(rx, this);
     ui->lineEdit_3->setValidator(validator);
 	
