@@ -40,18 +40,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Regex validators to handle 2 decimal float values from 0-100
     QRegExp rex("[0-9][0-9]\\.\\d{0,2}|[0-9]\\.\\d{0,2}|(100)");
-    QRegExpValidator *radiusvalidator = new QRegExpValidator(rex, this);
+    radiusvalidator = new QRegExpValidator(rex, this);
 
     ui->lineEdit->setValidator( radiusvalidator );
 
     QRegExp rex2("[0-9][0-9]\\.\\d{0,2}|[0-9]\\.\\d{0,2}|(100)");
-    QRegExpValidator *watervalidator = new QRegExpValidator(rex2, this);
+    watervalidator = new QRegExpValidator(rex2, this);
 
     ui->lineEdit_2->setValidator( watervalidator );
 
     //regex to handle max value for lineEdit to be 2*32-1 (UINT_MAX)
     QRegExp rx("^(\\d|\\d{1,9}|[0-3]\\d{1,9}|4[0-1]\\d{8}|42[0-8]\\d{7}|429[0-3]\\d{6}|4294[0-8]\\d{5}|42949[0-5]\\d{4}|429496[0-6]\\d{3}|4294967[0-1]\\d{2}|429496729[0-5])$");
-    QValidator *validator = new QRegExpValidator(rx, this);
+    validator = new QRegExpValidator(rx, this);
     ui->lineEdit_3->setValidator(validator);
 	
 	//set default parameters for now::
@@ -83,6 +83,10 @@ MainWindow::MainWindow(QWidget *parent) :
 
 MainWindow::~MainWindow()
 {
+    delete radiusvalidator;
+    delete watervalidator;
+    delete validator;
+    delete params;
     delete scene;
     delete ui;
 }
@@ -97,7 +101,8 @@ void MainWindow::on_pushButton_clicked()
 	rendering->setSceneAndRun(mySphere);
 	delete mySphere;
     rendering->cleanup();
-	delete rendering;
+
+	
 }
 
 void MainWindow::on_pushButton_2_clicked()
@@ -177,8 +182,7 @@ void MainWindow::openNewWindow()
 			frequencyAmplitude += values.value(0).toStdString() + ' ' +  values.value(1).toStdString() + ' ';
 		}
 		params->setFrequencyAmplitude(frequencyAmplitude, ' ');
-	}
-	delete dialog;
+	}	
 }
 
 void MainWindow::setAmps(float p_val1, float p_val2)
@@ -207,7 +211,6 @@ void MainWindow::on_pushButton_9_clicked()
             setMeshes( values.value(0),  values.value(1).toInt());
         }
     }
-	delete meshdialog;
 }
 
 void MainWindow::setMeshes(QString p_path, int p_count)

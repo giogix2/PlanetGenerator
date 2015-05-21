@@ -83,6 +83,9 @@ private:
     PSphere *mySphere;
     initOgre *rendering;
     QGraphicsScene *scene;
+    QRegExpValidator *radiusvalidator;
+    QRegExpValidator *watervalidator;
+    QRegExpValidator *validator;
 };
 
 #endif // MAINWINDOW_H
