@@ -1183,7 +1183,7 @@ void PSphere::exportMap(unsigned short width, unsigned short height, std::string
 		}
 	}
 	FreeImage_Save(FIF_PNG, bitmap, fileName.c_str(), 0);
-
+	FreeImage_Unload(bitmap);
 	FreeImage_DeInitialise();
 }
 
