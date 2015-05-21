@@ -94,8 +94,7 @@ void MainWindow::on_pushButton_clicked()
 	rendering->setSceneAndRun(mySphere);
 	delete mySphere;
     rendering->cleanup();
-
-	
+	delete rendering;
 }
 
 void MainWindow::on_pushButton_2_clicked()
@@ -175,7 +174,8 @@ void MainWindow::openNewWindow()
 			frequencyAmplitude += values.value(0).toStdString() + ' ' +  values.value(1).toStdString() + ' ';
 		}
 		params->setFrequencyAmplitude(frequencyAmplitude, ' ');
-	}	
+	}
+	delete dialog;
 }
 
 void MainWindow::setAmps(float p_val1, float p_val2)
@@ -204,6 +204,7 @@ void MainWindow::on_pushButton_9_clicked()
             setMeshes( values.value(0),  values.value(1).toInt());
         }
     }
+	delete meshdialog;
 }
 
 void MainWindow::setMeshes(QString p_path, int p_count)
