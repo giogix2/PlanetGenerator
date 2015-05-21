@@ -1087,6 +1087,11 @@ unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, M
 
 		exportImage = new unsigned char[width*(width/4*3)*3];
 
+		/* Initialize memory. Silences valgrind warning that happens because we
+		 * don't set pixel values for every pixel in cubemap, but FreeImage
+		 * reads uninitialized values when saving the image. */
+		memset(exportImage, 0, width*(width/4*3)*3);
+
 		gSize = width/4;
 		temp[0] = new Grid(gSize, gridYP->getOrientation());
 		temp[1] = new Grid(gSize, gridXM->getOrientation());
