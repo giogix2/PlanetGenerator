@@ -1327,3 +1327,7 @@ void PSphere::moveObject(const std::string &objectName, int direction, float pac
 		}
 	}
 }
+
+ResourceParameter *PSphere::getParameters() {
+	return &RParameter;
+}

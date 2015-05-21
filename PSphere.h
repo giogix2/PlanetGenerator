@@ -82,6 +82,8 @@ public:
 
 	PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, Ogre::uint16 textureWidth, Ogre::uint16 textureHeight, ResourceParameter resourceParameter);
 
+	ResourceParameter *getParameters();
+
 	~PSphere();
 
 private:

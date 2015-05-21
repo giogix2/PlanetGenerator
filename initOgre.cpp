@@ -219,10 +219,22 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	Ogre::SceneNode *sphere1 = Scene->getRootSceneNode()->createChildSceneNode("planetSphere");
 	sphere1->attachObject(entity1);
 
-
+	srand(0);
 	//planet->loadMeshFile("ram1.mesh", "LocalMesh");
+	for (vector<pair <string, int> >::const_iterator iter = planet->getParameters()->getMeshLocObjAmount().begin(); iter != planet->getParameters()->getMeshLocObjAmount().end(); ++iter)
+    {
+        //qDebug() << QString::fromStdString(iter->first) <<", " << iter->second;
+		for(int i=0; i<iter->second; i++) {
+			
+			double latitude = rand() % 90;
+			double longitude = rand() % 360;
+			planet->attachMeshOnGround(sphere1, Scene, iter->first, iter->first, latitude, longitude);
+		}
+		
 
-	planet->attachMeshOnGround(sphere1, Scene, "ram.mesh", "Ramiro", 0.0, 270.0);
+    }
+
+	/*planet->attachMeshOnGround(sphere1, Scene, "ram.mesh", "Ramiro", 0.0, 270.0);*/
 	planet->attachMesh(sphere1, Scene, "asteroid.mesh", "CK7", 0.0, 180.0);
 
 	// No need for this anymore
