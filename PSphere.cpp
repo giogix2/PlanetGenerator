@@ -91,8 +91,8 @@ void PSphere::setObserverPosition(Ogre::Vector3 position)
 	observer = position;
 }
 
-Ogre::Real PSphere::heightNoise(vector<float> amplitude,
-							   vector<float> frequency, Ogre::Vector3 Point)
+Ogre::Real PSphere::heightNoise(vector<float> &amplitude,
+							   vector<float> &frequency, Ogre::Vector3 Point)
 {
 	Ogre::uint32 i;
 	Ogre::Real height = 0.0f;

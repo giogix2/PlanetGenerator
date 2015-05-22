@@ -136,8 +136,8 @@ private:
 
 	Ogre::Vector3 calculateSphereCoordsFromTexCoords(Ogre::Vector2 *texCoord);
 
-	Ogre::Real heightNoise(vector<float> amplitude,
-						   vector<float> frequency, Ogre::Vector3 Point);
+	Ogre::Real heightNoise(vector<float> &amplitude,
+						   vector<float> &frequency, Ogre::Vector3 Point);
 
 	void generatePixel(unsigned short textureHeight, unsigned short stride, unsigned char *image, unsigned short x, unsigned short y, Ogre::Real height,
 									   unsigned char water1stblue, unsigned char water1stgreen, unsigned char water1stred,
