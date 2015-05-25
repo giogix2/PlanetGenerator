@@ -24,6 +24,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QGraphicsScene>
 #include "freqampdialog.h"
 #include "meshdialog.h"
 #include "../PSphere.h"
@@ -67,13 +68,13 @@ private slots:
 
     void openNewWindow();
 
-	
-
     void on_pushButton_9_clicked();
 
     void on_pushButton_10_clicked();
 
     void on_pushButton_11_clicked();
+
+    void addParameters();
 
 private:
     Ui::MainWindow *ui;   
@@ -82,6 +83,10 @@ private:
 	std::ResourceParameter *params;
     PSphere *mySphere;
     initOgre *rendering;
+    QGraphicsScene *scene;
+    QRegExpValidator *radiusvalidator;
+    QRegExpValidator *watervalidator;
+    QRegExpValidator *validator;
 };
 
 #endif // MAINWINDOW_H

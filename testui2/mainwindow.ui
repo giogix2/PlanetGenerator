@@ -327,10 +327,22 @@
     <property name="geometry">
      <rect>
       <x>290</x>
-      <y>20</y>
-      <width>201</width>
-      <height>141</height>
+      <y>30</y>
+      <width>196</width>
+      <height>98</height>
      </rect>
+    </property>
+    <property name="sizePolicy">
+     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+      <horstretch>0</horstretch>
+      <verstretch>0</verstretch>
+     </sizepolicy>
+    </property>
+    <property name="verticalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
+    </property>
+    <property name="horizontalScrollBarPolicy">
+     <enum>Qt::ScrollBarAlwaysOff</enum>
     </property>
    </widget>
    <widget class="QComboBox" name="comboBox">
@@ -400,6 +412,39 @@
     </property>
     <property name="text">
      <string>Choose size:</string>
+    </property>
+   </widget>
+   <widget class="QComboBox" name="comboBox_2">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>140</y>
+      <width>121</width>
+      <height>22</height>
+     </rect>
+    </property>
+    <item>
+     <property name="text">
+      <string>Equirectangular map</string>
+     </property>
+    </item>
+    <item>
+     <property name="text">
+      <string>Cube map</string>
+     </property>
+    </item>
+   </widget>
+   <widget class="QLabel" name="label_14">
+    <property name="geometry">
+     <rect>
+      <x>300</x>
+      <y>140</y>
+      <width>47</width>
+      <height>13</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Save as:</string>
     </property>
    </widget>
   </widget>

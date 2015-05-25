@@ -73,7 +73,16 @@ find_package(Boost QUIET)
 include_directories(${Boost_INCLUDE_DIR})
 add_definitions(-DBOOST_ALL_NO_LIB)
 set(OGRE_LIBRARIES ${OGRE_LIBRARIES} ${Boost_LIBRARIES})
- 
+
+find_path(LIBFREEIMAGE FreeImage.h)
+
+if(${LIBFREEIMAGE} STREQUAL "LIBFREEIMAGE-NOTFOUND")
+        message(FATAL_ERROR "Libfreeimage-header not found. ")
+else()
+        message(STATUS "Libfreeimage-header found from " ${LIBFREEIMAGE})
+        set(FreeImageLib freeimage)
+endif(${LIBFREEIMAGE} STREQUAL "LIBFREEIMAGE-NOTFOUND")
+
 set(HDRS
     ../simplexnoise1234.h
     ../PSphere.h
@@ -131,7 +140,7 @@ add_custom_command(TARGET PlanetGenerator POST_BUILD COMMAND ${CMAKE_COMMAND} -E
 # Add "_d" to debug-binary
 set_target_properties(PlanetGenerator PROPERTIES DEBUG_POSTFIX _d)
  
-target_link_libraries(PlanetGenerator ${OGRE_LIBRARIES} ${OIS_LIBRARIES} ${OGRE_Overlay_LIBRARIES} ${Qt5Libs} ${FreeImageLib} freeimage)
+target_link_libraries(PlanetGenerator ${OGRE_LIBRARIES} ${OIS_LIBRARIES} ${OGRE_Overlay_LIBRARIES} ${Qt5Libs} ${FreeImageLib})
 
 set(CMAKE_CXX_FLAGS "-Wall")
 

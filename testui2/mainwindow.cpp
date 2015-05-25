@@ -29,6 +29,7 @@
 #include <QVectorIterator>
 #include <QtMath>
 #include <QFileDialog>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -40,18 +41,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     //Regex validators to handle 2 decimal float values from 0-100
     QRegExp rex("[0-9][0-9]\\.\\d{0,2}|[0-9]\\.\\d{0,2}|(100)");
-    QRegExpValidator *radiusvalidator = new QRegExpValidator(rex, this);
+    radiusvalidator = new QRegExpValidator(rex, this);
 
     ui->lineEdit->setValidator( radiusvalidator );
 
     QRegExp rex2("[0-9][0-9]\\.\\d{0,2}|[0-9]\\.\\d{0,2}|(100)");
-    QRegExpValidator *watervalidator = new QRegExpValidator(rex2, this);
+    watervalidator = new QRegExpValidator(rex2, this);
 
     ui->lineEdit_2->setValidator( watervalidator );
 
-    //regex to handle max value for lineEdit to be 2*32-1 (UINT_MAX)
-    QRegExp rx("^(\\d|\\d{1,9}|[0-3]\\d{1,9}|4[0-1]\\d{8}|42[0-8]\\d{7}|429[0-3]\\d{6}|4294[0-8]\\d{5}|42949[0-5]\\d{4}|429496[0-6]\\d{3}|4294967[0-1]\\d{2}|429496729[0-5])$");
-    QValidator *validator = new QRegExpValidator(rx, this);
+    //regex to handle max value for lineEdit to be (2^32 − 1) (UINT_MAX)
+     QRegExp rx("^(\\d|\\d{1,9}|[0-3]\\d{1,9}|4[0-1]\\d{8}|42[0-8]\\d{7}|429[0-3]\\d{6}|4294[0-8]\\d{5}|42949[0-5]\\d{4}|429496[0-6]\\d{3}|4294967[0-1]\\d{2}|42949672[0-8]\\d{1}|429496729[0-5])$");
+    validator = new QRegExpValidator(rx, this);
     ui->lineEdit_3->setValidator(validator);
 	
 	//set default parameters for now::
@@ -69,7 +70,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 	float waterfraction = 0.6;
 	float radius = 7.5;
-    int seed = 60;
+    unsigned int seed = 60;
 
     ui->lineEdit->setText(""+QString::number(radius));
     ui->lineEdit_2->setText(""+QString::number(waterfraction*100));
@@ -77,105 +78,31 @@ MainWindow::MainWindow(QWidget *parent) :
 
     params = new std::ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#32CDFF"
         ,(std::string)"#64FFFF",(std::string)"#B4B4B4",(std::string)"#FFFFFF",waterfraction,radius,seed,frequencyAmplitude, meshlocs);
+
+    scene = new QGraphicsScene();
 }
 
 MainWindow::~MainWindow()
 {
+    delete radiusvalidator;
+    delete watervalidator;
+    delete validator;
+    delete params;
+    delete scene;
     delete ui;
 }
 
 void MainWindow::on_pushButton_clicked()
-{   
-	if(!ui->lineEdit->text().isEmpty())
-    {        
-        float radius = ui->lineEdit->text().toFloat();
-        params->setRadius(radius);
-    }
-	
-    if(!ui->lineEdit_2->text().isEmpty())
-    {       
-        float waterfraction = (ui->lineEdit_2->text().toFloat())/100;
-        params->setWaterFraction(waterfraction);
-    }
-    if(!ui->lineEdit_3->text().isEmpty())
-    {
-        int seed = ui->lineEdit_3->text().toInt();
-        params->setSeed(seed);
-    }
+{
+    addParameters();
 
-    if(ui->pushButton_2->text() != "Color")
-    {
-        params->setWaterFirstColor(ui->pushButton_2->text().toUtf8().constData());
-    }
-    if(ui->pushButton_3->text() != "Color")
-    {
-        params->setWaterSecondColor(ui->pushButton_3->text().toUtf8().constData());
-    }
-
-    if(ui->pushButton_4->text() != "Color")
-    {        
-        params->setTerrainFirstColor(ui->pushButton_4->text().toUtf8().constData());
-    }
-    if(ui->pushButton_5->text() != "Color")
-    {        
-        params->setTerrainSecondColor(ui->pushButton_5->text().toUtf8().constData());
-    }
-	
-	if(ui->pushButton_6->text() != "Color")
-    {        
-        params->setMountainFirstColor(ui->pushButton_6->text().toUtf8().constData());
-    }
-    if(ui->pushButton_7->text() != "Color")
-    {        
-        params->setMountainSecondColor(ui->pushButton_7->text().toUtf8().constData());
-    }
-		
-    //debug messages
-    qDebug() << params->getRadius();
-    qDebug() << params->getWaterFraction();
-    qDebug() << params->getSeed();
-	qDebug() << QString::fromStdString(params->getWaterFirstColor());
-	qDebug() << QString::fromStdString(params->getWaterSecondColor());
-	qDebug() << QString::fromStdString(params->getTerrainFirstColor());
-	qDebug() << QString::fromStdString(params->getTerrainSecondColor());
-	qDebug() << QString::fromStdString(params->getMountainFirstColor());
-	qDebug() << QString::fromStdString(params->getMountainSecondColor());
-	
-    for (std::vector<std::pair <float, float> >::const_iterator iter = params->getFrequencyAmplitude().begin(); iter != params->getFrequencyAmplitude().end(); ++iter)
-	{
-		qDebug() << iter->first <<", " << iter->second;
-    }
- /*   for (std::vector<float>::const_iterator iter = params->getFrequency().begin(); iter != params->getFrequency().end(); ++iter)
-    {
-        qDebug() << "Frequency:" << *iter;
-    }
-    for (std::vector<float>::const_iterator iter = params->getAmplitude().begin(); iter != params->getAmplitude().end(); ++iter)
-    {
-        qDebug() << "Amplitude: " << *iter;
-    }*/
-
-
-    for (std::vector<std::pair <std::string, int> >::const_iterator iter = params->getMeshLocObjAmount().begin(); iter != params->getMeshLocObjAmount().end(); ++iter)
-    {
-        qDebug() << QString::fromStdString(iter->first) <<", " << iter->second;
-    }
- /*   for (std::vector<std::string>::const_iterator iter = params->getMeshLocations().begin(); iter != params->getMeshLocations().end(); ++iter)
-    {
-        qDebug() << "Mesh path:" << QString::fromStdString(*iter);
-    }
-    for (std::vector<int>::const_iterator iter = params->getObjectAmount().begin(); iter != params->getObjectAmount().end(); ++iter)
-    {
-        qDebug() << "Amount: " << *iter;
-    }*/
-	
-	mySphere = new PSphere(100, 40, *params);
+	mySphere = new PSphere(100, 40, 1024, 512, *params);
 	rendering = new initOgre();
 	rendering->start();
 	rendering->setSceneAndRun(mySphere);
-	mySphere->exportEquirectangularMap(512, 256, "TestFile.png");
 	delete mySphere;
     rendering->cleanup();
-
+    delete rendering;
 	
 }
 
@@ -257,6 +184,7 @@ void MainWindow::openNewWindow()
 		}
 		params->setFrequencyAmplitude(frequencyAmplitude, ' ');
 	}	
+    delete dialog;
 }
 
 void MainWindow::setAmps(float p_val1, float p_val2)
@@ -285,6 +213,7 @@ void MainWindow::on_pushButton_9_clicked()
             setMeshes( values.value(0),  values.value(1).toInt());
         }
     }
+    delete meshdialog;
 }
 
 void MainWindow::setMeshes(QString p_path, int p_count)
@@ -301,8 +230,6 @@ void MainWindow::on_pushButton_10_clicked()
     QString filename = QFileDialog::getSaveFileName(this, "Save image", "../", "*.png" )+".png";
     qDebug() << "save as : " + filename;
 
-
-
     //unsigned short
     QString string = ui->comboBox->currentText();
 
@@ -310,22 +237,147 @@ void MainWindow::on_pushButton_10_clicked()
 
     unsigned short width =  values[0].toUShort();
     unsigned short height =  values[1].toUShort();
+	bool returnValue = false;
 
     qDebug() << "width: " << width << ", height: " << height ;
 
     //create planet
+    addParameters();
+	mySphere = new PSphere(100, 0, 0, 0, *params);
     //push to pshere export-method with filename + resolution
+    if(ui->comboBox_2->currentIndex() == 0)
+    {
+		returnValue = mySphere->exportMap(width, height, filename.toStdString(), PSphere::MAP_EQUIRECTANGULAR);
+    }
+    else if(ui->comboBox_2->currentIndex() == 1)
+    {
+		returnValue = mySphere->exportMap(width, height, filename.toStdString(), PSphere::MAP_CUBE);
+    }
+    else
+    {
+        qDebug() << "Something went wrong in saving image";
+    }
+
+	if (!returnValue)
+	{
+		QMessageBox errorBox;
+
+		errorBox.setWindowTitle("Error");
+		errorBox.setText("Saving image failed!");
+		errorBox.setStandardButtons(QMessageBox::Ok);
+		errorBox.exec();
+
+		qDebug() << "Function exportMap returned false";
+	}
+
+    delete mySphere;
 }
 
 void MainWindow::on_pushButton_11_clicked()
 {
- /*   QImage image = QImage::fromData(unsigned char array, QImage::Format_RGB888);
+    //Todo:: refresh-button
+    addParameters();
+	mySphere = new PSphere(100, 0, 0, 0, *params);
+
+	unsigned short width =  196;
+	unsigned short height =  98;
+
+	// One scanline must be divisible by 4 bytes
+	uchar *array = mySphere->exportMap(width, height, PSphere::MAP_EQUIRECTANGULAR);
+	QImage image = QImage(array, width, height, QImage::Format_RGB888);
+	image = image.mirrored();
 
 
-    QGraphicsScene scene;
-    scene.addItem(image);
+	scene->addPixmap(QPixmap::fromImage(image));
 
-    ui->graphicsView->setScene(scene);
+	delete mySphere;
+	ui->graphicsView->setScene(scene);
+
     ui->graphicsView->show();
-*/
+
+}
+
+void MainWindow::addParameters()
+{
+    if(!ui->lineEdit->text().isEmpty())
+    {
+        float radius = ui->lineEdit->text().toFloat();
+        params->setRadius(radius);
+    }
+
+    if(!ui->lineEdit_2->text().isEmpty())
+    {
+        float waterfraction = (ui->lineEdit_2->text().toFloat())/100;
+        params->setWaterFraction(waterfraction);
+    }
+    if(!ui->lineEdit_3->text().isEmpty())
+    {
+        unsigned int seed = ui->lineEdit_3->text().toUInt();
+        params->setSeed(seed);
+    }
+
+    if(ui->pushButton_2->text() != "Color")
+    {
+        params->setWaterFirstColor(ui->pushButton_2->text().toUtf8().constData());
+    }
+    if(ui->pushButton_3->text() != "Color")
+    {
+        params->setWaterSecondColor(ui->pushButton_3->text().toUtf8().constData());
+    }
+
+	if(ui->pushButton_5->text() != "Color")
+    {
+		params->setTerrainFirstColor(ui->pushButton_5->text().toUtf8().constData());
+    }
+	if(ui->pushButton_4->text() != "Color")
+    {
+		params->setTerrainSecondColor(ui->pushButton_4->text().toUtf8().constData());
+    }
+
+	if(ui->pushButton_7->text() != "Color")
+    {
+		params->setMountainFirstColor(ui->pushButton_7->text().toUtf8().constData());
+    }
+	if(ui->pushButton_6->text() != "Color")
+    {
+		params->setMountainSecondColor(ui->pushButton_6->text().toUtf8().constData());
+    }
+
+    //debug messages
+    qDebug() << params->getRadius();
+    qDebug() << params->getWaterFraction();
+    qDebug() << params->getSeed();
+    qDebug() << QString::fromStdString(params->getWaterFirstColor());
+    qDebug() << QString::fromStdString(params->getWaterSecondColor());
+    qDebug() << QString::fromStdString(params->getTerrainFirstColor());
+    qDebug() << QString::fromStdString(params->getTerrainSecondColor());
+    qDebug() << QString::fromStdString(params->getMountainFirstColor());
+    qDebug() << QString::fromStdString(params->getMountainSecondColor());
+
+    for (std::vector<std::pair <float, float> >::const_iterator iter = params->getFrequencyAmplitude().begin(); iter != params->getFrequencyAmplitude().end(); ++iter)
+    {
+        qDebug() << iter->first <<", " << iter->second;
+    }
+ /*   for (std::vector<float>::const_iterator iter = params->getFrequency().begin(); iter != params->getFrequency().end(); ++iter)
+    {
+        qDebug() << "Frequency:" << *iter;
+    }
+    for (std::vector<float>::const_iterator iter = params->getAmplitude().begin(); iter != params->getAmplitude().end(); ++iter)
+    {
+        qDebug() << "Amplitude: " << *iter;
+    }*/
+
+
+    for (std::vector<std::pair <std::string, int> >::const_iterator iter = params->getMeshLocObjAmount().begin(); iter != params->getMeshLocObjAmount().end(); ++iter)
+    {
+        qDebug() << QString::fromStdString(iter->first) <<", " << iter->second;
+    }
+ /*   for (std::vector<std::string>::const_iterator iter = params->getMeshLocations().begin(); iter != params->getMeshLocations().end(); ++iter)
+    {
+        qDebug() << "Mesh path:" << QString::fromStdString(*iter);
+    }
+    for (std::vector<int>::const_iterator iter = params->getObjectAmount().begin(); iter != params->getObjectAmount().end(); ++iter)
+    {
+        qDebug() << "Amount: " << *iter;
+    }*/
 }

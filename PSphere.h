@@ -36,6 +36,8 @@ class PSphere
 public:
 	enum Direction {PSPHERE_GRID_YPLUS, PSPHERE_GRID_YMINUS, PSPHERE_GRID_XPLUS, PSPHERE_GRID_XMINUS};
 
+	enum MapType {MAP_EQUIRECTANGULAR, MAP_CUBE};
+
 	void loadToBuffers(const std::string &meshName, const std::string &textureName);
 
 	void loadMeshFile(const std::string &path, const std::string &meshName);
@@ -74,11 +76,13 @@ public:
 
 	void setCollisionManager(CollisionManager	*CDM);
 
-	void exportEquirectangularMap(unsigned short width, unsigned short height, string fileName);
+	bool exportMap(unsigned short width, unsigned short height, string fileName, MapType type);
 
-	unsigned char *exportEquirectangularMap(unsigned short width, unsigned short height);
+	unsigned char *exportMap(unsigned short width, unsigned short height, MapType type);
 
-	PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter);
+	PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, Ogre::uint16 textureWidth, Ogre::uint16 textureHeight, ResourceParameter resourceParameter);
+
+	ResourceParameter *getParameters();
 
 	~PSphere();
 
@@ -92,6 +96,8 @@ private:
 	Ogre::Real			radius;
 	Ogre::Real			seaHeight;
 	unsigned char		*surfaceTexture;
+	unsigned short		surfaceTextureWidth;
+	unsigned short		surfaceTextureHeight;
 	unsigned char		*exportImage;
 	Ogre::MeshPtr		mesh;
 	Ogre::Vector3		observer;
@@ -130,8 +136,12 @@ private:
 
 	Ogre::Vector3 calculateSphereCoordsFromTexCoords(Ogre::Vector2 *texCoord);
 
-	Ogre::Real heightNoise(vector<float> amplitude,
-						   vector<float> frequency, Ogre::Vector3 Point);
+	Ogre::Real heightNoise(vector<float> &amplitude,
+						   vector<float> &frequency, Ogre::Vector3 Point);
+
+	Ogre::ColourValue generatePixel(Ogre::Real height,
+									   Ogre::ColourValue water1st, Ogre::ColourValue water2nd, Ogre::ColourValue terrain1st,
+									   Ogre::ColourValue terrain2nd, Ogre::ColourValue mountain1st, Ogre::ColourValue mountain2nd);
 
 	void generateImage(unsigned short width, unsigned short height, unsigned char *image);
 

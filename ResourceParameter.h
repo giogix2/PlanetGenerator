@@ -36,7 +36,7 @@ namespace std
 		ResourceParameter(void);
         ResourceParameter(string terrainFirstColor,string terrainSecondColor, string waterFirstColor
 			, string waterSecondColor, string mountainFirstColor, string mountainSecondColor
-            , float waterFraction, float radius, int seed, string frequencyAmplitude, vector <pair <string, int> > p_meshLocObjAmount);
+            , float waterFraction, float radius, unsigned int seed, string frequencyAmplitude, vector <pair <string, int> > p_meshLocObjAmount);
 		~ResourceParameter(void);
 		void getTerrainFirstColor(unsigned char &red, unsigned char &green, unsigned char &blue);
 		void getTerrainSecondColor(unsigned char &red, unsigned char &green, unsigned char &blue);
@@ -52,7 +52,7 @@ namespace std
 		string getMountainSecondColor(void);
 		float getWaterFraction(void);
 		float getRadius(void);
-		int getSeed(void);
+        unsigned int getSeed(void);
 		vector <float>& getFrequency(void);
 		vector <float>& getAmplitude(void);
 		vector<pair <float, float> >& getFrequencyAmplitude(void);
@@ -67,7 +67,7 @@ namespace std
 		void setMountainSecondColor(string);
 		void setWaterFraction(float);
 		void setRadius(float);
-		void setSeed(int);
+        void setSeed(unsigned int);
 		void setFrequencyAmplitude(string NewfrequencyAmplitude, char delimiter);
 		void setFrequencyAmplitude(float p_frequency, float p_amplitude);
         void setMeshLocation(string p_location);
@@ -84,7 +84,7 @@ namespace std
 		string mountainSecondColor;
 		float waterFraction;
 		float radius;
-		int seed;
+        unsigned int seed;
 		vector <float> frequency;
 		vector <float> amplitude;
 		vector <pair <float, float> > frequencyAmplitude;

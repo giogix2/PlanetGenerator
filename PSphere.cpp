@@ -41,20 +41,19 @@
 
 using namespace std;
 
-// Let's set texture dimensions this way for a time being
-#define TEX_WIDTH 1024
-#define TEX_HEIGHT 512
 #define UP 1
 #define DOWN 2
 #define LEFT 3
 #define RIGHT 4
 
-PSphere::PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter){
+PSphere::PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, Ogre::uint16 textureWidth, Ogre::uint16 textureHeight, ResourceParameter resourceParameter){
 	vertexes =	NULL;
 	vNorms =	NULL;
 	texCoords =	NULL;
 	indexes =	NULL;
-	surfaceTexture =		NULL;
+	surfaceTexture =NULL;
+	surfaceTextureWidth = textureWidth;
+	surfaceTextureHeight = textureHeight;
 	exportImage =	NULL;
 	observer =	Ogre::Vector3(0.0f, 0.0f, 0.0f);
 
@@ -76,6 +75,13 @@ PSphere::~PSphere()
 	delete faceYP;
 	delete faceZM;
 	delete faceZP;
+
+	delete gridXM;
+	delete gridXP;
+	delete gridYM;
+	delete gridYP;
+	delete gridZM;
+	delete gridZP;
 }
 
 /* Set position for the observer. This must be position vector in modelspace,
@@ -85,8 +91,8 @@ void PSphere::setObserverPosition(Ogre::Vector3 position)
 	observer = position;
 }
 
-Ogre::Real PSphere::heightNoise(vector<float> amplitude,
-							   vector<float> frequency, Ogre::Vector3 Point)
+Ogre::Real PSphere::heightNoise(vector<float> &amplitude,
+							   vector<float> &frequency, Ogre::Vector3 Point)
 {
 	Ogre::uint32 i;
 	Ogre::Real height = 0.0f;
@@ -209,6 +215,46 @@ Ogre::Real PSphere::getRadius()
 	return radius;
 }
 
+// Returns colour-values for one pixel
+Ogre::ColourValue PSphere::generatePixel(Ogre::Real height,
+								   Ogre::ColourValue water1st,
+								   Ogre::ColourValue water2nd,
+								   Ogre::ColourValue terrain1st,
+								   Ogre::ColourValue terrain2nd,
+								   Ogre::ColourValue mountain1st,
+								   Ogre::ColourValue mountain2nd)
+{
+	float const multiplyer = 0.6;
+	Ogre::ColourValue ColorOut;
+
+	// Set sea-colors
+	if(height < seaHeight)
+	{
+		/* FIXME: Unsigned char underflow can happen here, but probably affects
+		 * output visibly only when water1st-colors are around zero. */
+		ColorOut =  water1st + (water2nd-water1st)*(height-minimumHeight)/(seaHeight-minimumHeight);
+	}
+	else
+	{
+		// Set low (terrain) elevations
+		ColorOut =  terrain1st + (terrain2nd-terrain1st)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
+
+		// Set highest elevations
+		if(height > maximumHeight * multiplyer)
+		{
+			ColorOut = mountain2nd - (mountain2nd-mountain1st)*(maximumHeight-height)/(maximumHeight*(1.0f-multiplyer));
+			/* to avoid unsigned char overflow later on. HeightMaps are
+			 * approximations of simplex-noise generated geometry, and can't
+			 * guarantee maximumHeight is really the max value of elevations. */
+			ColorOut.r < 0.0f ? ColorOut.r = 0.0f : (ColorOut.r >= 256.0f ? ColorOut.r = 255.0f : ColorOut.r);
+			ColorOut.g < 0.0f ? ColorOut.g = 0.0f : (ColorOut.g >= 256.0f ? ColorOut.g = 255.0f : ColorOut.g);
+			ColorOut.b < 0.0f ? ColorOut.b = 0.0f : (ColorOut.b >= 256.0f ? ColorOut.b = 255.0f : ColorOut.b);
+		}
+	}
+
+	return ColorOut;
+}
+
 /* Generates surface-texturemap using noise-generated height differences.
  * Expects pointer to be already correctly allocated. */
 void PSphere::generateImage(unsigned short textureWidth, unsigned short textureHeight, unsigned char *image)
@@ -217,44 +263,45 @@ void PSphere::generateImage(unsigned short textureWidth, unsigned short textureH
 	Ogre::Real latitude, longitude;
 	Ogre::Real height;
 	Ogre::uint32 x, y;
-	Ogre::uint8 red, green, blue;
+	Ogre::ColourValue water1st, water2nd, terrain1st, terrain2nd, mountain1st, mountain2nd, Pixel;
+	unsigned char red, green, blue;
 	vector <float> frequency = RParameter.getFrequency();
 	vector <float> amplitude = RParameter.getAmplitude();
-	float const multiplyer = 0.6;
 
-	unsigned char waterFirstColorblue = 0;
-	unsigned char waterFirstColorgreen = 0;
-	unsigned char waterFirstColorred = 0;
-	unsigned char waterSecondColorblue = 0;
-	unsigned char waterSecondColorgreen = 0;
-	unsigned char waterSecondColorred = 0;
-	RParameter.getWaterFirstColor(waterFirstColorred,waterFirstColorgreen,waterFirstColorblue);
-	RParameter.getWaterSecondColor(waterSecondColorred,waterSecondColorgreen,waterSecondColorblue);
 
-	unsigned char terrainFirstColorblue = 0;
-	unsigned char terrainFirstColorgreen = 0;
-	unsigned char terrainFirstColorred = 0;
-	unsigned char terrainSecondColorblue = 0;
-	unsigned char terrainSecondColorgreen = 0;
-	unsigned char terrainSecondColorred = 0;
-	RParameter.getTerrainFirstColor(terrainFirstColorred,terrainFirstColorgreen,terrainFirstColorblue);
-	RParameter.getTerrainSecondColor(terrainSecondColorred,terrainSecondColorgreen,terrainSecondColorblue);
+	RParameter.getWaterFirstColor(red, green, blue);
+	water1st.r = red;
+	water1st.g = green;
+	water1st.b = blue;
+	RParameter.getWaterSecondColor(red, green, blue);
+	water2nd.r = red;
+	water2nd.g = green;
+	water2nd.b = blue;
 
-	unsigned char mountainFirstColorblue = 0;
-	unsigned char mountainFirstColorgreen = 0;
-	unsigned char mountainFirstColorred = 0;
-	unsigned char mountainSecondColorblue = 0;
-	unsigned char mountainSecondColorgreen = 0;
-	unsigned char mountainSecondColorred = 0;
-	RParameter.getMountainFirstColor(mountainFirstColorred,mountainFirstColorgreen,mountainFirstColorblue);
-	RParameter.getMountainSecondColor(mountainSecondColorred,mountainSecondColorgreen,mountainSecondColorblue);
+	RParameter.getTerrainFirstColor(red, green, blue);
+	terrain1st.r = red;
+	terrain1st.g = green;
+	terrain1st.b = blue;
+	RParameter.getTerrainSecondColor(red, green, blue);
+	terrain2nd.r = red;
+	terrain2nd.g = green;
+	terrain2nd.b = blue;
+
+	RParameter.getMountainFirstColor(red, green, blue);
+	mountain1st.r = red;
+	mountain1st.g = green;
+	mountain1st.b = blue;
+	RParameter.getMountainSecondColor(red, green, blue);
+	mountain2nd.r = red;
+	mountain2nd.g = green;
+	mountain2nd.b = blue;
 
 	for(y=0; y < textureHeight; y++)
 	{
 		for(x=0; x < textureWidth; x++)
 		{
 			longitude = (Ogre::Real(x)+0.5f)/textureWidth*360.0f;
-			latitude = (90.0f-0.5f/textureHeight) - (Ogre::Real(y)+0.5f)/textureHeight*180.0f;
+			latitude = 90.0f - (Ogre::Real(y)+0.5f)/textureHeight*180.0f;
 
 			// Get a point that corresponds to a given pixel
 			spherePoint = convertSphericalToCartesian(latitude, longitude);
@@ -262,39 +309,17 @@ void PSphere::generateImage(unsigned short textureWidth, unsigned short textureH
 			// Get height of a point
 			height = heightNoise(amplitude, frequency, spherePoint + randomTranslate);
 
-			// Set sea-colors, deeper part is slighly deeper blue.
-			if(height < seaHeight)
-			{
-				red =  waterFirstColorred + (waterSecondColorred-waterFirstColorred)*(height-minimumHeight)/(seaHeight-minimumHeight);
-				green =  waterFirstColorgreen + (waterSecondColorgreen-waterFirstColorgreen)*(height-minimumHeight)/(seaHeight-minimumHeight);
-				blue =  waterFirstColorblue + (waterSecondColorblue-waterFirstColorblue)*(height-minimumHeight)/(seaHeight-minimumHeight);
-			}
-			else
-			{
-				// Set low elevations green and higher brown
-				red =  terrainFirstColorred + (terrainSecondColorred-terrainFirstColorred)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
-				green =  terrainFirstColorgreen + (terrainSecondColorgreen-terrainFirstColorgreen)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
-				blue =  terrainFirstColorblue + (terrainSecondColorblue-terrainFirstColorblue)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
-				// Highest elevations are bright grey and go toward white
-				if(height > maximumHeight * multiplyer)
-				{
-					// to avoid unsigned char overflow
-					float substractred = (float)mountainSecondColorred - (mountainSecondColorred-mountainFirstColorred)*(maximumHeight-height)/(maximumHeight);
-					float substractgreen = (float)mountainSecondColorgreen - (mountainSecondColorgreen-mountainFirstColorgreen)*(maximumHeight-height)/(maximumHeight);
-					float substractblue = (float)mountainSecondColorblue - (mountainSecondColorblue-mountainFirstColorblue)*(maximumHeight-height)/(maximumHeight);
-					substractred < 0.0f ? substractred = 0.0f : (substractred >= 256.0f ? substractred = 255.0f : substractred);
-					substractgreen < 0.0f ? substractgreen = 0.0f : (substractgreen >= 256.0f ? substractgreen = 255.0f : substractgreen);
-					substractblue < 0.0f ? substractblue = 0.0f : (substractblue >= 256.0f ? substractblue = 255.0f : substractblue);
-					red =  substractred;
-					green =  substractgreen;
-					blue =  substractblue;
-				}
-			}
+			Pixel = generatePixel(height,
+						  water1st,
+						  water2nd,
+						  terrain1st,
+						  terrain2nd,
+						  mountain1st,
+						  mountain2nd);
 
-			// Write pixel to image
-			image[((textureHeight-1-y)*textureWidth+x)*3] = red;
-			image[((textureHeight-1-y)*textureWidth+x)*3+1] = green;
-			image[((textureHeight-1-y)*textureWidth+x)*3+2] = blue;
+			image[((textureHeight-1-y)*textureWidth+x)*3] = Pixel.r;
+			image[((textureHeight-1-y)*textureWidth+x)*3+1] = Pixel.g;
+			image[((textureHeight-1-y)*textureWidth+x)*3+2] = Pixel.b;
 		}
 	}
 }
@@ -411,6 +436,19 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
 		iters = 3;
 		std::cout << "Sphere needs atleast 3 iters" << std::endl;
 	}
+	// Creating 2D texture with zeros would fail when creating texture with Ogre
+	if (surfaceTextureWidth == 0)
+	{
+		surfaceTextureWidth = 1;
+	}
+	if (surfaceTextureHeight == 0)
+	{
+		surfaceTextureHeight = 1;
+	}
+	/* Make grid big enough, so that so that grid-depending code doesn't make
+	 * anything nasty. Probably need to be tested. */
+	if (gridSize < 2)
+		gridSize = 2;
 
 	radius = resourceParameter.getRadius();
 
@@ -491,8 +529,8 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
 
 	calculateSeaLevel(minimumHeight, maximumHeight, waterFraction);
 
-	surfaceTexture = new unsigned char[TEX_WIDTH*TEX_HEIGHT*3];
-	generateImage(TEX_WIDTH, TEX_HEIGHT, surfaceTexture);//take longtime
+	surfaceTexture = new unsigned char[surfaceTextureWidth*surfaceTextureHeight*3];
+	generateImage(surfaceTextureWidth, surfaceTextureHeight, surfaceTexture);//take longtime
 
 	// Requires variable seaHeight that is set by calculateSeaLevel
 	setGridLandInfo(gridYP);
@@ -634,24 +672,24 @@ void PSphere::loadToBuffers(const std::string &meshName, const std::string &text
 	// Texture stuff
 	Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton()
 			.createManual(textureName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-						  Ogre::TEX_TYPE_2D, TEX_WIDTH, TEX_HEIGHT, 0, Ogre::PF_R8G8B8, Ogre:: TU_DYNAMIC);
+						  Ogre::TEX_TYPE_2D, surfaceTextureWidth, surfaceTextureHeight, 0, Ogre::PF_R8G8B8, Ogre:: TU_DYNAMIC);
 	Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
 	pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
 
 	const Ogre::PixelBox &pixelBox = pixelBuffer->getCurrentLock();
 	Ogre::uint8 *exteriorTexture = static_cast<Ogre::uint8*>(pixelBox.data);
 
-	for(i=0; i < TEX_HEIGHT; i++)
+	for(i=0; i < surfaceTextureHeight; i++)
 	{
-		for(j=0; j < TEX_WIDTH; j++)
+		for(j=0; j < surfaceTextureWidth; j++)
 		{
 			/* FIXME: Might be unnecessary memory copy, but was convenient. */
 			/* TextureManager did not honor Ogre::PF_R8G8B8, so need to swap red and blue,
 			 * plus hardware wants alfa channel values too */
-			exteriorTexture[(i*TEX_WIDTH+j)*4]   = surfaceTexture[(i*TEX_WIDTH+j)*3+2];   // blue
-			exteriorTexture[(i*TEX_WIDTH+j)*4+1] = surfaceTexture[(i*TEX_WIDTH+j)*3+1];   // green
-			exteriorTexture[(i*TEX_WIDTH+j)*4+2] = surfaceTexture[(i*TEX_WIDTH+j)*3];     // red
-			exteriorTexture[(i*TEX_WIDTH+j)*4+3] = 255;                          // Alfa
+			exteriorTexture[(i*surfaceTextureWidth+j)*4]   = surfaceTexture[(i*surfaceTextureWidth+j)*3+2];   // blue
+			exteriorTexture[(i*surfaceTextureWidth+j)*4+1] = surfaceTexture[(i*surfaceTextureWidth+j)*3+1];   // green
+			exteriorTexture[(i*surfaceTextureWidth+j)*4+2] = surfaceTexture[(i*surfaceTextureWidth+j)*3];     // red
+			exteriorTexture[(i*surfaceTextureWidth+j)*4+3] = 255;                          // Alfa
 		}
 	}
 
@@ -1011,26 +1049,169 @@ void PSphere::setCollisionManager(CollisionManager	*CDM)
 	CollisionDetectionManager = CDM;
 }
 
-unsigned char *PSphere::exportEquirectangularMap(unsigned short width, unsigned short height) {
+/* Generates a map and gives pointer to array that has rgb-image
+ * information. Then MapType is MAP_CUBE, ignores height variable.
+ * With wrong type, returns NULL-pointer. */
+unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, MapType type) {
 
 	// Check if exportImage is already allocated
 	if (exportImage != NULL)
 		delete[] exportImage;
-	exportImage = new unsigned char[width*height*3];
 
-	// Generates the map. exportImage points to it.
-	generateImage(width, height, exportImage);
+	if (type == MAP_EQUIRECTANGULAR)
+	{
+		exportImage = new unsigned char[width*height*3];
+
+		// Generates the map. exportImage points to it.
+		generateImage(width, height, exportImage);
+	}
+	else if (type == MAP_CUBE)
+	{
+		unsigned short x, y, i, gSize;
+		unsigned char red, green, blue;
+		Ogre::Real elev;
+		Grid *temp[6];
+		Ogre::ColourValue water1st, water2nd, Output;
+
+		RParameter.getWaterFirstColor(red, green, blue);
+		water1st.r = red;
+		water1st.g = green;
+		water1st.b = blue;
+		RParameter.getWaterSecondColor(red, green, blue);
+		water2nd.r = red;
+		water2nd.g = green;
+		water2nd.b = blue;
+
+		Ogre::ColourValue terrain1st, terrain2nd;
+
+		RParameter.getTerrainFirstColor(red, green, blue);
+		terrain1st.r = red;
+		terrain1st.g = green;
+		terrain1st.b = blue;
+		RParameter.getTerrainSecondColor(red, green, blue);
+		terrain2nd.r = red;
+		terrain2nd.g = green;
+		terrain2nd.b = blue;
+
+		Ogre::ColourValue mountain1st, mountain2nd;
+
+		RParameter.getMountainFirstColor(red, green, blue);
+		mountain1st.r = red;
+		mountain1st.g = green;
+		mountain1st.b = blue;
+		RParameter.getMountainSecondColor(red, green, blue);
+		mountain2nd.r = red;
+		mountain2nd.g = green;
+		mountain2nd.b = blue;
+
+		exportImage = new unsigned char[width*(width/4*3)*3];
+
+		/* Initialize memory. Silences valgrind warning that happens because we
+		 * don't set pixel values for every pixel in cubemap, but FreeImage
+		 * reads uninitialized values when saving the image. */
+		memset(exportImage, 0, width*(width/4*3)*3);
+
+		gSize = width/4;
+		temp[0] = new Grid(gSize, gridYP->getOrientation());
+		temp[1] = new Grid(gSize, gridXM->getOrientation());
+		temp[2] = new Grid(gSize, gridYM->getOrientation());
+		temp[3] = new Grid(gSize, gridXP->getOrientation());
+		temp[4] = new Grid(gSize, gridZP->getOrientation());
+		temp[5] = new Grid(gSize, gridZM->getOrientation());
+
+		// 4 equatorial tiles
+		for(i=0; i < 4; i++)
+		{
+			for(y=0; y < gSize; y++)
+			{
+				for(x=0; x < gSize; x++)
+				{
+					elev = heightNoise(RParameter.getAmplitude(), RParameter.getFrequency(), temp[i]->projectToSphere(x, y)+randomTranslate);
+					Output = generatePixel(elev,
+								  water1st,
+								  water2nd,
+								  terrain1st,
+								  terrain2nd,
+								  mountain1st,
+								  mountain2nd);
+
+					exportImage[((gSize+y)*width+x+i*gSize)*3] = Output.r;
+					exportImage[((gSize+y)*width+x+i*gSize)*3+1] = Output.g;
+					exportImage[((gSize+y)*width+x+i*gSize)*3+2] = Output.b;
+				}
+			}
+		}
+		// +Z tile
+		for(y=0; y < gSize; y++)
+		{
+			for(x=0; x < gSize; x++)
+			{
+				elev = heightNoise(RParameter.getAmplitude(), RParameter.getFrequency(), temp[4]->projectToSphere(x, y)+randomTranslate);
+				Output = generatePixel(elev,
+							  water1st,
+							  water2nd,
+							  terrain1st,
+							  terrain2nd,
+							  mountain1st,
+							  mountain2nd);
+
+				exportImage[((gSize*2+y)*width+x)*3] = Output.r;
+				exportImage[((gSize*2+y)*width+x)*3+1] = Output.g;
+				exportImage[((gSize*2+y)*width+x)*3+2] = Output.b;
+			}
+		}
+		// -Z tile
+		for(y=0; y < gSize; y++)
+		{
+			for(x=0; x < gSize; x++)
+			{
+				elev = heightNoise(RParameter.getAmplitude(), RParameter.getFrequency(), temp[5]->projectToSphere(x, y)+randomTranslate);
+				Output = generatePixel(elev,
+							  water1st,
+							  water2nd,
+							  terrain1st,
+							  terrain2nd,
+							  mountain1st,
+							  mountain2nd);
+
+				exportImage[((y)*width+x)*3] = Output.r;
+				exportImage[((y)*width+x)*3+1] = Output.g;
+				exportImage[((y)*width+x)*3+2] = Output.b;
+			}
+		}
+		// Delete temporary grids
+		for(i=0; i < 6; i++)
+		{
+			delete temp[i];
+		}
+	}
+	else
+	{
+		std::cerr << "Type not recognized!" << std::endl;
+		// memory was deleted.
+		exportImage = NULL;
+	}
 
 	return exportImage;
 }
 
-void PSphere::exportEquirectangularMap(unsigned short width, unsigned short height, std::string fileName) {
+/* Saves map to the given filename. With MapType MAP_CUBE ignores height-variable */
+bool PSphere::exportMap(unsigned short width, unsigned short height, std::string fileName, MapType type) {
 	RGBQUAD color;
-//	unsigned char *exportImage;
 
 	/* Create map to memory location pointed by exportImage.
 	 * It is class private variable. */
-	exportEquirectangularMap(width, height);
+	exportMap(width, height, type);
+
+	if (exportImage == NULL)
+	{
+		std::cerr << "Map not created!" << std::endl;
+		return false;
+	}
+
+	// Ignore given height with Cubemap
+	if (type == MAP_CUBE)
+		height = width/4*3;
 
 	// Use freeimage to save the map as a file
 	FreeImage_Initialise();
@@ -1043,9 +1224,19 @@ void PSphere::exportEquirectangularMap(unsigned short width, unsigned short heig
 			FreeImage_SetPixelColor(bitmap, i, j, &color);
 		}
 	}
-	FreeImage_Save(FIF_PNG, bitmap, fileName.c_str(), 0);
+	if ( !FreeImage_Save(FIF_PNG, bitmap, fileName.c_str(), 0) )
+	{
+		std::cerr << "Saving image " << fileName << " failed!" << std::endl;
 
+		FreeImage_Unload(bitmap);
+		FreeImage_DeInitialise();
+
+		return false;
+	}
+	FreeImage_Unload(bitmap);
 	FreeImage_DeInitialise();
+
+	return true;
 }
 
 void PSphere::moveObject(const std::string &objectName, int direction, float pace) {
@@ -1185,4 +1376,8 @@ void PSphere::moveObject(const std::string &objectName, int direction, float pac
 			}
 		}
 	}
+}
+
+ResourceParameter *PSphere::getParameters() {
+	return &RParameter;
 }
