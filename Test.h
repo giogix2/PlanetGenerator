@@ -19,47 +19,24 @@
  * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE. */
+#pragma once
+#ifndef TEST_H
+#define TEST_H
 
-
-
-#include <iostream>
-#include <exception>
-
-#include "initOgre.h"
+#include <assert.h>
 #include "PSphere.h"
-#include "Common.h"
-#include "Test.h"
-#include "testui2/mainwindow.h"
-#include <QApplication>
-#include "ResourceParameter.h"
+
+/* This is unit test.
+ * To run the test, you need to launch the application
+ * in consle with a argument "t".*/
+
+void testAll();
+bool initTest(PSphere **Sphere);
+bool test_PSphere_getRadius(PSphere *Sphere);
+bool test_PSphere_checkAccessibility(PSphere *Sphere);
+bool test_PSphere_getSurfaceHeight(PSphere *Sphere);
 
 
-using namespace std;
 
-#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-#define WIN32_LEAN_AND_MEAN
-#include "windows.h"
+
 #endif
-
-int main(int argc, char *argv[])
-{
-	/*std::cout << "argc=" << argc << endl;
-	for(int i=0; i!=argc;i++)
-	{
-		cout << "argv[" << i << "]:" << argv[i] << endl;
-	}*/
-	if(argc==1) //no arguments, run planet generator
-	{
-		QApplication a(argc, argv);
-		MainWindow w;
-		w.show();
-		a.exec();
-	}else if(argc==2 && (std::strcmp(argv[1],"t")==0) )
-	{
-		cout << "Testing Mode" << endl;
-		testAll();
-		cout << "Test Ended." << endl;
-	}
-
-	return 0;
-}
