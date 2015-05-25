@@ -94,6 +94,7 @@ set(HDRS
     ../Common.h
     ../ResourceParameter.h
     ../ObjectInfo.h
+    ../Test.h
     ../testui2/mainwindow.h
     ../testui2/freqampdialog.h
     ../testui2/meshdialog.h
@@ -111,6 +112,7 @@ set(SRCS
     ../Common.cpp
     ../ResourceParameter.cpp
     ../ObjectInfo.cpp
+    ../Test.cpp
     ../testui2/mainwindow.cpp
     ../testui2/freqampdialog.cpp
     ../testui2/meshdialog.cpp
