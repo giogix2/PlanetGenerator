@@ -52,24 +52,22 @@ HeightMap::~HeightMap()
 
 void HeightMap::getHistogram(unsigned int histogram[], unsigned short brackets)
 {
-	unsigned int x, y, i;
-	/* Subtract brackets with 1.5 to make sure iterator can't go over 99.
-	 * Add assert to catch possible overflows in the future. */
-	float divider = static_cast<float>(brackets) - 1.5f;
+	unsigned int x, y, slot;
+	float mult;
 
-	for(x=0; x < gridSize; x++)
+	for(y=0; y < gridSize; y++)
 	{
-		for(y=0; y < gridSize; y++)
+		for(x=0; x < gridSize; x++)
 		{
-			// Any better ways to create histograms?
-			i = 0;
-			while(height[y][x] > (i/divider*(maxHeight-minHeight) + minHeight))
-				i++;
-			// Check overflow with assert
-			assert(i < brackets);
-			histogram[i] += 1;
+			// Calculate histogram-slot for a given height
+			mult = static_cast<float>(brackets-1) + 0.5f;
+			slot = static_cast<unsigned int>((height[y][x]-minHeight) / (maxHeight-minHeight) * mult);
+
+			// Let's be sure
+			assert(slot < brackets);
+			histogram[slot] += 1;
 		}
-   }
+	}
 }
 
 void HeightMap::getMinMax(float &min, float &max)
