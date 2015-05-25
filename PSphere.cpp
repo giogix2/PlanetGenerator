@@ -1196,12 +1196,18 @@ unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, M
 }
 
 /* Saves map to the given filename. With MapType MAP_CUBE ignores height-variable */
-void PSphere::exportMap(unsigned short width, unsigned short height, std::string fileName, MapType type) {
+bool PSphere::exportMap(unsigned short width, unsigned short height, std::string fileName, MapType type) {
 	RGBQUAD color;
 
 	/* Create map to memory location pointed by exportImage.
 	 * It is class private variable. */
 	exportMap(width, height, type);
+
+	if (exportImage == NULL)
+	{
+		std::cerr << "Map not created!" << std::endl;
+		return false;
+	}
 
 	// Ignore given height with Cubemap
 	if (type == MAP_CUBE)
@@ -1218,9 +1224,19 @@ void PSphere::exportMap(unsigned short width, unsigned short height, std::string
 			FreeImage_SetPixelColor(bitmap, i, j, &color);
 		}
 	}
-	FreeImage_Save(FIF_PNG, bitmap, fileName.c_str(), 0);
+	if ( !FreeImage_Save(FIF_PNG, bitmap, fileName.c_str(), 0) )
+	{
+		std::cerr << "Saving image " << fileName << " failed!" << std::endl;
+
+		FreeImage_Unload(bitmap);
+		FreeImage_DeInitialise();
+
+		return false;
+	}
 	FreeImage_Unload(bitmap);
 	FreeImage_DeInitialise();
+
+	return true;
 }
 
 void PSphere::moveObject(const std::string &objectName, int direction, float pace) {

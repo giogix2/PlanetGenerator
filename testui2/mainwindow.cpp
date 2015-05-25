@@ -29,6 +29,7 @@
 #include <QVectorIterator>
 #include <QtMath>
 #include <QFileDialog>
+#include <QMessageBox>
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -236,6 +237,7 @@ void MainWindow::on_pushButton_10_clicked()
 
     unsigned short width =  values[0].toUShort();
     unsigned short height =  values[1].toUShort();
+	bool returnValue = false;
 
     qDebug() << "width: " << width << ", height: " << height ;
 
@@ -245,16 +247,28 @@ void MainWindow::on_pushButton_10_clicked()
     //push to pshere export-method with filename + resolution
     if(ui->comboBox_2->currentIndex() == 0)
     {
-        mySphere->exportMap(width, height, filename.toStdString(), PSphere::MAP_EQUIRECTANGULAR);
+		returnValue = mySphere->exportMap(width, height, filename.toStdString(), PSphere::MAP_EQUIRECTANGULAR);
     }
     else if(ui->comboBox_2->currentIndex() == 1)
     {
-        mySphere->exportMap(width, height, filename.toStdString(), PSphere::MAP_CUBE);
+		returnValue = mySphere->exportMap(width, height, filename.toStdString(), PSphere::MAP_CUBE);
     }
     else
     {
         qDebug() << "Something went wrong in saving image";
     }
+
+	if (!returnValue)
+	{
+		QMessageBox errorBox;
+
+		errorBox.setWindowTitle("Error");
+		errorBox.setText("Saving image failed!");
+		errorBox.setStandardButtons(QMessageBox::Ok);
+		errorBox.exec();
+
+		qDebug() << "Function exportMap returned false";
+	}
 
     delete mySphere;
 }

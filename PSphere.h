@@ -76,7 +76,7 @@ public:
 
 	void setCollisionManager(CollisionManager	*CDM);
 
-	void exportMap(unsigned short width, unsigned short height, string fileName, MapType type);
+	bool exportMap(unsigned short width, unsigned short height, string fileName, MapType type);
 
 	unsigned char *exportMap(unsigned short width, unsigned short height, MapType type);
 
