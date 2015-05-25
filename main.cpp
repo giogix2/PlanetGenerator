@@ -28,9 +28,11 @@
 #include "initOgre.h"
 #include "PSphere.h"
 #include "Common.h"
+#include "Test.h"
 #include "testui2/mainwindow.h"
 #include <QApplication>
 #include "ResourceParameter.h"
+
 
 using namespace std;
 
@@ -41,20 +43,21 @@ using namespace std;
 
 int main(int argc, char *argv[])
 {
-    QApplication a(argc, argv);
-    MainWindow w;
-    w.show();
-
-/*	vector<float> frequency;
-	frequency.push_back(0.4f);
-	frequency.push_back(0.06666f);
-	vector <float> amplitude;
-	amplitude.push_back(0.02f);
-	amplitude.push_back(0.006666f);
-
-	ResourceParameter resourceParameter = ResourceParameter((string)"#00FF00",(string)"#FACD00",(string)"#32CDFF"
-		,(string)"#64FFFF",(string)"#B4B4B4",(string)"#FFFFFF",0.6f,7.5f,60,frequency,amplitude);*/
-	a.exec();
+	/*std::cout << "argc=" << argc << endl;
+	for(int i=0; i!=argc;i++)
+	{
+		cout << "argv[" << i << "]:" << argv[i] << endl;
+	}*/
+	if(argc==1) //no arguments, run planet generator
+	{
+		QApplication a(argc, argv);
+		MainWindow w;
+		w.show();
+		a.exec();
+	}else if(argc==2 && (std::strcmp(argv[1],"t")==0) )
+	{
+		cout << "Testing Mode" << endl;
+	}
 
 	return 0;
 }

@@ -425,6 +425,7 @@ bool GeneratorFrameListener::processUnbufferedKeyInput(const Ogre::FrameEvent& e
 		}
 		if(name!=""){
 			mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Move selected object: "+selectedObject->getObjectName()+" .");
+			//mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption( Ogre::StringConverter::toString( pSphere->getObjects()->at(0).getPosition().z ) +" Move selected object: "+selectedObject->getObjectName()+" .");
 			pSphere->moveObject(name, 1, 0.5);
 		}
 	}
@@ -441,44 +442,45 @@ bool GeneratorFrameListener::processUnbufferedKeyInput(const Ogre::FrameEvent& e
 		}
 		if(name!=""){
 			mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Move selected object: "+selectedObject->getObjectName()+" .");
+			//mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption(  Ogre::StringConverter::toString(pSphere->getObjects()->at(0).getPosition().z) +" Move selected object: "+selectedObject->getObjectName()+" .");
 			pSphere->moveObject(name, 2, 0.5);
 		}
 	}
 	//move selected object to left
-	//if (mKeyboard->isKeyDown(OIS::KC_J))
-	//{
-	//	
-	//	if(selectedObject==NULL)
-	//		return true;
-	//	Ogre::String name=selectedObject->getObjectName();
-	//	//Unmovable object
-	//	if(name == "CK7"){
-	//		mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Selected object: "+selectedObject->getObjectName()+" is not movable.");
-	//		return true;
-	//	}
-	//	if(name!=""){
-	//		mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Move selected object: "+selectedObject->getObjectName()+" .");
-	//		//mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption(selectedObject->getPosition()."Move selected object: "+selectedObject->getObjectName()+" .");
-	//		pSphere->moveObject(name, 3, 0.5);
-	//	}
-	//	//pSphere->moveObject("Ramiro", 3, 0.5);
-	//}
+	if (mKeyboard->isKeyDown(OIS::KC_J))
+	{
+		
+		if(selectedObject==NULL)
+			return true;
+		Ogre::String name=selectedObject->getObjectName();
+		//Unmovable object
+		if(name == "CK7"){
+			mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Selected object: "+selectedObject->getObjectName()+" is not movable.");
+			return true;
+		}
+		if(name!=""){
+			mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption( "Move selected object: "+selectedObject->getObjectName()+" .");
+			//mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption( Ogre::StringConverter::toString( pSphere->getObjects()->at(0).getPosition().z) +" Move selected object: "+selectedObject->getObjectName()+" .");
+			pSphere->moveObject(name, 3, 0.5);
+		}
+		//pSphere->moveObject("Ramiro", 3, 0.5);
+	}
 	////move selected object to right
-	//if (mKeyboard->isKeyDown(OIS::KC_L) )
-	//{
-	//	if(selectedObject==NULL)
-	//		return true;
-	//	Ogre::String name=selectedObject->getObjectName();
-	//	//Unmovable object
-	//	if(name == "CK7"){
-	//		mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Selected object: "+selectedObject->getObjectName()+" is not movable.");
-	//		return true;
-	//	}
-	//	if(name!=""){
-	//		mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Move selected object: "+selectedObject->getObjectName()+" .");
-	//		pSphere->moveObject(name, 4, 0.5);
-	//	}
-	//}
+	if (mKeyboard->isKeyDown(OIS::KC_L) )
+	{
+		if(selectedObject==NULL)
+			return true;
+		Ogre::String name=selectedObject->getObjectName();
+		//Unmovable object
+		if(name == "CK7"){
+			mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Selected object: "+selectedObject->getObjectName()+" is not movable.");
+			return true;
+		}
+		if(name!=""){
+			mInformationOverlay->getChild("InformationPanel")->getChild("InformationText")->setCaption("Move selected object: "+selectedObject->getObjectName()+" .");
+			pSphere->moveObject(name, 4, 0.5);
+		}
+	}
 
 	// Return true to continue rendering
 	return true;
