@@ -311,22 +311,22 @@ void MainWindow::addParameters()
         params->setWaterSecondColor(ui->pushButton_3->text().toUtf8().constData());
     }
 
-    if(ui->pushButton_4->text() != "Color")
+	if(ui->pushButton_5->text() != "Color")
     {
-        params->setTerrainFirstColor(ui->pushButton_4->text().toUtf8().constData());
+		params->setTerrainFirstColor(ui->pushButton_5->text().toUtf8().constData());
     }
-    if(ui->pushButton_5->text() != "Color")
+	if(ui->pushButton_4->text() != "Color")
     {
-        params->setTerrainSecondColor(ui->pushButton_5->text().toUtf8().constData());
+		params->setTerrainSecondColor(ui->pushButton_4->text().toUtf8().constData());
     }
 
-    if(ui->pushButton_6->text() != "Color")
+	if(ui->pushButton_7->text() != "Color")
     {
-        params->setMountainFirstColor(ui->pushButton_6->text().toUtf8().constData());
+		params->setMountainFirstColor(ui->pushButton_7->text().toUtf8().constData());
     }
-    if(ui->pushButton_7->text() != "Color")
+	if(ui->pushButton_6->text() != "Color")
     {
-        params->setMountainSecondColor(ui->pushButton_7->text().toUtf8().constData());
+		params->setMountainSecondColor(ui->pushButton_6->text().toUtf8().constData());
     }
 
     //debug messages

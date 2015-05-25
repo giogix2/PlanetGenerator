@@ -139,13 +139,9 @@ private:
 	Ogre::Real heightNoise(vector<float> &amplitude,
 						   vector<float> &frequency, Ogre::Vector3 Point);
 
-	void generatePixel(unsigned short textureHeight, unsigned short stride, unsigned char *image, unsigned short x, unsigned short y, Ogre::Real height,
-									   unsigned char water1stblue, unsigned char water1stgreen, unsigned char water1stred,
-									   unsigned char water2ndblue, unsigned char water2ndgreen, unsigned char water2ndred,
-									   unsigned char terrain1stblue, unsigned char terrain1stgreen, unsigned char terrain1stred,
-									   unsigned char terrain2ndblue, unsigned char terrain2ndgreen, unsigned char terrain2ndred,
-									   unsigned char mountain1stblue, unsigned char mountain1stgreen, unsigned char mountain1stred,
-									   unsigned char mountain2ndblue, unsigned char mountain2ndgreen, unsigned char mountain2ndred);
+	Ogre::ColourValue generatePixel(Ogre::Real height,
+									   Ogre::ColourValue water1st, Ogre::ColourValue water2nd, Ogre::ColourValue terrain1st,
+									   Ogre::ColourValue terrain2nd, Ogre::ColourValue mountain1st, Ogre::ColourValue mountain2nd);
 
 	void generateImage(unsigned short width, unsigned short height, unsigned char *image);
 
