@@ -247,25 +247,13 @@ bool GeneratorFrameListener::processUnbufferedKeyInput(const Ogre::FrameEvent& e
 
 	if(mKeyboard->isKeyDown(OIS::KC_UP) || mKeyboard->isKeyDown(OIS::KC_W) )
 	{
-		Ogre::Entity *tmpE = NULL;
-		Ogre::Vector3 result = Ogre::Vector3::ZERO;
-		float distToColl;
-		Ogre::Vector2 *Vec=new Ogre::Vector2(mMouse->getMouseState().X.abs,mMouse->getMouseState().Y.abs);
-
 		mTranslateVector.z = -pSphere->getRadius()*0.1;
-
 	}
 			
 
 	if(mKeyboard->isKeyDown(OIS::KC_DOWN) || mKeyboard->isKeyDown(OIS::KC_S) )
 	{
-		Ogre::Entity *tmpE = NULL;
-		Ogre::Vector3 result = Ogre::Vector3::ZERO;
-		float distToColl;
-		Ogre::Vector2 *Vec=new Ogre::Vector2(mMouse->getMouseState().X.abs,mMouse->getMouseState().Y.abs);
-
 		mTranslateVector.z = pSphere->getRadius()*0.1;
-		
 	}
 			
 

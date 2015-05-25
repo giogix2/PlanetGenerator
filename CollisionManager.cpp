@@ -25,10 +25,7 @@
 CollisionManager::CollisionManager(std::vector<std::ObjectInfo> *Obs, Ogre::Camera *cam)
 {
 	Objects=Obs;
-	camera=cam;
-	int a=camera->getPosition().x;
-	
-
+	camera=cam;	
 }
 CheckCollisionAnswer CollisionManager::checkCollisionAABB(std::ObjectInfo object)
 {
@@ -61,7 +58,6 @@ CheckCollisionAnswer CollisionManager::checkCameraCollision()
 	answer.amount=0;
 	answer.objectName="camera";
 	answer.collided=false;
-	int a=camera->getPosition().x;
 	Ogre::AxisAlignedBox *spbox = new Ogre::AxisAlignedBox(	camera->getPosition().x-0.1f,camera->getPosition().y-0.1f,camera->getPosition().z-0.1f,
 																camera->getPosition().x+0.1f,camera->getPosition().y+0.1f,camera->getPosition().z+0.1f);
 	for (std::vector<std::ObjectInfo>::iterator iter = Objects->begin(); iter != Objects->end(); iter++)

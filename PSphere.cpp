@@ -190,7 +190,6 @@ Ogre::Real PSphere::getSurfaceHeight(Ogre::Vector3 Position)
 {
 	Ogre::Real height;
 	Ogre::Vector3 direction, surfacePos;
-	Ogre::Real distance;
 
 	// Hardcode these values for now, waiting for parameter class.
 	vector <float> frequency = RParameter.getFrequency();
