@@ -227,50 +227,59 @@ void MainWindow::setMeshes(QString p_path, int p_count)
 
 void MainWindow::on_pushButton_10_clicked()
 {
-    QString filename = QFileDialog::getSaveFileName(this, "Save image", "../", "*.png" )+".png";
-    qDebug() << "save as : " + filename;
-
-    //unsigned short
-    QString string = ui->comboBox->currentText();
-
-    QStringList values = string.split(" x ");
-
-    unsigned short width =  values[0].toUShort();
-    unsigned short height =  values[1].toUShort();
-	bool returnValue = false;
-
-    qDebug() << "width: " << width << ", height: " << height ;
-
-    //create planet
-    addParameters();
-	mySphere = new PSphere(100, 0, 0, 0, *params);
-    //push to pshere export-method with filename + resolution
-    if(ui->comboBox_2->currentIndex() == 0)
-    {
-		returnValue = mySphere->exportMap(width, height, filename.toStdString(), PSphere::MAP_EQUIRECTANGULAR);
-    }
-    else if(ui->comboBox_2->currentIndex() == 1)
-    {
-		returnValue = mySphere->exportMap(width, height, filename.toStdString(), PSphere::MAP_CUBE);
-    }
-    else
-    {
-        qDebug() << "Something went wrong in saving image";
-    }
-
-	if (!returnValue)
+	QString filename = QFileDialog::getSaveFileName(this, "Save image", "../", "*.png" );
+	if (!filename.isEmpty())
 	{
-		QMessageBox errorBox;
+		QString extension = filename.right(4);
 
-		errorBox.setWindowTitle("Error");
-		errorBox.setText("Saving image failed!");
-		errorBox.setStandardButtons(QMessageBox::Ok);
-		errorBox.exec();
+		if (QString::compare(extension, ".png", Qt::CaseInsensitive))
+		{
+			filename.append(".png");
+		}
+		qDebug() << "save as : " + filename;
 
-		qDebug() << "Function exportMap returned false";
+		//unsigned short
+		QString string = ui->comboBox->currentText();
+
+		QStringList values = string.split(" x ");
+
+		unsigned short width =  values[0].toUShort();
+		unsigned short height =  values[1].toUShort();
+		bool returnValue = false;
+
+		qDebug() << "width: " << width << ", height: " << height ;
+
+		//create planet
+		addParameters();
+		mySphere = new PSphere(100, 0, 0, 0, *params);
+		//push to pshere export-method with filename + resolution
+		if(ui->comboBox_2->currentIndex() == 0)
+		{
+			returnValue = mySphere->exportMap(width, height, filename.toStdString(), PSphere::MAP_EQUIRECTANGULAR);
+		}
+		else if(ui->comboBox_2->currentIndex() == 1)
+		{
+			returnValue = mySphere->exportMap(width, height, filename.toStdString(), PSphere::MAP_CUBE);
+		}
+		else
+		{
+			qDebug() << "Something went wrong in saving image";
+		}
+
+		if (!returnValue)
+		{
+			QMessageBox errorBox;
+
+			errorBox.setWindowTitle("Error");
+			errorBox.setText("Saving image failed!");
+			errorBox.setStandardButtons(QMessageBox::Ok);
+			errorBox.exec();
+
+			qDebug() << "Function exportMap returned false";
+		}
+
+		delete mySphere;
 	}
-
-    delete mySphere;
 }
 
 void MainWindow::on_pushButton_11_clicked()
