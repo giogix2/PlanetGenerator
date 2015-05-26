@@ -855,10 +855,26 @@ bool PSphere::getGridLocation(Ogre::Vector3 location, Grid **face,
 	Grid *grid;
 	Ogre::Real x, y, z, x_f, y_f;
 
-edgeCase:
 	x = Ogre::Math::Abs(location.x);
 	y = Ogre::Math::Abs(location.y);
 	z = Ogre::Math::Abs(location.z);
+
+	/* If two or three vector elements equal to each other, they are on
+	 * cube edges. This slightly shortens y compared to x and z compared to y.
+	 *  This results in ix and iy to fall within a correct range. */
+	if (x == y)
+	{
+		location.y *= 0.9999;
+
+	}
+	if (x == z)
+	{
+		location.z *= 0.9999;
+	}
+	if (y == z)
+	{
+		location.z *= 0.9999;
+	}
 
 	if (x > y && x > z)
 	{
@@ -911,28 +927,7 @@ edgeCase:
 	}
 	else
 	{
-		// If vector length is zero, location can't reside on a cube.
-		if (location.length() == 0)
-			return false;
-
-		/* If two or three vector elements equal to each other, they are on
-		 * cube edges. This slightly shortens y compared to x and z compared to y.
-		 *  This results in ix and iy to fall within a correct range. */
-		if (x == y)
-		{
-			location.y *= 0.9999;
-
-		}
-		if (x == z)
-		{
-			location.z *= 0.9999;
-		}
-		if (y == z)
-		{
-			location.z *= 0.9999;
-		}
-		// Use goto to try again
-		goto edgeCase;
+		return false;
 	}
 
 	iy = (unsigned short)((1.0f+y_f)/2.0f*grid->getSize());
@@ -953,27 +948,33 @@ bool PSphere::checkAccessibility(Ogre::Vector3 location)
 	unsigned int i, ix, iy, Obj_x, Obj_y;
 	Ogre::Vector3 ObjPos;
 
-	getGridLocation(location, &grid, ix, iy);
-
-	// Check if location to check has already an object
-	for(i=0; i < objects.size(); i++)
+	if (getGridLocation(location, &grid, ix, iy))
 	{
-		ObjPos = objects[i].getPosition();
-		getGridLocation(ObjPos, &gridObj, Obj_x, Obj_y);
-
-		// Checks if location and object is on a same grid
-		if (grid == gridObj)
+		// Check if location to check has already an object
+		for(i=0; i < objects.size(); i++)
 		{
-			if ( (ix == Obj_x) && (iy == Obj_y) )
+			ObjPos = objects[i].getPosition();
+			if (!getGridLocation(ObjPos, &gridObj, Obj_x, Obj_y))
 				return false;
-		}
-	}
 
-	// If location height is more than sea-height, it is accessible.
-	if (grid->getValue(ix, iy) != 0.0)
-		return true;
+			// Checks if location and object is on a same grid
+			if (grid == gridObj)
+			{
+				if ( (ix == Obj_x) && (iy == Obj_y) )
+					return false;
+			}
+		}
+
+		// If land mask is nonzero, it is accessible.
+		if (grid->getValue(ix, iy) != 0)
+			return true;
+		else
+			return false;
+	}
 	else
+	{
 		return false;
+	}
 }
 
 Ogre::Vector3 PSphere::nextPosition(Ogre::Vector3 location, PSphere::Direction dir)
@@ -984,7 +985,8 @@ Ogre::Vector3 PSphere::nextPosition(Ogre::Vector3 location, PSphere::Direction d
 
 	/* Using 3D cartesian position figures out which face of the 6 cubefaces it
 	 * resides, and gives integer grid-coordinates x and y for it. */
-	getGridLocation(location, &grid, int_x, int_y);
+	if (!getGridLocation(location, &grid, int_x, int_y))
+		return Ogre::Vector3(0.0f, 0.0f, 0.0f);
 
 	// Going y+
 	if (dir == PSPHERE_GRID_YPLUS)

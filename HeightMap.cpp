@@ -31,8 +31,8 @@ HeightMap::HeightMap(unsigned int size, const Ogre::Matrix3 face)
 	height = allocate2DArray<float>(size, size);
 	memset(height[0], 0, sizeof(float)*size*size);
 
-	minHeight =  1.0e9f;
-	maxHeight = -1.0e9f;
+	minHeight = std::numeric_limits<float>::max();
+	maxHeight = std::numeric_limits<float>::min();
 
 	vertexes = new Ogre::Vector3[gridSize*gridSize];
 	verNorms = new Ogre::Vector3[gridSize*gridSize];
@@ -224,17 +224,18 @@ void HeightMap::blendNormalsWithNeighbours()
 			entry_x = 0;
 			entry_y = i;
 			// get neighboring coordinate
-			getNeighbourEntryCoordinates(neighbour_XM, entry_x, entry_y);
+			if (getNeighbourEntryCoordinates(neighbour_XM, entry_x, entry_y))
+			{
+				// Get normals
+				normNeighbour = neighbour->getNormal(entry_x, entry_y);
+				norm = getNormal(0, i);
 
-			// Get normals
-			normNeighbour = neighbour->getNormal(entry_x, entry_y);
-			norm = getNormal(0, i);
-
-			// Blend and save
-			blendedNorm = norm+normNeighbour;
-			blendedNorm.normalise();
-			setNormal(blendedNorm, 0, i);
-			neighbour->setNormal(blendedNorm, entry_x, entry_y);
+				// Blend and save
+				blendedNorm = norm+normNeighbour;
+				blendedNorm.normalise();
+				setNormal(blendedNorm, 0, i);
+				neighbour->setNormal(blendedNorm, entry_x, entry_y);
+			}
 		}
 	}
 
@@ -245,15 +246,16 @@ void HeightMap::blendNormalsWithNeighbours()
 		{
 			entry_x = gridSize-1;
 			entry_y = i;
-			getNeighbourEntryCoordinates(neighbour_XP, entry_x, entry_y);
+			if (getNeighbourEntryCoordinates(neighbour_XP, entry_x, entry_y))
+			{
+				normNeighbour = neighbour->getNormal(entry_x, entry_y);
+				norm = getNormal(gridSize-1, i);
 
-			normNeighbour = neighbour->getNormal(entry_x, entry_y);
-			norm = getNormal(gridSize-1, i);
-
-			blendedNorm = norm+normNeighbour;
-			blendedNorm.normalise();
-			setNormal(blendedNorm, gridSize-1, i);
-			neighbour->setNormal(blendedNorm, entry_x, entry_y);
+				blendedNorm = norm+normNeighbour;
+				blendedNorm.normalise();
+				setNormal(blendedNorm, gridSize-1, i);
+				neighbour->setNormal(blendedNorm, entry_x, entry_y);
+			}
 		}
 	}
 
@@ -264,15 +266,16 @@ void HeightMap::blendNormalsWithNeighbours()
 		{
 			entry_x = i;
 			entry_y = 0;
-			getNeighbourEntryCoordinates(neighbour_YM, entry_x, entry_y);
+			if (getNeighbourEntryCoordinates(neighbour_YM, entry_x, entry_y))
+			{
+				normNeighbour = neighbour->getNormal(entry_x, entry_y);
+				norm = getNormal(i, 0);
 
-			normNeighbour = neighbour->getNormal(entry_x, entry_y);
-			norm = getNormal(i, 0);
-
-			blendedNorm = norm+normNeighbour;
-			blendedNorm.normalise();
-			setNormal(blendedNorm, i, 0);
-			neighbour->setNormal(blendedNorm, entry_x, entry_y);
+				blendedNorm = norm+normNeighbour;
+				blendedNorm.normalise();
+				setNormal(blendedNorm, i, 0);
+				neighbour->setNormal(blendedNorm, entry_x, entry_y);
+			}
 		}
 	}
 
@@ -283,15 +286,16 @@ void HeightMap::blendNormalsWithNeighbours()
 		{
 			entry_x = i;
 			entry_y = gridSize-1;
-			getNeighbourEntryCoordinates(neighbour_YP, entry_x, entry_y);
+			if (getNeighbourEntryCoordinates(neighbour_YP, entry_x, entry_y))
+			{
+				normNeighbour = neighbour->getNormal(entry_x, entry_y);
+				norm = getNormal(i, gridSize-1);
 
-			normNeighbour = neighbour->getNormal(entry_x, entry_y);
-			norm = getNormal(i, gridSize-1);
-
-			blendedNorm = norm+normNeighbour;
-			blendedNorm.normalise();
-			setNormal(blendedNorm, i, gridSize-1);
-			neighbour->setNormal(blendedNorm, entry_x, entry_y);
+				blendedNorm = norm+normNeighbour;
+				blendedNorm.normalise();
+				setNormal(blendedNorm, i, gridSize-1);
+				neighbour->setNormal(blendedNorm, entry_x, entry_y);
+			}
 		}
 	}
 }
