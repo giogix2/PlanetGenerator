@@ -131,6 +131,15 @@ bool Grid::getNeighbourEntryCoordinates(Grid_neighbour neighbour
 
 	gridNeighbour = this->getNeighbourPtr(neighbour);
 
+	if (gridNeighbour == NULL)
+		return false;
+
+	if (this->gridSize != gridNeighbour->getSize())
+	{
+		std::cerr << "Grid and neighbour sizes differ!" << std::endl;
+		return false;
+	}
+
 	/* Assuming both square-grids face their frontface in same direction,
 	 * there are 16 different neighboring combinations. */
 
@@ -144,8 +153,9 @@ bool Grid::getNeighbourEntryCoordinates(Grid_neighbour neighbour
 		}
 		else if (neighbour == neighbour_XM)
 		{
-			//entry_x == gridN->getSize()-1;
+			/* There is no usecase for this combination in the current code. */
 			std::cerr << "This should not happen! XM and Neighbour XM" << std::endl;
+			return false;
 		}
 		else if (neighbour == neighbour_YP)
 		{
@@ -162,8 +172,9 @@ bool Grid::getNeighbourEntryCoordinates(Grid_neighbour neighbour
 	{
 		if (neighbour == neighbour_XP)
 		{
-			//entry_x = gridN->getSize()-1;
+			/* There is no usecase for this combination in the current code. */
 			std::cerr << "This should not happen! XP and Neighbour XP" << std::endl;
+			return false;
 		}
 		else if (neighbour == neighbour_XM)
 		{
@@ -223,6 +234,12 @@ bool Grid::getNeighbourEntryCoordinates(Grid_neighbour neighbour
 		{
 			entry_y = gridNeighbour->getSize() - 1;
 		}
+	}
+	else
+	{
+		std::cerr << "Neighbouring grid does not have this Grid as a neighbour"
+				  << std::endl;
+		return false;
 	}
 
 	return true;
