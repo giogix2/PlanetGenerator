@@ -52,6 +52,9 @@ int main(int argc, char *argv[])
 	{
 		QApplication a(argc, argv);
 		MainWindow w;
+		QFont font("Arial", 11);
+
+		a.setFont(font);
 		w.show();
 		a.exec();
 	}else if(argc==2 && (std::strcmp(argv[1],"t")==0) )
