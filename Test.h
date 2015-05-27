@@ -31,11 +31,14 @@
  * in consle with a argument "t".*/
 
 void testAll();
-bool initTest(PSphere **Sphere);
+bool initTest(PSphere **Sphere,Ogre::Root **Root, Ogre::SceneManager **Scene, Ogre::SceneNode **sphere);
 bool test_PSphere_getRadius(PSphere *Sphere);
 bool test_PSphere_checkAccessibility(PSphere *Sphere);
 bool test_PSphere_getSurfaceHeight(PSphere *Sphere);
-
+bool test_PSphere_getGridLocation(PSphere *Sphere);
+bool test_PSphere_nextPosition(PSphere *Sphere);
+bool test_PSphere_getObserverDistanceToSurface(PSphere *Sphere);
+bool test_PSphere_attachMeshOnGround(PSphere *Sphere,Ogre::SceneNode *sphereNode, Ogre::SceneManager *Scene);
 
 
 

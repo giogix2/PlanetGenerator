@@ -32,6 +32,8 @@
 #include "testui2/mainwindow.h"
 #include <QApplication>
 #include "ResourceParameter.h"
+#include <io.h>
+#include <fcntl.h>
 
 
 using namespace std;
@@ -41,15 +43,13 @@ using namespace std;
 #include "windows.h"
 #endif
 
+
 int main(int argc, char *argv[])
 {
-	/*std::cout << "argc=" << argc << endl;
-	for(int i=0; i!=argc;i++)
-	{
-		cout << "argv[" << i << "]:" << argv[i] << endl;
-	}*/
 	if(argc==1) //no arguments, run planet generator
 	{
+
+		//#pragma comment( linker, "/subsystem:windows" )
 		QApplication a(argc, argv);
 		MainWindow w;
 		QFont font("Arial", 11);
@@ -59,9 +59,49 @@ int main(int argc, char *argv[])
 		a.exec();
 	}else if(argc==2 && (std::strcmp(argv[1],"t")==0) )
 	{
+#ifdef linux
+
+		cout<<"  linux OS!"<<endl;
+
+#endif
+#ifdef __WINDOWS_
+
+		AllocConsole();
+		HANDLE handle_out = GetStdHandle(STD_OUTPUT_HANDLE);
+		int hCrt = _open_osfhandle((long) handle_out, _O_TEXT);
+		FILE* hf_out = _fdopen(hCrt, "w");
+		setvbuf(hf_out, NULL, _IONBF, 1);
+		*stdout = *hf_out;
+
+		HANDLE handle_in = GetStdHandle(STD_INPUT_HANDLE);
+		hCrt = _open_osfhandle((long) handle_in, _O_TEXT);
+		FILE* hf_in = _fdopen(hCrt, "r");
+		setvbuf(hf_in, NULL, _IONBF, 128);
+		*stdin = *hf_in;
+		cout<<"  Windows OS!  "<<endl;
+
+#endif
+#ifdef _WIN32
+		AllocConsole();
+		HANDLE handle_out = GetStdHandle(STD_OUTPUT_HANDLE);
+		int hCrt = _open_osfhandle((long) handle_out, _O_TEXT);
+		FILE* hf_out = _fdopen(hCrt, "w");
+		setvbuf(hf_out, NULL, _IONBF, 1);
+		*stdout = *hf_out;
+
+		HANDLE handle_in = GetStdHandle(STD_INPUT_HANDLE);
+		hCrt = _open_osfhandle((long) handle_in, _O_TEXT);
+		FILE* hf_in = _fdopen(hCrt, "r");
+		setvbuf(hf_in, NULL, _IONBF, 128);
+		*stdin = *hf_in;
+		cout<<"  WIN32 OS!  "<<endl;
+#endif
+		
+
 		cout << "Testing Mode" << endl;
 		testAll();
-		cout << "Test Ended." << endl;
+		cout << "Test Ended. Press Enter to exit." << endl;
+		cin.get();
 	}
 
 	return 0;
