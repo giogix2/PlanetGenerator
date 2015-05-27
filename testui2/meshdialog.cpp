@@ -23,6 +23,7 @@
 #include "meshdialog.h"
 #include "ui_meshdialog.h"
 #include <QFileDialog>
+#include <QDebug>
 
 MeshDialog::MeshDialog(QWidget *parent) :
     QDialog(parent),
@@ -40,12 +41,15 @@ MeshDialog::~MeshDialog()
 
 void MeshDialog::on_pushButton_clicked()
 {
-    QDir dir("../");
+    QDir dir("../media/models");
     QString path;
 
     path = dir.relativeFilePath(QFileDialog::getOpenFileName(this, "Choose mesh", "../media/models", "*.mesh"));
 
-    ui->lineEdit->setText(path);
+    if(!path.isNull())
+        ui->lineEdit->setText(path);
+    else
+        qDebug() << "File null";
 
     //QListWidgetItem *item = new QListWidgetItem(meshpath.toString());
     //item->setTextAlignment(Qt::AlignRight);
