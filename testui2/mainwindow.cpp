@@ -257,7 +257,7 @@ void MainWindow::setMeshes(QString p_path, int p_count)
 
 void MainWindow::on_pushButton_10_clicked()
 {
-	QString filename = QFileDialog::getSaveFileName(this, "Save image", "../", "*.png" );
+    QString filename = QFileDialog::getSaveFileName(this, "Save image", "", "*.png" );
 	if (!filename.isEmpty())
 	{
 		QString extension = filename.right(4);
@@ -419,4 +419,20 @@ void MainWindow::addParameters()
     {
         qDebug() << "Amount: " << *iter;
     }*/
+}
+
+void MainWindow::on_pushButton_12_clicked()
+{
+    QString filename = QFileDialog::getSaveFileName(this, "Save image", "media/models", "*.mesh" );
+    if (!filename.isEmpty())
+    {
+        QString extension = filename.right(5);
+
+        if (QString::compare(extension, ".mesh", Qt::CaseInsensitive))
+        {
+            filename.append(".mesh");
+        }
+        qDebug() << "save as : " + filename;
+        //call initogre exportmesh function
+    }
 }

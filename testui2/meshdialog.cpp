@@ -41,10 +41,10 @@ MeshDialog::~MeshDialog()
 
 void MeshDialog::on_pushButton_clicked()
 {
-    QDir dir("../media/models");
+    QDir dir("media/models");
     QString path;
 
-    path = dir.relativeFilePath(QFileDialog::getOpenFileName(this, "Choose mesh", "../media/models", "*.mesh"));
+    path = dir.relativeFilePath(QFileDialog::getOpenFileName(this, "Choose mesh", "media/models", "*.mesh"));
 
     if(!path.isNull())
         ui->lineEdit->setText(path);

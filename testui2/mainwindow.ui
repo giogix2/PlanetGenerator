@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>563</width>
-    <height>344</height>
+    <height>365</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,10 +17,10 @@
    <widget class="QPushButton" name="pushButton">
     <property name="geometry">
      <rect>
-      <x>450</x>
+      <x>240</x>
       <y>300</y>
-      <width>91</width>
-      <height>23</height>
+      <width>311</width>
+      <height>51</height>
      </rect>
     </property>
     <property name="text">
@@ -30,9 +30,9 @@
    <widget class="QLineEdit" name="lineEdit">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>30</y>
-      <width>113</width>
+      <x>110</x>
+      <y>10</y>
+      <width>91</width>
       <height>20</height>
      </rect>
     </property>
@@ -53,25 +53,12 @@
      <string>Planet Size (0-100):</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_2">
-    <property name="geometry">
-     <rect>
-      <x>10</x>
-      <y>120</y>
-      <width>91</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Water Color:</string>
-    </property>
-   </widget>
    <widget class="QLineEdit" name="lineEdit_2">
     <property name="geometry">
      <rect>
-      <x>10</x>
-      <y>90</y>
-      <width>113</width>
+      <x>110</x>
+      <y>70</y>
+      <width>91</width>
       <height>20</height>
      </rect>
     </property>
@@ -96,7 +83,7 @@
     <property name="geometry">
      <rect>
       <x>20</x>
-      <y>140</y>
+      <y>130</y>
       <width>101</width>
       <height>16</height>
      </rect>
@@ -248,63 +235,37 @@
      <string>Low Mountain Color:</string>
     </property>
    </widget>
-   <widget class="QLabel" name="label_4">
-    <property name="geometry">
-     <rect>
-      <x>230</x>
-      <y>300</y>
-      <width>161</width>
-      <height>20</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Add frequencies and amplitudes:</string>
-    </property>
-   </widget>
    <widget class="QPushButton" name="pushButton_8">
     <property name="geometry">
      <rect>
-      <x>390</x>
-      <y>300</y>
-      <width>21</width>
+      <x>20</x>
+      <y>330</y>
+      <width>181</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>X</string>
+     <string>Add frequencies and amplitudes</string>
     </property>
    </widget>
    <widget class="QPushButton" name="pushButton_9">
     <property name="geometry">
      <rect>
-      <x>390</x>
+      <x>240</x>
       <y>270</y>
-      <width>21</width>
+      <width>151</width>
       <height>23</height>
      </rect>
     </property>
     <property name="text">
-     <string>X</string>
-    </property>
-   </widget>
-   <widget class="QLabel" name="label_5">
-    <property name="geometry">
-     <rect>
-      <x>310</x>
-      <y>270</y>
-      <width>81</width>
-      <height>16</height>
-     </rect>
-    </property>
-    <property name="text">
-     <string>Choose meshes:</string>
+     <string>Import meshes to planet</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_12">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>10</y>
+      <x>10</x>
+      <y>40</y>
       <width>47</width>
       <height>13</height>
      </rect>
@@ -316,9 +277,9 @@
    <widget class="QLineEdit" name="lineEdit_3">
     <property name="geometry">
      <rect>
-      <x>150</x>
-      <y>30</y>
-      <width>113</width>
+      <x>110</x>
+      <y>40</y>
+      <width>91</width>
       <height>20</height>
      </rect>
     </property>
@@ -348,8 +309,8 @@
    <widget class="QComboBox" name="comboBox">
     <property name="geometry">
      <rect>
-      <x>390</x>
-      <y>170</y>
+      <x>380</x>
+      <y>190</y>
       <width>101</width>
       <height>22</height>
      </rect>
@@ -378,10 +339,10 @@
    <widget class="QPushButton" name="pushButton_10">
     <property name="geometry">
      <rect>
-      <x>294</x>
-      <y>200</y>
-      <width>191</width>
-      <height>23</height>
+      <x>300</x>
+      <y>220</y>
+      <width>181</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
@@ -391,21 +352,21 @@
    <widget class="QPushButton" name="pushButton_11">
     <property name="geometry">
      <rect>
-      <x>500</x>
-      <y>70</y>
-      <width>51</width>
-      <height>41</height>
+      <x>290</x>
+      <y>130</y>
+      <width>196</width>
+      <height>21</height>
      </rect>
     </property>
     <property name="text">
-     <string>Refresh</string>
+     <string>Refresh image</string>
     </property>
    </widget>
    <widget class="QLabel" name="label_13">
     <property name="geometry">
      <rect>
       <x>300</x>
-      <y>170</y>
+      <y>190</y>
       <width>71</width>
       <height>16</height>
      </rect>
@@ -417,8 +378,8 @@
    <widget class="QComboBox" name="comboBox_2">
     <property name="geometry">
      <rect>
-      <x>370</x>
-      <y>140</y>
+      <x>360</x>
+      <y>160</y>
       <width>121</width>
       <height>22</height>
      </rect>
@@ -438,13 +399,39 @@
     <property name="geometry">
      <rect>
       <x>300</x>
-      <y>140</y>
+      <y>160</y>
       <width>47</width>
       <height>13</height>
      </rect>
     </property>
     <property name="text">
      <string>Save as:</string>
+    </property>
+   </widget>
+   <widget class="QPushButton" name="pushButton_12">
+    <property name="geometry">
+     <rect>
+      <x>400</x>
+      <y>270</y>
+      <width>151</width>
+      <height>23</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Export planet as .mesh-file</string>
+    </property>
+   </widget>
+   <widget class="QLabel" name="label_2">
+    <property name="geometry">
+     <rect>
+      <x>10</x>
+      <y>100</y>
+      <width>81</width>
+      <height>16</height>
+     </rect>
+    </property>
+    <property name="text">
+     <string>Choose colors:</string>
     </property>
    </widget>
   </widget>
