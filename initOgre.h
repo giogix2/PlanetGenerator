@@ -44,7 +44,6 @@ private:
 	Ogre::SceneManager      *Scene;
 	Ogre::SceneNode         *RootSceneNode;
 	Ogre::RenderWindow      *Window;
-	Ogre::RenderTexture		*WindowReplacer;
 	Ogre::Camera            *Camera;
 	GeneratorFrameListener  *FrameListener;
 	Ogre::OverlaySystem     *OverlaySystem;
