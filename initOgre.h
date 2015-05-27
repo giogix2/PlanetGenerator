@@ -37,17 +37,24 @@ class initOgre{
 	int start();
 	void setSceneAndRun(PSphere *planet);
 	void cleanup();
+	void savePlanetAsMesh(PSphere *planet, const string &exportFile);
+	void cleanupSavePlanetAsMesh();
 private:
 	Ogre::Root              *Root;
 	Ogre::SceneManager      *Scene;
 	Ogre::SceneNode         *RootSceneNode;
 	Ogre::RenderWindow      *Window;
+	Ogre::RenderTexture		*WindowReplacer;
 	Ogre::Camera            *Camera;
 	GeneratorFrameListener  *FrameListener;
 	Ogre::OverlaySystem     *OverlaySystem;
 	CollisionManager		*CollisionDetectionManager;
 
 	void CreateFrameListener(PSphere *pSphere);
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
+	std::string findPlugin();
+#endif
 };
 
 #endif

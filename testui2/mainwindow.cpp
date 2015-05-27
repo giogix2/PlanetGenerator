@@ -433,6 +433,14 @@ void MainWindow::on_pushButton_12_clicked()
             filename.append(".mesh");
         }
         qDebug() << "save as : " + filename;
+
         //call initogre exportmesh function
-    }
+		initOgre *temp = new initOgre;
+		PSphere *tempPlanet = new PSphere(100, 0, 1024, 512, *params);
+		temp->savePlanetAsMesh(tempPlanet, filename.toStdString());
+		// Must delete PSphere before cleaning initOgre
+		delete tempPlanet;
+		temp->cleanupSavePlanetAsMesh();
+		delete temp;
+	}
 }

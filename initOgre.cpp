@@ -26,7 +26,7 @@
 #include "OgreConfigFile.h"
 #include <OgreMeshSerializer.h>
 
-#ifdef OGRE_PLATFORM_LINUX
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
 #include <sys/stat.h>
 #endif
 
@@ -54,38 +54,7 @@ int initOgre::start(){
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
 	PluginName.append("RenderSystem_Direct3D9");
 #else
-	/* Use Posix-function stat to check existence of a file.
-	 * This is needed because Ogre makes zero effort to find its own plugins. */
-	struct stat statBuf;
-	Ogre::String PluginFile[4];
-
-	PluginFile[0].append("/usr/lib/OGRE/RenderSystem_GL.so");
-	PluginFile[1].append("/usr/lib/local/OGRE/RenderSystem_GL.so");
-	// Ubuntu
-#ifdef __x86_64__
-	PluginFile[2].append("/usr/lib/x86_64-linux-gnu/OGRE-");
-	PluginFile[3].append("/usr/lib64/OGRE/RenderSystem_GL.so");
-#elif __i386__
-	PluginFile[2].append("/usr/lib/i386-linux-gnu/OGRE-");
-	PluginFile[3].append("/usr/lib32/OGRE/RenderSystem_GL.so");
-#endif
-	PluginFile[2] += Ogre::StringConverter::toString(OGRE_VERSION_MAJOR) + ".";
-	PluginFile[2] += Ogre::StringConverter::toString(OGRE_VERSION_MINOR) + ".";
-	PluginFile[2] += Ogre::StringConverter::toString(OGRE_VERSION_PATCH);
-	PluginFile[2] += "/RenderSystem_GL.so";
-
-	int i;
-	for(i=0; i < 4; i++)
-	{
-		if( stat(PluginFile[i].c_str(), &statBuf) == 0 )
-		{
-			PluginFile[i].resize(PluginFile[i].size()-3);	// strip ".so"
-			PluginName.assign( PluginFile[i] );
-			break;											// Exit loop if file exists
-		}
-	}
-	if(PluginName == "")
-		Ogre::LogManager::getSingleton().logMessage(Ogre::LML_CRITICAL, "Could not find RenderSystem_GL.so!");
+	PluginName = findPlugin();
 #endif
 
 	// RenderSystem_GL_d if using Ogre debug mode
@@ -301,3 +270,139 @@ void initOgre::cleanup(){
 
 	//Ogre::LogManager::getSingleton().logMessage("Ogre is cleaned up");
 }
+
+void initOgre::cleanupSavePlanetAsMesh(){
+
+	// Clean up our mess before exiting
+	Ogre::MaterialManager::getSingleton().remove("TextureObject");
+	Ogre::TextureManager::getSingleton().remove("sphereTex");
+	Scene->destroyEntity("CustomEntity");
+	Ogre::Root::getSingleton().getRenderSystem()->destroyRenderWindow("My little planet");
+	Scene->clearScene();
+	Root->destroySceneManager(Scene);
+
+	Root->shutdown();
+
+	delete FrameListener;
+	FrameListener = NULL;
+	delete OverlaySystem;
+	OverlaySystem = NULL;
+	delete Root;
+	Root = NULL;
+
+}
+
+void initOgre::savePlanetAsMesh(PSphere *planet, const std::string &exportFile)
+{
+	Ogre::String PluginName;
+
+	Root = new Ogre::Root("", "", "Exporter.LOG");
+
+	// Renderer is required to create window
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+	PluginName.append("RenderSystem_Direct3D9");
+#else
+	PluginName = findPlugin();
+#endif
+
+	// RenderSystem_GL_d if using Ogre debug mode
+	if(OGRE_DEBUG_MODE)
+		PluginName.append("_d");
+	// Loads renderer plugin
+	Root->loadPlugin(PluginName);
+
+
+	// Check renderer availability
+	const Ogre::RenderSystemList& RenderSystemList = Root->getAvailableRenderers();
+	if( RenderSystemList.size() == 0 )
+	{
+		Ogre::LogManager::getSingleton().logMessage("Rendersystems not found.");
+		return;
+	}
+	Ogre::RenderSystem *RenderSystem = RenderSystemList[0];
+	Root->setRenderSystem(RenderSystem);
+
+
+	// Do not create window automatically
+	Root->initialise(false);
+
+	// Actual call to create window, bool value is fullscreen flag
+	Window = Root->createRenderWindow("My little planet", 800, 600, false);
+
+	// Try to hide. Flashes anyway.
+	Window->setHidden(true);
+	Ogre::WindowEventUtilities::messagePump();
+
+	// Required to create entity
+	Scene = Root->createSceneManager(Ogre::ST_EXTERIOR_CLOSE);
+
+//	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
+
+
+	// Draw a sphere
+	planet->loadToBuffers("CustomMesh", "sphereTex");
+
+	Ogre::Entity *sphereEntity = Scene->createEntity("CustomEntity", "CustomMesh");
+
+	Ogre::MaterialPtr textureMap = Ogre::MaterialManager::getSingleton()
+			.create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	textureMap->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex");
+	textureMap->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+
+	// Set texture for the sphere
+	sphereEntity->setMaterial(textureMap);
+
+//	Ogre::SubEntity *subEntity1 = entity1->getSubEntity(0);
+//	Ogre::MaterialPtr planetTexture = subEntity1->getMaterial();
+
+	//Export the shape in a mesh file before destroying it
+	Ogre::MeshPtr mesh;
+	mesh = sphereEntity->getMesh();
+	Ogre::MeshSerializer ser;
+	ser.exportMesh(mesh.getPointer(), exportFile,  Ogre::MeshSerializer::ENDIAN_NATIVE);
+}
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
+std::string initOgre::findPlugin()
+{
+	/* Use Posix-function stat to check existence of a file.
+	 * This is needed because Ogre makes zero effort to find its own plugins. */
+	struct stat statBuf;
+	Ogre::String PluginName, PluginFile[4];
+
+	PluginFile[0].append("/usr/lib/OGRE/RenderSystem_GL.so");
+	PluginFile[1].append("/usr/lib/local/OGRE/RenderSystem_GL.so");
+
+	// Ubuntu and Fedora
+#ifdef __x86_64__
+	PluginFile[2].append("/usr/lib/x86_64-linux-gnu/OGRE-");
+	PluginFile[3].append("/usr/lib64/OGRE/RenderSystem_GL.so");
+#elif __i386__
+	PluginFile[2].append("/usr/lib/i386-linux-gnu/OGRE-");
+	PluginFile[3].append("/usr/lib32/OGRE/RenderSystem_GL.so");
+#endif
+	// Ubuntu
+	PluginFile[2] += Ogre::StringConverter::toString(OGRE_VERSION_MAJOR) + ".";
+	PluginFile[2] += Ogre::StringConverter::toString(OGRE_VERSION_MINOR) + ".";
+	PluginFile[2] += Ogre::StringConverter::toString(OGRE_VERSION_PATCH);
+	PluginFile[2] += "/RenderSystem_GL.so";
+
+	int i;
+	for(i=0; i < 4; i++)
+	{
+		if( stat(PluginFile[i].c_str(), &statBuf) == 0 )
+		{
+			// strip ".so"
+			PluginFile[i].resize(PluginFile[i].size()-3);
+			PluginName.assign( PluginFile[i] );
+			// Exit loop if file exists
+			break;
+		}
+	}
+	if(PluginName == "")
+		Ogre::LogManager::getSingleton().logMessage(Ogre::LML_CRITICAL,
+													"Could not find RenderSystem_GL.so!");
+
+	return PluginName;
+}
+#endif
