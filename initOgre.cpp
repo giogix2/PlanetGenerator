@@ -205,13 +205,6 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	// Draw a sphere
 	planet->loadToBuffers("CustomMesh", "sphereTex");
 
-	//Export the shape in a mesh file before destroying it
-	//Ogre::MeshPtr mesh;
-	//mesh = planet->getMesh();
-	//Ogre::MeshSerializer ser;
-	//ser.exportMesh(mesh.getPointer(), "C:\\Users\\giova\\Documents\\PlanetGenerator\\planet.mesh",  Ogre::MeshSerializer::ENDIAN_NATIVE);
-
-
 	// Attach entitys to sceneNodes
 	Ogre::SceneNode *CameraNode = RootSceneNode->createChildSceneNode("DefaultCameraNode");
 	CameraNode->attachObject(Camera);
@@ -257,6 +250,16 @@ void initOgre::setSceneAndRun(PSphere *planet){
 
 	// Set texture for the sphere
 	entity1->setMaterial(textureMap);
+
+	Ogre::SubEntity *subEntity1 = entity1->getSubEntity(0);
+	Ogre::MaterialPtr planetTexture = subEntity1->getMaterial();
+	//Export the shape in a mesh file before destroying it
+	entity1->getMesh();
+	Ogre::MeshPtr mesh;
+	//mesh = planet->getMesh();
+	mesh = entity1->getMesh();
+	Ogre::MeshSerializer ser;
+	ser.exportMesh(mesh.getPointer(), "C:\\Users\\giova\\Documents\\PlanetGenerator\\planet.mesh",  Ogre::MeshSerializer::ENDIAN_NATIVE);
 
 	sphere1->setOrientation(0.163149834f, -0.19578641f, -0.314332321f, -0.9144643269f);
 
