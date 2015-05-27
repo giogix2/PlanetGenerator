@@ -21,6 +21,7 @@
  * THE SOFTWARE. */
 
 #include "initOgre.h"
+
 #include "Common.h"
 
 #include "OgreConfigFile.h"
