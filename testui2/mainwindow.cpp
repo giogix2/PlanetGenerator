@@ -96,68 +96,98 @@ void MainWindow::on_pushButton_clicked()
 {
     addParameters();
 
-	mySphere = new PSphere(100, 40, 1024, 512, *params);
+    mySphere = new PSphere(100, 40, 1024, 512, *params);
 	rendering = new initOgre();
 	rendering->start();
 	rendering->setSceneAndRun(mySphere);
 	delete mySphere;
     rendering->cleanup();
     delete rendering;
-	
+
 }
 
 void MainWindow::on_pushButton_2_clicked()
 {
     QColor rg = QColorDialog::getColor(Qt::white,this, "Text Color",  QColorDialog::DontUseNativeDialog);
-    QString qss = QString("background-color: %1").arg(rg.name());
-    ui->pushButton_2->setStyleSheet(qss);
-    ui->pushButton_2->setText(""+rg.name());
-    qDebug() << "Color chosen: "+rg.name();
+    if(rg.isValid())
+    {
+        QString qss = QString("background-color: %1").arg(rg.name());
+        ui->pushButton_2->setStyleSheet(qss);
+        ui->pushButton_2->setText(""+rg.name());
+        qDebug() << "Color chosen: "+rg.name();
+    }
+    else
+        qDebug() << "Color not valid";
 }
 
 void MainWindow::on_pushButton_3_clicked()
 {
     QColor rg = QColorDialog::getColor(Qt::white,this, "Text Color",  QColorDialog::DontUseNativeDialog);
-    QString qss = QString("background-color: %1").arg(rg.name());
-    ui->pushButton_3->setStyleSheet(qss);
-    ui->pushButton_3->setText(""+rg.name());
-    qDebug() << "Color chosen: "+rg.name();
+    if(rg.isValid())
+    {
+        QString qss = QString("background-color: %1").arg(rg.name());
+        ui->pushButton_3->setStyleSheet(qss);
+        ui->pushButton_3->setText(""+rg.name());
+        qDebug() << "Color chosen: "+rg.name();
+    }
+    else
+        qDebug() << "Color not valid";
 }
 
 void MainWindow::on_pushButton_4_clicked()
 {
     QColor rg = QColorDialog::getColor(Qt::white,this, "Text Color",  QColorDialog::DontUseNativeDialog);
-    QString qss = QString("background-color: %1").arg(rg.name());
-    ui->pushButton_4->setStyleSheet(qss);
-    ui->pushButton_4->setText(""+rg.name());
-    qDebug() << "Color chosen: "+rg.name();
+    if(rg.isValid())
+    {
+        QString qss = QString("background-color: %1").arg(rg.name());
+        ui->pushButton_4->setStyleSheet(qss);
+        ui->pushButton_4->setText(""+rg.name());
+        qDebug() << "Color chosen: "+rg.name();
+    }
+    else
+        qDebug() << "Color not valid";
 }
 
 void MainWindow::on_pushButton_5_clicked()
 {
     QColor rg = QColorDialog::getColor(Qt::white,this, "Text Color",  QColorDialog::DontUseNativeDialog);
-    QString qss = QString("background-color: %1").arg(rg.name());
-    ui->pushButton_5->setStyleSheet(qss);
-    ui->pushButton_5->setText(""+rg.name());
-    qDebug() << "Color chosen: "+rg.name();
+    if(rg.isValid())
+    {
+        QString qss = QString("background-color: %1").arg(rg.name());
+        ui->pushButton_5->setStyleSheet(qss);
+        ui->pushButton_5->setText(""+rg.name());
+        qDebug() << "Color chosen: "+rg.name();
+    }
+    else
+        qDebug() << "Color not valid";
 }
 
 void MainWindow::on_pushButton_6_clicked()
 {
     QColor rg = QColorDialog::getColor(Qt::white,this, "Text Color",  QColorDialog::DontUseNativeDialog);
-    QString qss = QString("background-color: %1").arg(rg.name());
-    ui->pushButton_6->setStyleSheet(qss);
-    ui->pushButton_6->setText(""+rg.name());
-    qDebug() << "Color chosen: "+rg.name();
+    if(rg.isValid())
+    {
+        QString qss = QString("background-color: %1").arg(rg.name());
+        ui->pushButton_6->setStyleSheet(qss);
+        ui->pushButton_6->setText(""+rg.name());
+        qDebug() << "Color chosen: "+rg.name();
+    }
+    else
+        qDebug() << "Color not valid";
 }
 
 void MainWindow::on_pushButton_7_clicked()
 {
     QColor rg = QColorDialog::getColor(Qt::white,this, "Text Color",  QColorDialog::DontUseNativeDialog);
-    QString qss = QString("background-color: %1").arg(rg.name());
-    ui->pushButton_7->setStyleSheet(qss);
-    ui->pushButton_7->setText(""+rg.name());
-    qDebug() << "Color chosen: "+rg.name();
+    if(rg.isValid())
+    {
+        QString qss = QString("background-color: %1").arg(rg.name());
+        ui->pushButton_7->setStyleSheet(qss);
+        ui->pushButton_7->setText(""+rg.name());
+        qDebug() << "Color chosen: "+rg.name();
+    }
+    else
+        qDebug() << "Color not valid";
 }
 
 void MainWindow::on_pushButton_8_clicked()
@@ -251,7 +281,7 @@ void MainWindow::on_pushButton_10_clicked()
 
 		//create planet
 		addParameters();
-		mySphere = new PSphere(100, 0, 0, 0, *params);
+        mySphere = new PSphere(100, 0, 0, 0, *params);
 		//push to pshere export-method with filename + resolution
 		if(ui->comboBox_2->currentIndex() == 0)
 		{
@@ -278,7 +308,7 @@ void MainWindow::on_pushButton_10_clicked()
 			qDebug() << "Function exportMap returned false";
 		}
 
-		delete mySphere;
+        delete mySphere;
 	}
 }
 
