@@ -8,11 +8,6 @@ material Material.001
     {
         pass Material.001
         {
-            ambient 0.800000011920929 0.800000011920929 0.800000011920929 1.0
-            diffuse 0.6400000190734865 0.6400000190734865 0.6400000190734865 1.0
-            specular 0.0 0.0 0.0 1.0 12.5
-            emissive 0.800000011920929 0.800000011920929 0.800000011920929 1.0
-
             alpha_to_coverage off
             colour_write on
             cull_hardware clockwise
@@ -35,7 +30,7 @@ material Material.001
                 texture "space rock tex 3.jpg"
                 tex_address_mode wrap
                 scale 1.0 1.0
-                colour_op replace
+                colour_op modulate
             }
         }
     }

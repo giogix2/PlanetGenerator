@@ -8,11 +8,6 @@ material ram_skin_horns
     {
         pass ram_skin_horns
         {
-            ambient 0.3240285813808441 0.3240285813808441 0.3240285813808441 1.0
-            diffuse 0.259222868967397 0.259222868967397 0.259222868967397 1.0
-            specular 0.20000000298023224 0.20000000298023224 0.20000000298023224 1.0 6.0
-            emissive 0.06480571724184925 0.06480571724184925 0.06480571724184925 1.0
-
             alpha_to_coverage off
             colour_write on
             cull_hardware clockwise
@@ -35,7 +30,7 @@ material ram_skin_horns
                 texture char_ram_col.jpg
                 tex_address_mode wrap
                 scale 1.0 1.0
-                colour_op replace
+                colour_op modulate
             }
         }
     }

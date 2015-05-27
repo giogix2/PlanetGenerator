@@ -8,11 +8,6 @@ material ram_skin
     {
         pass ram_skin
         {
-            ambient 0.7434145212173462 0.564552366733551 0.564552366733551 1.0
-            diffuse 0.07434145322950858 0.056455237514603684 0.056455237514603684 1.0
-            specular 0.0 0.0 0.0 1.0 15.25
-            emissive 0.14868290645901716 0.11291047502920737 0.11291047502920737 1.0
-
             alpha_to_coverage off
             colour_write on
             cull_hardware clockwise
@@ -35,7 +30,7 @@ material ram_skin
                 texture char_ram_col.jpg
                 tex_address_mode wrap
                 scale 1.0 1.0
-                colour_op replace
+                colour_op modulate
             }
         }
     }
