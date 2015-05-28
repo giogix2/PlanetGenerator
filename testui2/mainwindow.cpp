@@ -403,7 +403,7 @@ void MainWindow::addParameters()
 
 void MainWindow::on_pushButton_12_clicked()
 {
-    QString filename = QFileDialog::getSaveFileName(this, "Save image", "media/models", "*.mesh" );
+	QString filename = QFileDialog::getSaveFileName(this, "Export mesh", "media/models", "*.mesh" );
     if (!filename.isEmpty())
     {
         QString extension = filename.right(5);
