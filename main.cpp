@@ -56,9 +56,9 @@ int main(int argc, char *argv[])
 		// Calculate fontsize. size 8 is for dpi 96
 		fontSize = 8;
 		qDebug() << "DPI is:" << w.logicalDpiX() << w.logicalDpiY();
-		fontSize = roundf(((float)fontSize+0.25f) * (96.0f / w.logicalDpiY()));
+		fontSize = (unsigned int)((((float)fontSize+0.25f) * (96.0f / w.logicalDpiY()))+0.5f);
 		qDebug() << "Setting fontsize to:" << fontSize;
-
+		
 		QFont font("Arial", fontSize);
 		a.setFont(font);
 
