@@ -32,7 +32,7 @@
 #include "testui2/mainwindow.h"
 #include <QApplication>
 #include "ResourceParameter.h"
-
+#include <QDebug>
 
 using namespace std;
 
@@ -48,13 +48,20 @@ int main(int argc, char *argv[])
 {
 	if(argc==1) //no arguments, run planet generator
 	{
-
+		unsigned int fontSize;
 		//#pragma comment( linker, "/subsystem:windows" )
 		QApplication a(argc, argv);
 		MainWindow w;
-		QFont font("Arial", 11);
 
+		// Calculate fontsize. size 8 is for dpi 96
+		fontSize = 8;
+		qDebug() << "DPI is:" << w.logicalDpiX() << w.logicalDpiY();
+		fontSize = roundf(((float)fontSize+0.25f) * (96.0f / w.logicalDpiY()));
+		qDebug() << "Setting fontsize to:" << fontSize;
+
+		QFont font("Arial", fontSize);
 		a.setFont(font);
+
 		w.show();
 		a.exec();
 	}else if(argc==2 && (std::strcmp(argv[1],"t")==0) )
