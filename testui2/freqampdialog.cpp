@@ -32,10 +32,17 @@ FreqAmpDialog::FreqAmpDialog(QWidget *parent) :
     ui->setupUi(this);
 
     setFixedSize(geometry().width(), geometry().height());
+
+    QRegExp rex("[0-9]\\.\\d{0,6}|(10)");
+    validator = new QRegExpValidator(rex, this);
+
+    ui->lineEdit->setValidator( validator );
+    ui->lineEdit_2->setValidator( validator );
 }
 
 FreqAmpDialog::~FreqAmpDialog()
 {
+    delete validator;
     delete ui;
 }
 
@@ -47,16 +54,6 @@ void FreqAmpDialog::on_pushButton_clicked()
 
     ui->listWidget->addItem(""+freq+","+amp);
 
-}
-
-void FreqAmpDialog::on_buttonBox_accepted()
-{
-	//for(int i=0; i<ui->listWidget->count(); i++)
-	//{
-	//	//qDebug() << "" +ui->listWidget->item(i)->text();
-	//	//connect(, SIGNAL(accepted()), this, SLOT(setAmps(ui->lineEdit->text().toFloat(), ui->lineEdit_2->text().toFloat())) );
-	//	//MainWindow::setAmps(ui->lineEdit->text().toFloat(), ui->lineEdit_2->text().toFloat());		
-	//}
 }
 
 QListWidget* FreqAmpDialog::getThem()
@@ -76,6 +73,5 @@ void FreqAmpDialog::instantiateList(std::vector< std::pair < float, float > > fr
         QString freq = QString::number(iter->first);
         QString amp = QString::number(iter->second);
         ui->listWidget->addItem(""+freq+","+amp);
-        //qDebug() << iter->first <<", " << iter->second;
     }
 }

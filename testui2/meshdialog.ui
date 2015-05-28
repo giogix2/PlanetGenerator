@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>Import meshes to planet</string>
   </property>
   <widget class="QDialogButtonBox" name="buttonBox">
    <property name="geometry">
@@ -89,6 +89,9 @@
      <width>42</width>
      <height>22</height>
     </rect>
+   </property>
+   <property name="minimum">
+    <number>1</number>
    </property>
   </widget>
   <widget class="QPushButton" name="pushButton_2">

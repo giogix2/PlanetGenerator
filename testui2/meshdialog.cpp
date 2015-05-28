@@ -51,9 +51,6 @@ void MeshDialog::on_pushButton_clicked()
     else
         qDebug() << "File null";
 
-    //QListWidgetItem *item = new QListWidgetItem(meshpath.toString());
-    //item->setTextAlignment(Qt::AlignRight);
-
 }
 
 QListWidget* MeshDialog::getMeshes()
@@ -77,6 +74,5 @@ void MeshDialog::instantiateList(std::vector< std::pair < std::string, int > > m
         QString meshLoc = QString::fromStdString(iter->first);
         QString objAmount = QString::number(iter->second);
         ui->listWidget->addItem(""+meshLoc+","+objAmount);
-        //qDebug() << QString::fromStdString(iter->first) <<", " << QString::number(iter->second);
     }
 }

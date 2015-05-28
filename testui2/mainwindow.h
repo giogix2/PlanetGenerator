@@ -44,11 +44,6 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
-
-public slots:
-	void setAmps(float p_val1, float p_val2);
-    void setMeshes(QString p_path, int p_count);
-
 private slots:
     void on_pushButton_clicked();   
 

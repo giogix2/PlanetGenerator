@@ -103,7 +103,6 @@ void MainWindow::on_pushButton_clicked()
 	delete mySphere;
     rendering->cleanup();
     delete rendering;
-
 }
 
 void MainWindow::on_pushButton_2_clicked()
@@ -208,22 +207,13 @@ void MainWindow::openNewWindow()
 		for(int i=0; i<dialog->getThem()->count(); i++)
 		{			
 			QStringList values = dialog->getThem()->item(i)->text().split(",");
+
             //put values to ResourceParameter vector
-            //setAmps( values.value(0).toFloat(),  values.value(1).toFloat());
 			frequencyAmplitude += values.value(0).toStdString() + ' ' +  values.value(1).toStdString() + ' ';
 		}
 		params->setFrequencyAmplitude(frequencyAmplitude, ' ');
 	}	
     delete dialog;
-}
-
-void MainWindow::setAmps(float p_val1, float p_val2)
-{
-    //params->setFrequencyAmplitude(p_val1, p_val2);
-
-    //alternate way:
-    //params->setFrequency(p_val1);
-    //params->setAmplitude(p_val2);
 }
 
 void MainWindow::on_pushButton_9_clicked()
@@ -240,19 +230,10 @@ void MainWindow::on_pushButton_9_clicked()
             QStringList values = meshdialog->getMeshes()->item(i)->text().split(",");
 
             //put values to ResourceParameter vector
-            setMeshes( values.value(0),  values.value(1).toInt());
+            params->setMeshLocObjAmount(values.value(0).toStdString(), values.value(1).toInt());
         }
     }
     delete meshdialog;
-}
-
-void MainWindow::setMeshes(QString p_path, int p_count)
-{
-    params->setMeshLocObjAmount(p_path.toStdString(), p_count);
-
-    //alternate way:
-    //params->setMeshLocation(p_path.toStdString());
-    //params->setObjectAmount(p_count);
 }
 
 void MainWindow::on_pushButton_10_clicked()
@@ -313,10 +294,9 @@ void MainWindow::on_pushButton_10_clicked()
 }
 
 void MainWindow::on_pushButton_11_clicked()
-{
-    //Todo:: refresh-button
+{    
     addParameters();
-	mySphere = new PSphere(100, 0, 0, 0, *params);
+    mySphere = new PSphere(100, 0, 0, 0, *params);
 
 	unsigned short width =  196;
 	unsigned short height =  98;
@@ -441,6 +421,6 @@ void MainWindow::on_pushButton_12_clicked()
 		// Must delete PSphere before cleaning initOgre
 		delete tempPlanet;
 		temp->cleanupSavePlanetAsMesh();
-		delete temp;
+        delete temp;
 	}
 }
