@@ -869,6 +869,11 @@ bool PSphere::getGridLocation(Ogre::Vector3 location, Grid **face,
 		location.z *= 0.9999;
 	}
 
+	// reassign absolut values in case location vector was changed
+	x = Ogre::Math::Abs(location.x);
+	y = Ogre::Math::Abs(location.y);
+	z = Ogre::Math::Abs(location.z);
+
 	if (x > y && x > z)
 	{
 		// Scale longest component to unit length
