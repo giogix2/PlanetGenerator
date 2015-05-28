@@ -329,7 +329,6 @@ void initOgre::savePlanetAsMesh(PSphere *planet, const std::string &exportFile)
 
 //	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
-
 	// Draw a sphere
 	planet->loadToBuffers("CustomMesh", "sphereTex");
 
@@ -341,22 +340,17 @@ void initOgre::savePlanetAsMesh(PSphere *planet, const std::string &exportFile)
 	pass->setLightingEnabled(true);
 	pass->setDepthCheckEnabled(true);
 	pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+	std::cout << matSphere->getName() << std::endl;
 
-	Ogre::TextureUnitState *tex = pass->createTextureUnitState("MyCustomState", 0);
-	tex->setTextureName("planet.png");
+	Ogre::TextureUnitState *tex = pass->createTextureUnitState("sphereTex", 0);
+	//tex->setTextureName("sphereTex");
 	tex->setTextureFiltering(Ogre::TFO_TRILINEAR);
-
-	Ogre::MaterialPtr textureMap = Ogre::MaterialManager::getSingleton()
-			.create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-	textureMap->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex");
-	textureMap->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
 
 	matSphere->load();
 	// Set texture for the sphere
-	sphereEntity->setMaterial(textureMap);
+	sphereEntity->setMaterial(matSphere);
 
-//	Ogre::SubEntity *subEntity1 = entity1->getSubEntity(0);
-//	Ogre::MaterialPtr planetTexture = subEntity1->getMaterial();
+	std::cout << "Entity material name: " << sphereEntity->getSubEntity(0)->getMaterialName() << std::endl;
 
 	//Export the shape in a mesh file before destroying it
 	Ogre::MeshPtr mesh;
