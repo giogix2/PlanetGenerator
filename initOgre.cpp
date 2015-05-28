@@ -335,11 +335,23 @@ void initOgre::savePlanetAsMesh(PSphere *planet, const std::string &exportFile)
 
 	Ogre::Entity *sphereEntity = Scene->createEntity("CustomEntity", "CustomMesh");
 
+	Ogre::MaterialPtr matSphere;
+	matSphere = Ogre::MaterialManager::getSingleton().create("TexMap", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	Ogre::Pass *pass = matSphere->getTechnique(0)->getPass(0);
+	pass->setLightingEnabled(true);
+	pass->setDepthCheckEnabled(true);
+	pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+
+	Ogre::TextureUnitState *tex = pass->createTextureUnitState("MyCustomState", 0);
+	tex->setTextureName("planet.png");
+	tex->setTextureFiltering(Ogre::TFO_TRILINEAR);
+
 	Ogre::MaterialPtr textureMap = Ogre::MaterialManager::getSingleton()
 			.create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 	textureMap->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex");
 	textureMap->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
 
+	matSphere->load();
 	// Set texture for the sphere
 	sphereEntity->setMaterial(textureMap);
 
