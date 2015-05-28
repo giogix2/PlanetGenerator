@@ -329,22 +329,31 @@ void initOgre::savePlanetAsMesh(PSphere *planet, const std::string &exportFile)
 
 //	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
-
 	// Draw a sphere
 	planet->loadToBuffers("CustomMesh", "sphereTex");
 
 	Ogre::Entity *sphereEntity = Scene->createEntity("CustomEntity", "CustomMesh");
 
-	Ogre::MaterialPtr textureMap = Ogre::MaterialManager::getSingleton()
-			.create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-	textureMap->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex");
-	textureMap->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+	/* Material parameters are probably useless to set up as we are only
+	 * interested on setting material name for a mesh */
+	Ogre::MaterialPtr matSphere;
+	matSphere = Ogre::MaterialManager::getSingleton().create("TexMap", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	Ogre::Pass *pass = matSphere->getTechnique(0)->getPass(0);
+	pass->setLightingEnabled(true);
+	pass->setDepthCheckEnabled(true);
+	pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+	std::cout << matSphere->getName() << std::endl;
 
-	// Set texture for the sphere
-	sphereEntity->setMaterial(textureMap);
+	Ogre::TextureUnitState *tex = pass->createTextureUnitState("sphereTex", 0);
+	tex->setColourOperation(Ogre::LBO_MODULATE);
+	tex->setTextureFiltering(Ogre::TFO_TRILINEAR);
 
-//	Ogre::SubEntity *subEntity1 = entity1->getSubEntity(0);
-//	Ogre::MaterialPtr planetTexture = subEntity1->getMaterial();
+	matSphere->load();
+	/* Set texture for the sphere, does nothing if you want to export mesh with
+	 * material. */
+	sphereEntity->setMaterial(matSphere);
+	// Mesh has now information for material name
+	sphereEntity->getMesh()->getSubMesh(0)->setMaterialName("TexMap");
 
 	//Export the shape in a mesh file before destroying it
 	Ogre::MeshPtr mesh;
