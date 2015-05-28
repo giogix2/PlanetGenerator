@@ -56,8 +56,6 @@ public:
 
 	void moveObject(const std::string &objectName, int direction, float pace);
 
-	Ogre::MeshPtr getMesh();
-
 	void setObserverPosition(Ogre::Vector3 position);
 
 	Ogre::Real getObserverDistanceToSurface();
@@ -99,7 +97,6 @@ private:
 	unsigned short		surfaceTextureWidth;
 	unsigned short		surfaceTextureHeight;
 	unsigned char		*exportImage;
-	Ogre::MeshPtr		mesh;
 	Ogre::Vector3		observer;
 	HeightMap			*faceYP;
 	HeightMap			*faceXM;

@@ -666,8 +666,6 @@ void PSphere::loadToBuffers(const std::string &meshName, const std::string &text
 
 	mesh->load();
 
-	this->mesh = mesh;
-
 	// Texture stuff
 	Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton()
 			.createManual(textureName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
@@ -836,11 +834,6 @@ void PSphere::attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scen
 
 	ObjectInfo object = ObjectInfo(position, finalName, node);
 	objects.push_back(object);
-}
-
-
-Ogre::MeshPtr PSphere::getMesh(){
-	return mesh;
 }
 
 /* Figures which one of the cubefaces 3D-location lands, and what 2D-coordinates
