@@ -334,6 +334,8 @@ void initOgre::savePlanetAsMesh(PSphere *planet, const std::string &exportFile)
 
 	Ogre::Entity *sphereEntity = Scene->createEntity("CustomEntity", "CustomMesh");
 
+	/* Material parameters are probably useless to set up as we are only
+	 * interested on setting material name for a mesh */
 	Ogre::MaterialPtr matSphere;
 	matSphere = Ogre::MaterialManager::getSingleton().create("TexMap", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 	Ogre::Pass *pass = matSphere->getTechnique(0)->getPass(0);
@@ -343,14 +345,15 @@ void initOgre::savePlanetAsMesh(PSphere *planet, const std::string &exportFile)
 	std::cout << matSphere->getName() << std::endl;
 
 	Ogre::TextureUnitState *tex = pass->createTextureUnitState("sphereTex", 0);
-	//tex->setTextureName("sphereTex");
+	tex->setColourOperation(Ogre::LBO_MODULATE);
 	tex->setTextureFiltering(Ogre::TFO_TRILINEAR);
 
 	matSphere->load();
-	// Set texture for the sphere
+	/* Set texture for the sphere, does nothing if you want to export mesh with
+	 * material. */
 	sphereEntity->setMaterial(matSphere);
-
-	std::cout << "Entity material name: " << sphereEntity->getSubEntity(0)->getMaterialName() << std::endl;
+	// Mesh has now information for material name
+	sphereEntity->getMesh()->getSubMesh(0)->setMaterialName("TexMap");
 
 	//Export the shape in a mesh file before destroying it
 	Ogre::MeshPtr mesh;
