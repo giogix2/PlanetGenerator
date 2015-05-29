@@ -329,7 +329,18 @@ void initOgre::savePlanetAsMesh(PSphere *planet, const std::string &exportFile)
 
 //	Ogre::ResourceGroupManager::getSingleton().initialiseAllResourceGroups();
 
-	// Draw a sphere
+	// manipulate filename
+	const size_t last_slash = exportFile.find_last_of("\\/");
+	std::string name = exportFile;
+
+	name.erase(0, last_slash + 1);
+	name.erase(name.length()-5, name.length()); // Name of files without extension
+
+	// Materials name
+	std::string materialName = name + "_Material";
+
+
+	// Create mesh
 	planet->loadToBuffers("CustomMesh", "sphereTex");
 
 	Ogre::Entity *sphereEntity = Scene->createEntity("CustomEntity", "CustomMesh");
@@ -337,12 +348,11 @@ void initOgre::savePlanetAsMesh(PSphere *planet, const std::string &exportFile)
 	/* Material parameters are probably useless to set up as we are only
 	 * interested on setting material name for a mesh */
 	Ogre::MaterialPtr matSphere;
-	matSphere = Ogre::MaterialManager::getSingleton().create("TexMap", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+	matSphere = Ogre::MaterialManager::getSingleton().create(materialName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 	Ogre::Pass *pass = matSphere->getTechnique(0)->getPass(0);
 	pass->setLightingEnabled(true);
 	pass->setDepthCheckEnabled(true);
 	pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-	std::cout << matSphere->getName() << std::endl;
 
 	Ogre::TextureUnitState *tex = pass->createTextureUnitState("sphereTex", 0);
 	tex->setColourOperation(Ogre::LBO_MODULATE);
@@ -353,13 +363,34 @@ void initOgre::savePlanetAsMesh(PSphere *planet, const std::string &exportFile)
 	 * material. */
 	sphereEntity->setMaterial(matSphere);
 	// Mesh has now information for material name
-	sphereEntity->getMesh()->getSubMesh(0)->setMaterialName("TexMap");
+	sphereEntity->getMesh()->getSubMesh(0)->setMaterialName(materialName);
 
 	//Export the shape in a mesh file before destroying it
 	Ogre::MeshPtr mesh;
 	mesh = sphereEntity->getMesh();
 	Ogre::MeshSerializer ser;
 	ser.exportMesh(mesh.getPointer(), exportFile,  Ogre::MeshSerializer::ENDIAN_NATIVE);
+
+#if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
+	std::string materialPath = "media\\materials\\scripts\\";
+	std::string texturePath = "media\\materials\\textures\\";
+#else
+	std::string materialPath = "media/materials/scripts/";
+	std::string texturePath = "media/materials/textures/";
+#endif
+
+	std::string textureFile = name + ".png";
+	if (!planet->exportMap(1024, 512, texturePath+textureFile, PSphere::MAP_EQUIRECTANGULAR))
+	{
+		Ogre::LogManager::getSingleton().logMessage("Saving texture failed!");
+	}
+	else
+	{
+		Ogre::LogManager::getSingleton().logMessage("Saving texture succeeded!");
+	}
+
+	std::string materialFile = name + ".material";
+	saveMaterialFile(materialPath+materialFile, sphereEntity->getMesh()->getSubMesh(0)->getMaterialName(), textureFile);
 }
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
@@ -406,3 +437,19 @@ std::string initOgre::findPlugin()
 	return PluginName;
 }
 #endif
+
+void initOgre::saveMaterialFile(const std::string &fileName, const std::string &material, const std::string &textureName)
+{
+	std::ofstream matFile;
+
+	matFile.open(fileName.c_str());
+	matFile << "material " << material << "\n{\n";
+	matFile << "    receive_shadows on\n\n    technique\n    {\n        pass\n";
+	matFile << "        {\n            texture_unit\n            {\n";
+	matFile << "                texture " << textureName << "\n";
+	matFile << "                tex_address_mode wrap\n";
+	matFile << "                scale 1.0 -1.0\n";
+	matFile << "                colour_op modulate\n";
+	matFile << "            }\n        }\n    }\n}\n";
+	matFile.close();
+}

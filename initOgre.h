@@ -50,6 +50,7 @@ private:
 	CollisionManager		*CollisionDetectionManager;
 
 	void CreateFrameListener(PSphere *pSphere);
+	void saveMaterialFile(const std::string &fileName, const std::string &material, const std::string &textureName);
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX
 	std::string findPlugin();
