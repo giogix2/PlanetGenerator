@@ -40,24 +40,24 @@
       <h3>
 <a id="welcome-to-planet-generator" class="anchor" href="#welcome-to-planet-generator" aria-hidden="true"><span class="octicon octicon-link"></span></a>How to start</h3>
 
-<pre><code> mySphere = new PSphere();
- mySphere->create(100, *params);
+<pre><code> mySphere = new PSphere(100, 40, 1024, 512, *params);
  rendering = new initOgre();
  rendering->start();
  rendering->setSceneAndRun(mySphere);
  delete mySphere;
  rendering->cleanup();
+ delete rendering;
 </code></pre>
 
 <p>The objects <b>PSphere</b> and <b>ResourceParameter</b> are the only things you need. To set up the Ogre 3D environment (as such the scene and the lights), the class initOgre can be used.<BR>
   <ul>
-    <li><b>new PSphere():</b> The object PSphere is created. It's the class representing the planet itself.</li>
-    <li><b>create(100, *params):</b> The planet is set up. The first parameter indicates the number of vertices. The second paramenter is a ResourceParameter object, containing all the information of the planet (for example: water percentage, colors used, diameter, etc.)</li>
+    <li><b>new PSphere(100, 40, 1024, 512, *params):</b> The object PSphere is created. It's a class representing the planet itself. The planet is set up by the constructor. The first parameter indicates the number of vertices, second grid-resolution, third and fourth texture resolution and fifth is a ResourceParameter object, containing all the information of the planet (for example: water percentage, colors used, radius, etc.)</li>
     <li><b>new initOgre():</b> The object initOgre is created. </li>
     <li><b>start():</b> It's set up the Ogre 3D environment, such the scene or the lights.</li>
     <li><b>setSceneAndRun(mySphere):</b> The planet is passed to the Ogre's scene just created, and it starts to show it in the window.</li>
     <li><b>delete mySphere:</b> The planet is destroid and memory is released.</li>
     <li><b>rendering->cleanup():</b> Object relative to the Ogre's scene are destroid.</li>
+    <li><b>delete rendering:</b> Finalize deletion of the object.</li>
   </ul>
 </p>
 
