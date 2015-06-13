@@ -40,7 +40,7 @@
     <section class="main-content">
 
 <h3>
-<a id="welcome-to-planet-generator" class="anchor" href="#welcome-to-planet-generator" aria-hidden="true"><span class="octicon octicon-link"></span></a>Try the executable project.</h3>
+<a id="tryExe" class="anchor" href="#tryExe" aria-hidden="true"><span class="octicon octicon-link"></span></a>Try the executable project.</h3>
 
 <p>You can try the executable project (on Windows). Linux users can build the project with make (make files come with the code). The executable project provides a graphical user interface to help setting all the fundamental parameters. Anyway the exexutable project doesn't provide all the features present in the code, since it has been thought just as starting point for those who want to work with this project. Download and run <a href="https://github.com/giogix2/PlanetGenerator/releases/download/v0.2/PlanetGenerator.rar"> PlanetGenerator</a>.<BR>
   <ol>
@@ -57,9 +57,43 @@
   </ol>
 </p>
 
+<h3>
+<a id="putObject" class="anchor" href="#putObject" aria-hidden="true"><span class="octicon octicon-link"></span></a>Put objects on the planet.</h3>
+<p>You can put any .mesh object on the planet. You can create these with any modelling tool, like Blender. The .mesh files have to be put in the "/media/models" folder. If there are any material (.material) and texture (.jpg, .png, etc.) files, these go respectively in the "/media/materials/script" and "/media/materials/textures" folders. All the files contained in "/media" folder and subfolders is automatically loaded in the beginning. You can choose how many objects of each kind to put on the planet, and an automatic name will be given to those. Objects are put in random positions.<BR> This project already provides two 3D objects. The first represents a <a href="http://www.3dvia.com/models/67EC495D6F415365/ramiro-the-ram">ram</a>. The second represents an <a href="http://www.3dvia.com/models/DB67BDD1E3F5C7D9/asteroid">asteroid</a>.</a><BR></p>
+<div style="text-align: center;"><img src="images/GUI6.jpg" alt="Planets" left: 30px; style="width:413px;height:337px"><img src="images/Ram.jpg" alt="Planets" left: 30px; style="width:413px;height:337px"></div>
 
-
-
+<h3>
+<a id="moveObject" class="anchor" href="#moveObject" aria-hidden="true"><span class="octicon octicon-link"></span></a>Choose and move objects.</h3>
+<p>Objetcts put on the planet can also be selected and moved. Here's the list of buttons which can permit to interact with the objects:
+<ul>
+    <li><b>"o": </b> select next object. The name of the selected object appears in the bottom of the window.</li>
+    <li><b>"u": </b> select previous object. The name of the selected object appears in the bottom of the window.</li>
+    <li><b>"i": </b> move the selected object up.</li>
+    <li><b>"k": </b> move the selected object down.</li>
+    <li><b>"l": </b> move the selected object to the right.</li>
+    <li><b>"j": </b> move the selected object to the left.</li>
+    <div style="text-align: center;"><img src="images/Ram.jpg" alt="Planets" left: 30px; style="width:814px;height:635px"></div>
+  </ul>
+</p>
+<h3>
+<a id="viewMode" class="anchor" href="#viewMode" aria-hidden="true"><span class="octicon octicon-link"></span></a>View mode</h3>
+<p>There are 3 different way to view the planet: "texture view", "line view" and "vertex view". This can be changed pressing the button "r".</p>
+<div style="text-align: center;">
+	<img src="images/LineView.jpg" alt="Planets" left: 30px; style="width:573px;height:544px">
+	<img src="images/VertexView.jpg" alt="Planets" left: 30px; style="width:561px;height:540px">
+</div>
+<p>Additionally, pressing the button "f" it's possible to show/hidden an overlay containing the following information:
+<ul>
+	<li><b>Current fps</b></li>
+    <li><b>Average fps</b></li>
+    <li><b>Worst fps</b></li>
+    <li><b>Best fps</b></li>
+    <li><b>Triangle count</b></li>
+  </ul>
+  <div style="text-align: center;">
+	<img src="images/Overlay.jpg" alt="Planets" left: 30px; style="width:220px;height:102px">
+</div>
+</p>
       <footer class="site-footer">
         <span class="site-footer-owner"><a href="https://github.com/giogix2/PlanetGenerator">Planetgenerator</a> is maintained by <a href="https://github.com/giogix2">giogix2</a>, <a href="https://github.com/latami">latami</a>, <a href="https://github.com/LiPingjiang">LiPingjiang</a>, <a href="https://github.com/tommipu">tommipu</a>, <a href="https://github.com/mvahida">mvahida</a></span>
 
