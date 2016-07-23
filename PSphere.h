@@ -52,20 +52,41 @@ public:
 
 	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, Ogre::Real latitude, Ogre::Real longitude);
 
+    /* To skip collision detection while moving object, I try to attach it on the ground and set the initial orientation
+    *Maybe later we need object in air or outer space, so I leave attachmesh() and create this function which could put the object on ground. */
 	void attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude);
 
 	void moveObject(const std::string &objectName, int direction, float pace);
 
+    /* Set position for the observer. This must be position vector in modelspace,
+     * not in worldspace. In other words, one must undo rotations. */
 	void setObserverPosition(Ogre::Vector3 position);
 
+    /* Gives observer distance to the point on surface that is directly between
+     * observer and planet origo.
+     * Negative values mean that the observer is inside the planet */
 	Ogre::Real getObserverDistanceToSurface();
 
+    /* Get the Height of a particular position of the surface.
+     * Position is a 3-d vector over the surface which you need to know the height
+     * return the height */
 	Ogre::Real getSurfaceHeight(Ogre::Vector3 Position);
 
+    /* Checks if position is water or solid ground.
+     * Returns:
+     *  On ground, return true.
+     *  On water or has an object, return false. */
 	bool checkAccessibility(Ogre::Vector3 location);
 
+    /* return radius */
 	Ogre::Real getRadius();
 
+    /* Figures which one of the cubefaces 3D-location lands, and what 2D-coordinates
+     * that face has.
+     * Returns:
+     *	On success, pointer to a pointer of HeightMap location lands,
+     *	HeightMap-coordinates x and y, and function return value true.
+     *	On failure, return function value is false. */
 	bool getGridLocation(Ogre::Vector3 location, Grid **face, unsigned int &x, unsigned int &y);
 
 	Ogre::Vector3 nextPosition(Ogre::Vector3 location, PSphere::Direction dir);
@@ -74,8 +95,12 @@ public:
 
 	void setCollisionManager(CollisionManager	*CDM);
 
+    /* Saves map to the given filename. With MapType MAP_CUBE ignores height-variable */
 	bool exportMap(unsigned short width, unsigned short height, string fileName, MapType type);
 
+    /* Generates a map and gives pointer to array that has rgb-image
+     * information. Then MapType is MAP_CUBE, ignores height variable.
+     * With wrong type, returns NULL-pointer. */
 	unsigned char *exportMap(unsigned short width, unsigned short height, MapType type);
 
 	PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, Ogre::uint16 textureWidth, Ogre::uint16 textureHeight, ResourceParameter resourceParameter);
@@ -117,10 +142,12 @@ private:
 	Ogre::Real			maximumHeight;
 	Ogre::Real			minimumHeight;
 
+    // Makes a sphere out of a cube that is made of 6 squares
 	void create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter);
 
 	void calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour);
 
+    /* Fix a seam by adding vertex duplicates with texture u going over 1.0 */
 	void fixTextureSeam();
 
 	void calculateSeaLevel(float &minElev, float &maxElev, float seaFraction);
@@ -136,10 +163,13 @@ private:
 	Ogre::Real heightNoise(vector<float> &amplitude,
 						   vector<float> &frequency, Ogre::Vector3 Point);
 
+    // Returns colour-values for one pixel
 	Ogre::ColourValue generatePixel(Ogre::Real height,
 									   Ogre::ColourValue water1st, Ogre::ColourValue water2nd, Ogre::ColourValue terrain1st,
 									   Ogre::ColourValue terrain2nd, Ogre::ColourValue mountain1st, Ogre::ColourValue mountain2nd);
 
+    /* Generates surface-texturemap using noise-generated height differences.
+     * Expects pointer to be already correctly allocated. */
 	void generateImage(unsigned short width, unsigned short height, unsigned char *image);
 
 	void generateMeshData();

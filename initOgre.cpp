@@ -53,7 +53,7 @@ int initOgre::start(){
 
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-	PluginName.append("RenderSystem_Direct3D9");
+    PluginName.append("RenderSystem_GL");
 #else
 	PluginName = findPlugin();
 #endif
@@ -291,7 +291,7 @@ void initOgre::savePlanetAsMesh(PSphere *planet, const std::string &exportFile)
 
 	// Renderer is required to create window
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-	PluginName.append("RenderSystem_Direct3D9");
+    PluginName.append("RenderSystem_GL");
 #else
 	PluginName = findPlugin();
 #endif

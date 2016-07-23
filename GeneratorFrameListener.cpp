@@ -36,13 +36,9 @@ GeneratorFrameListener::GeneratorFrameListener(	Ogre::RenderWindow* win, Ogre::C
 {
 
 	CollisionDetectionManager = CDM;
-
 	RootSceneNode = RSN;
-
 	Scene = Sc;
-
 	pSphere = ps;
-
 	selectedObject=NULL;
 
 	Ogre::LogManager::getSingletonPtr()->logMessage("*** Initializing OIS ***");
@@ -69,6 +65,9 @@ GeneratorFrameListener::GeneratorFrameListener(	Ogre::RenderWindow* win, Ogre::C
 	//Set initial mouse clipping size
 	windowResized(mWindow);
 
+    /********************************************************************************
+     *                          OVERLAY
+     * ******************************************************************************/
 	//overlay ststem
 	Ogre::OverlayManager &overlayManager = Ogre::OverlayManager::getSingleton();
 	mDebugOverlay = overlayManager.getByName("Core/DebugOverlay");
@@ -84,6 +83,9 @@ GeneratorFrameListener::GeneratorFrameListener(	Ogre::RenderWindow* win, Ogre::C
 	//border->setMaterialName( "BaseWhite" );
 	//border->setMaterialName("Examples/Rockwall");
 
+    /********************************************************************************
+     *                          TEXT AREA
+     * ******************************************************************************/
 	// Create a text area
 	Ogre::TextAreaOverlayElement* textArea = static_cast<Ogre::TextAreaOverlayElement*>(
     overlayManager.createOverlayElement("TextArea", "InformationText"));
@@ -102,18 +104,14 @@ GeneratorFrameListener::GeneratorFrameListener(	Ogre::RenderWindow* win, Ogre::C
 	border->addChild(textArea);
 	mInformationOverlay->add2D(border);
 	mInformationOverlay->show();
-
-		
 	//mWindow->resize(800, 700);
 
 	//Register as a Window listener
 	Ogre::WindowEventUtilities::addWindowEventListener(mWindow, this);	
-
 }
 
 void GeneratorFrameListener::updateStats(void)
 {
-
     static Ogre::String currFps = "Current FPS: ";
     static Ogre::String avgFps = "Average FPS: ";
     static Ogre::String bestFps = "Best FPS: ";
@@ -144,62 +142,7 @@ void GeneratorFrameListener::updateStats(void)
     {
         // ignore
     }
-
 }
-
-#ifdef INCLUDE_RTSHADER_SYSTEM
-void GeneratorFrameListener::processShaderGeneratorInput()
-{
-	// Switch to default scheme.
-	if (mKeyboard->isKeyDown(OIS::KC_F2))
-	{	
-		mCamera->getViewport()->setMaterialScheme(MaterialManager::DEFAULT_SCHEME_NAME);			
-		mDebugText = "Active Viewport Scheme: ";
-		mDebugText += MaterialManager::DEFAULT_SCHEME_NAME;						
-	}
-
-	// Switch to shader generator scheme.
-	if (mKeyboard->isKeyDown(OIS::KC_F3))
-	{
-		mCamera->getViewport()->setMaterialScheme(RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
-		mDebugText = "Active Viewport Scheme: ";
-		mDebugText += RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME;
-	}	
-
-	// Toggles per pixel per light model.
-	if (mKeyboard->isKeyDown(OIS::KC_F4) && mTimeUntilNextToggle <= 0)
-	{	
-		mTimeUntilNextToggle = 1.0;
-
-		static bool userPerPixelLightModel = true;
-		RTShader::ShaderGenerator* shaderGenerator = RTShader::ShaderGenerator::getSingletonPtr();			
-		RTShader::RenderState* renderState = shaderGenerator->getRenderState(RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
-
-		// Remove all global sub render states.
-		renderState->reset();
-
-		// Add per pixel lighting sub render state to the global scheme render state.
-		// It will override the default FFP lighting sub render state.
-		if (userPerPixelLightModel)
-		{
-			RTShader::SubRenderState* perPixelLightModel = shaderGenerator->createSubRenderState(RTShader::PerPixelLighting::Type);
-			renderState->addTemplateSubRenderState(perPixelLightModel);
-
-			mDebugText = "Per pixel lighting model applied to shader generator default scheme";
-		}
-		else
-		{
-			mDebugText = "Per vertex lighting model applied to shader generator default scheme";
-		}
-
-		// Invalidate the scheme in order to re-generate all shaders based technique related to this scheme.
-		shaderGenerator->invalidateScheme(RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
-
-		userPerPixelLightModel = !userPerPixelLightModel;
-	}	
-		
-}
-#endif
 
 void GeneratorFrameListener::windowResized(Ogre::RenderWindow* rw)
 {
@@ -250,13 +193,11 @@ bool GeneratorFrameListener::processUnbufferedKeyInput(const Ogre::FrameEvent& e
 		mTranslateVector.z = -pSphere->getRadius()*0.1;
 	}
 			
-
 	if(mKeyboard->isKeyDown(OIS::KC_DOWN) || mKeyboard->isKeyDown(OIS::KC_S) )
 	{
 		mTranslateVector.z = pSphere->getRadius()*0.1;
 	}
 			
-
 	if(mKeyboard->isKeyDown(OIS::KC_PGUP))
 		mTranslateVector.y = moveScale;	// Move camera up
 
@@ -476,7 +417,6 @@ bool GeneratorFrameListener::processUnbufferedKeyInput(const Ogre::FrameEvent& e
 
 bool GeneratorFrameListener::processUnbufferedMouseInput(const Ogre::FrameEvent& evt)
 {
-
 	// Rotation factors, may not be used if the second mouse button is pressed
 	// 2nd mouse button - slide, otherwise rotate
 	const OIS::MouseState &ms = mMouse->getMouseState();
@@ -654,3 +594,57 @@ GeneratorFrameListener::~GeneratorFrameListener()
 	Ogre::WindowEventUtilities::removeWindowEventListener(mWindow, this);
 	windowClosed(mWindow);
 }
+
+#ifdef INCLUDE_RTSHADER_SYSTEM
+void GeneratorFrameListener::processShaderGeneratorInput()
+{
+    // Switch to default scheme.
+    if (mKeyboard->isKeyDown(OIS::KC_F2))
+    {
+        mCamera->getViewport()->setMaterialScheme(MaterialManager::DEFAULT_SCHEME_NAME);
+        mDebugText = "Active Viewport Scheme: ";
+        mDebugText += MaterialManager::DEFAULT_SCHEME_NAME;
+    }
+
+    // Switch to shader generator scheme.
+    if (mKeyboard->isKeyDown(OIS::KC_F3))
+    {
+        mCamera->getViewport()->setMaterialScheme(RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
+        mDebugText = "Active Viewport Scheme: ";
+        mDebugText += RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME;
+    }
+
+    // Toggles per pixel per light model.
+    if (mKeyboard->isKeyDown(OIS::KC_F4) && mTimeUntilNextToggle <= 0)
+    {
+        mTimeUntilNextToggle = 1.0;
+
+        static bool userPerPixelLightModel = true;
+        RTShader::ShaderGenerator* shaderGenerator = RTShader::ShaderGenerator::getSingletonPtr();
+        RTShader::RenderState* renderState = shaderGenerator->getRenderState(RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
+
+        // Remove all global sub render states.
+        renderState->reset();
+
+        // Add per pixel lighting sub render state to the global scheme render state.
+        // It will override the default FFP lighting sub render state.
+        if (userPerPixelLightModel)
+        {
+            RTShader::SubRenderState* perPixelLightModel = shaderGenerator->createSubRenderState(RTShader::PerPixelLighting::Type);
+            renderState->addTemplateSubRenderState(perPixelLightModel);
+
+            mDebugText = "Per pixel lighting model applied to shader generator default scheme";
+        }
+        else
+        {
+            mDebugText = "Per vertex lighting model applied to shader generator default scheme";
+        }
+
+        // Invalidate the scheme in order to re-generate all shaders based technique related to this scheme.
+        shaderGenerator->invalidateScheme(RTShader::ShaderGenerator::DEFAULT_SCHEME_NAME);
+
+        userPerPixelLightModel = !userPerPixelLightModel;
+    }
+
+}
+#endif

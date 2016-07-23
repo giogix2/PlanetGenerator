@@ -84,31 +84,11 @@ PSphere::~PSphere()
 	delete gridZP;
 }
 
-/* Set position for the observer. This must be position vector in modelspace,
- * not in worldspace. In other words, one must undo rotations. */
 void PSphere::setObserverPosition(Ogre::Vector3 position)
 {
 	observer = position;
 }
 
-Ogre::Real PSphere::heightNoise(vector<float> &amplitude,
-							   vector<float> &frequency, Ogre::Vector3 Point)
-{
-	Ogre::uint32 i;
-	Ogre::Real height = 0.0f;
-
-	// Run through the amplitude.size
-	for(i=0; i < amplitude.size(); i++)
-	{
-		height += amplitude[i] * SimplexNoise1234::noise(Point.x/frequency[i],
-														  Point.y/frequency[i],
-														  Point.z/frequency[i]);
-	}
-
-	return height;
-}
-
-/* Fix a seam by adding vertex duplicates with texture u going over 1.0 */
 void PSphere::fixTextureSeam()
 {
 	Ogre::uint32 i, j, affectedTriangleCount=0, vCntBeforeFix;
@@ -158,9 +138,6 @@ void PSphere::fixTextureSeam()
 			  << vertexCount - vCntBeforeFix << std::endl;
 }
 
-/* Gives observer distance to the point on surface that is directly between
- * observer and planet origo.
- * Negative values mean that the observer is inside the planet */
 Ogre::Real PSphere::getObserverDistanceToSurface()
 {
 	Ogre::Real height;
@@ -183,9 +160,6 @@ Ogre::Real PSphere::getObserverDistanceToSurface()
 	return distance;
 }
 
-/* Get the Height of a particular position of the surface.
- * Position is a 3-d vector over the surface which you need to know the height
- * return the height */
 Ogre::Real PSphere::getSurfaceHeight(Ogre::Vector3 Position)
 {
 	Ogre::Real height;
@@ -206,56 +180,12 @@ Ogre::Real PSphere::getSurfaceHeight(Ogre::Vector3 Position)
 
 	return surfacePos.length();
 }
-/*
-*return radius
-*/
+
 Ogre::Real PSphere::getRadius()
 {
 	return radius;
 }
 
-// Returns colour-values for one pixel
-Ogre::ColourValue PSphere::generatePixel(Ogre::Real height,
-								   Ogre::ColourValue water1st,
-								   Ogre::ColourValue water2nd,
-								   Ogre::ColourValue terrain1st,
-								   Ogre::ColourValue terrain2nd,
-								   Ogre::ColourValue mountain1st,
-								   Ogre::ColourValue mountain2nd)
-{
-	float const multiplyer = 0.6;
-	Ogre::ColourValue ColorOut;
-
-	// Set sea-colors
-	if(height < seaHeight)
-	{
-		/* FIXME: Unsigned char underflow can happen here, but probably affects
-		 * output visibly only when water1st-colors are around zero. */
-		ColorOut =  water1st + (water2nd-water1st)*(height-minimumHeight)/(seaHeight-minimumHeight);
-	}
-	else
-	{
-		// Set low (terrain) elevations
-		ColorOut =  terrain1st + (terrain2nd-terrain1st)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
-
-		// Set highest elevations
-		if(height > maximumHeight * multiplyer)
-		{
-			ColorOut = mountain2nd - (mountain2nd-mountain1st)*(maximumHeight-height)/(maximumHeight*(1.0f-multiplyer));
-			/* to avoid unsigned char overflow later on. HeightMaps are
-			 * approximations of simplex-noise generated geometry, and can't
-			 * guarantee maximumHeight is really the max value of elevations. */
-			ColorOut.r < 0.0f ? ColorOut.r = 0.0f : (ColorOut.r >= 256.0f ? ColorOut.r = 255.0f : ColorOut.r);
-			ColorOut.g < 0.0f ? ColorOut.g = 0.0f : (ColorOut.g >= 256.0f ? ColorOut.g = 255.0f : ColorOut.g);
-			ColorOut.b < 0.0f ? ColorOut.b = 0.0f : (ColorOut.b >= 256.0f ? ColorOut.b = 255.0f : ColorOut.b);
-		}
-	}
-
-	return ColorOut;
-}
-
-/* Generates surface-texturemap using noise-generated height differences.
- * Expects pointer to be already correctly allocated. */
 void PSphere::generateImage(unsigned short textureWidth, unsigned short textureHeight, unsigned char *image)
 {
 	Ogre::Vector3 spherePoint;
@@ -423,8 +353,6 @@ void PSphere::smoothSeaArea()
 	faceZM->setToMinimumHeight(seaHeight);
 }
 
-
-// Makes a sphere out of a cube that is made of 6 squares
 void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter)
 {
 	RParameter = resourceParameter;
@@ -790,10 +718,7 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 	this->attachMesh(node, scene, meshName, x, y, z);
 
 }
-/*
-*To skip collision detection while moving object, I try to attach it on the ground and set the initial orientation
-*Maybe later we need object in air or outer space, so I leave attachmesh() and create this function which could put the object on ground.
-*/
+
 void PSphere::attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude) {
 	Ogre::Vector3 cart_coord = convertSphericalToCartesian(latitude, longitude);
 	Ogre::Real x = radius*cart_coord.x;
@@ -836,12 +761,6 @@ void PSphere::attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scen
 	objects.push_back(object);
 }
 
-/* Figures which one of the cubefaces 3D-location lands, and what 2D-coordinates
- * that face has.
- * Returns:
- *	On success, pointer to a pointer of HeightMap location lands,
- *	HeightMap-coordinates x and y, and function return value true.
- *	On failure, return function value is false. */
 bool PSphere::getGridLocation(Ogre::Vector3 location, Grid **face,
 							  unsigned int &ix, unsigned int &iy)
 {
@@ -936,10 +855,6 @@ bool PSphere::getGridLocation(Ogre::Vector3 location, Grid **face,
 	return true;
 }
 
-/* Checks if position is water or solid ground.
- * Returns:
- *  On ground, return true.
- *  On water or has an object, return false. */
 bool PSphere::checkAccessibility(Ogre::Vector3 location)
 {
 	Grid *grid, *gridObj;
@@ -1037,7 +952,6 @@ Ogre::Vector3 PSphere::nextPosition(Ogre::Vector3 location, PSphere::Direction d
 	return newPos;
 }
 
-
 vector<ObjectInfo> *PSphere::getObjects()
 {
 	return &objects;
@@ -1048,9 +962,6 @@ void PSphere::setCollisionManager(CollisionManager	*CDM)
 	CollisionDetectionManager = CDM;
 }
 
-/* Generates a map and gives pointer to array that has rgb-image
- * information. Then MapType is MAP_CUBE, ignores height variable.
- * With wrong type, returns NULL-pointer. */
 unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, MapType type) {
 
 	// Check if exportImage is already allocated
@@ -1194,7 +1105,6 @@ unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, M
 	return exportImage;
 }
 
-/* Saves map to the given filename. With MapType MAP_CUBE ignores height-variable */
 bool PSphere::exportMap(unsigned short width, unsigned short height, std::string fileName, MapType type) {
 	RGBQUAD color;
 
@@ -1379,4 +1289,61 @@ void PSphere::moveObject(const std::string &objectName, int direction, float pac
 
 ResourceParameter *PSphere::getParameters() {
 	return &RParameter;
+}
+
+
+Ogre::Real PSphere::heightNoise(vector<float> &amplitude,
+                               vector<float> &frequency, Ogre::Vector3 Point)
+{
+    Ogre::uint32 i;
+    Ogre::Real height = 0.0f;
+
+    // Run through the amplitude.size
+    for(i=0; i < amplitude.size(); i++)
+    {
+        height += amplitude[i] * SimplexNoise1234::noise(Point.x/frequency[i],
+                                                          Point.y/frequency[i],
+                                                          Point.z/frequency[i]);
+    }
+
+    return height;
+}
+
+Ogre::ColourValue PSphere::generatePixel(Ogre::Real height,
+                                   Ogre::ColourValue water1st,
+                                   Ogre::ColourValue water2nd,
+                                   Ogre::ColourValue terrain1st,
+                                   Ogre::ColourValue terrain2nd,
+                                   Ogre::ColourValue mountain1st,
+                                   Ogre::ColourValue mountain2nd)
+{
+    float const multiplyer = 0.6;
+    Ogre::ColourValue ColorOut;
+
+    // Set sea-colors
+    if(height < seaHeight)
+    {
+        /* FIXME: Unsigned char underflow can happen here, but probably affects
+         * output visibly only when water1st-colors are around zero. */
+        ColorOut =  water1st + (water2nd-water1st)*(height-minimumHeight)/(seaHeight-minimumHeight);
+    }
+    else
+    {
+        // Set low (terrain) elevations
+        ColorOut =  terrain1st + (terrain2nd-terrain1st)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
+
+        // Set highest elevations
+        if(height > maximumHeight * multiplyer)
+        {
+            ColorOut = mountain2nd - (mountain2nd-mountain1st)*(maximumHeight-height)/(maximumHeight*(1.0f-multiplyer));
+            /* to avoid unsigned char overflow later on. HeightMaps are
+             * approximations of simplex-noise generated geometry, and can't
+             * guarantee maximumHeight is really the max value of elevations. */
+            ColorOut.r < 0.0f ? ColorOut.r = 0.0f : (ColorOut.r >= 256.0f ? ColorOut.r = 255.0f : ColorOut.r);
+            ColorOut.g < 0.0f ? ColorOut.g = 0.0f : (ColorOut.g >= 256.0f ? ColorOut.g = 255.0f : ColorOut.g);
+            ColorOut.b < 0.0f ? ColorOut.b = 0.0f : (ColorOut.b >= 256.0f ? ColorOut.b = 255.0f : ColorOut.b);
+        }
+    }
+
+    return ColorOut;
 }
