@@ -30,6 +30,8 @@ namespace std {
 
 	ObjectInfo::ObjectInfo(Ogre::Vector3 pos, const string& objName, Ogre::SceneNode *rootNode) 
 	{
+        std::cout << "######################TEST######################";
+
 		position = pos;
 		name = objName;
 		node = rootNode->getChild(objName);

@@ -683,6 +683,7 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
     string sec_node = "sec_node_";
 	string nameWithoutFormat = newName.substr(0, newName.find(delimiter)); // Remove the format from the name (the part of the name after the ".")
 	string finalName = nameWithoutFormat;
+    sec_node = sec_node+finalName;
 	while (checkIfObjectIsIn(finalName)) { 
 		// If the name has already been used it change it adding an auto-increased number in the end
 		temp_int++;
@@ -693,18 +694,22 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
         sec_node = sec_node+finalName;
 	}
 
-	Ogre::Vector3 position = Ogre::Vector3(x, y, z);
-	Ogre::Entity *entity = scene->createEntity(finalName, meshName);
+    Ogre::Vector3 position = Ogre::Vector3(x, y, z);
+    Ogre::Entity *entity = scene->createEntity(finalName, meshName);
     Ogre::SceneNode *node_secondary = node->createChildSceneNode(sec_node);
-    Ogre::SceneNode *cube = node->createChildSceneNode(finalName, position);
-    ObjectInfo object = ObjectInfo(position, finalName, node);
-//    Ogre::SceneNode *node_satellite = node_secondary->createChildSceneNode(finalName, position);
-//    ObjectInfo object = ObjectInfo(position, finalName, node_satellite);
-	objects.push_back(object);
-    cube->attachObject(entity);
-//    node_satellite->attachObject(entity);
+    Ogre::SceneNode *node_satellite = node_secondary->createChildSceneNode(finalName, position);
+    ObjectInfo object = ObjectInfo(position, finalName, node_secondary);
+    objects.push_back(object);
+    node_satellite->attachObject(entity);
 
-	
+    // OLD CODE (TO REMOVE)
+    //	Ogre::Vector3 position = Ogre::Vector3(x, y, z);
+    //	Ogre::Entity *entity = scene->createEntity(finalName, meshName);
+    //    Ogre::SceneNode *cube = node->createChildSceneNode(finalName, position);
+    //    ObjectInfo object = ObjectInfo(position, finalName, node);
+    //    objects.push_back(object);
+    //    cube->attachObject(entity);
+
 }
 
 void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude) {
