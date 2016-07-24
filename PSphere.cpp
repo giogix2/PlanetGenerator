@@ -680,6 +680,7 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 	string newName = objectName;
 	string result;
 	string delimiter = ".";
+    string sec_node = "sec_node_";
 	string nameWithoutFormat = newName.substr(0, newName.find(delimiter)); // Remove the format from the name (the part of the name after the ".")
 	string finalName = nameWithoutFormat;
 	while (checkIfObjectIsIn(finalName)) { 
@@ -689,14 +690,19 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 		convert << temp_int;
 		string result = convert.str();
 		finalName = nameWithoutFormat+result;
+        sec_node = sec_node+finalName;
 	}
 
 	Ogre::Vector3 position = Ogre::Vector3(x, y, z);
 	Ogre::Entity *entity = scene->createEntity(finalName, meshName);
-	Ogre::SceneNode *cube = node->createChildSceneNode(finalName, position);
-	ObjectInfo object = ObjectInfo(position, finalName, node);
+    Ogre::SceneNode *node_secondary = node->createChildSceneNode(sec_node);
+    Ogre::SceneNode *cube = node->createChildSceneNode(finalName, position);
+    ObjectInfo object = ObjectInfo(position, finalName, node);
+//    Ogre::SceneNode *node_satellite = node_secondary->createChildSceneNode(finalName, position);
+//    ObjectInfo object = ObjectInfo(position, finalName, node_satellite);
 	objects.push_back(object);
-	cube->attachObject(entity);
+    cube->attachObject(entity);
+//    node_satellite->attachObject(entity);
 
 	
 }
@@ -1285,6 +1291,42 @@ void PSphere::moveObject(const std::string &objectName, int direction, float pac
 			}
 		}
 	}
+}
+
+void PSphere::moveObjectRevolution(const std::string &objectName, int direction, float pace) {
+    for (vector<ObjectInfo>::iterator it = objects.begin() ; it != objects.end(); ++it) {
+        //ObjectInfo objTemp = *it;
+        if (it->getObjectName().compare(objectName) == 0) {
+            Ogre::Node *node = it->getNode();
+            Ogre::Vector3 oldPosition = node->getPosition();
+
+            Ogre::Vector3 newPosition(oldPosition.x, oldPosition.y, oldPosition.z);
+
+            Ogre::Vector3 oldPositionNormalised = oldPosition.normalisedCopy();
+
+            Ogre::Vector2 cartesianCoord;
+            Ogre::Vector3 cart_coord;
+
+            switch (direction) {
+                case (UP):
+
+                    cartesianCoord = Ogre::Vector2(asin(oldPositionNormalised.z ), atan2(oldPositionNormalised.y, oldPositionNormalised.x));
+                    cartesianCoord = Ogre::Vector2(cartesianCoord.x*(180/Ogre::Math::PI)+pace, 360+cartesianCoord.y*(180/Ogre::Math::PI)); // Convertion from radians to degrees
+                    if(cartesianCoord.x > 90.0f)//prevent shaking
+                        break;
+                    cart_coord = convertSphericalToCartesian(cartesianCoord.x, cartesianCoord.y);
+
+                    //set on the ground
+                    newPosition = cart_coord * ( getSurfaceHeight(cart_coord) / cart_coord.length()) ;
+
+                    node->setPosition(newPosition);
+                    it->setPosition(newPosition);
+                    break;
+                case (DOWN):
+                    break;
+            }
+        }
+    }
 }
 
 ResourceParameter *PSphere::getParameters() {

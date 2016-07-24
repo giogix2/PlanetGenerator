@@ -58,6 +58,8 @@ public:
 
 	void moveObject(const std::string &objectName, int direction, float pace);
 
+    void moveObjectRevolution(const std::string &objectName, int direction, float pace);
+
     /* Set position for the observer. This must be position vector in modelspace,
      * not in worldspace. In other words, one must undo rotations. */
 	void setObserverPosition(Ogre::Vector3 position);

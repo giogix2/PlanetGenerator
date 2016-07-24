@@ -146,6 +146,9 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	//background
 	Scene->setSkyBox(true, "SpaceSkyBox",1000.0f,false);
 
+    /********************************************************************************
+     *                          CAMERA, LIGHTS, VIEWPORT
+     * ******************************************************************************/
 	// Create camera
 	Camera = Scene->createCamera("VertCamera");
 
@@ -171,11 +174,12 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	light->setType(Ogre::Light::LT_POINT);
 	light->setPosition(200, 40, 150);
 
-
 	// Draw a sphere
 	planet->loadToBuffers("CustomMesh", "sphereTex");
 
-	// Attach entitys to sceneNodes
+    /********************************************************************************
+     *                          ATTACH PLANET AND CAMERA TO NODES
+     * ******************************************************************************/
 	Ogre::SceneNode *CameraNode = RootSceneNode->createChildSceneNode("DefaultCameraNode");
 	CameraNode->attachObject(Camera);
 
@@ -183,8 +187,10 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	Ogre::SceneNode *sphere1 = Scene->getRootSceneNode()->createChildSceneNode("planetSphere");
 	sphere1->attachObject(entity1);
 
+    /********************************************************************************
+     *                          ATTACH OBJECTS ON THE PLANET
+     * ******************************************************************************/
 	srand(0);
-	//planet->loadMeshFile("ram1.mesh", "LocalMesh");
 	for (vector<pair <string, int> >::const_iterator iter = planet->getParameters()->getMeshLocObjAmount().begin(); iter != planet->getParameters()->getMeshLocObjAmount().end(); ++iter)
     {
         //qDebug() << QString::fromStdString(iter->first) <<", " << iter->second;
@@ -210,9 +216,9 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	/*planet->attachMeshOnGround(sphere1, Scene, "ram.mesh", "Ramiro", 0.0, 270.0);*/
 	planet->attachMesh(sphere1, Scene, "asteroid.mesh", "CK7", 0.0, 180.0);
 
-	// No need for this anymore
-	//Ogre::MeshManager::getSingleton().remove("CustomMesh");
-
+    /********************************************************************************
+     *                          MATERIALS AND TEXTURE
+     * ******************************************************************************/
 	Ogre::MaterialPtr textureMap = Ogre::MaterialManager::getSingleton()
 			.create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 	textureMap->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex");
@@ -221,6 +227,9 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	// Set texture for the sphere
 	entity1->setMaterial(textureMap);
 
+    /********************************************************************************
+     *                   PLANET ORIENTATION, COLLISION MANAGER, FRAME LISTENER
+     * ******************************************************************************/
 	sphere1->setOrientation(0.163149834f, -0.19578641f, -0.314332321f, -0.9144643269f);
 
 	//Collision Manager
@@ -229,8 +238,6 @@ void initOgre::setSceneAndRun(PSphere *planet){
 
 	//createFrameListener
 	CreateFrameListener(planet);
-
-	
 
 	//start Rendering
 	Root->startRendering();
