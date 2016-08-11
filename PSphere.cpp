@@ -651,27 +651,31 @@ bool PSphere::checkIfObjectIsIn (std::string &objectName) {
 }
 
 void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, Ogre::Real x, Ogre::Real y, Ogre::Real z) {
-	int temp_int = 0;
-	string newName = meshName;
-	string result;
-	string delimiter = ".";
-	string nameWithoutFormat = newName.substr(0, newName.find(delimiter)); // Remove the format from the name (the part of the name after the ".")
-	string finalName = nameWithoutFormat;
-	while (checkIfObjectIsIn(finalName)) { 
-		// If the name has already been used it change it adding an auto-increased number in the end
-		temp_int++;
-		ostringstream convert;
-		convert << temp_int;
-		string result = convert.str();
-		finalName = nameWithoutFormat+result;
-	}
+    int temp_int = 0;
+    string newName = meshName;
+    string result;
+    string delimiter = ".";
+    string sec_node = "sec_node_";
+    string nameWithoutFormat = newName.substr(0, newName.find(delimiter)); // Remove the format from the name (the part of the name after the ".")
+    string finalName = nameWithoutFormat;
+    sec_node = sec_node+finalName;
+    while (checkIfObjectIsIn(finalName)) {
+        // If the name has already been used it change it adding an auto-increased number in the end
+        temp_int++;
+        ostringstream convert;
+        convert << temp_int;
+        string result = convert.str();
+        finalName = nameWithoutFormat+result;
+        sec_node = sec_node+finalName;
+    }
 
-	Ogre::Vector3 position = Ogre::Vector3(x, y, z);
-	Ogre::Entity *entity = scene->createEntity(finalName, meshName);
-	Ogre::SceneNode *cube = node->createChildSceneNode(finalName, position);
-	ObjectInfo object = ObjectInfo(position, finalName, node);
-	objects.push_back(object);
-	cube->attachObject(entity);
+    Ogre::Vector3 position = Ogre::Vector3(x, y, z);
+    Ogre::Entity *entity = scene->createEntity(finalName, meshName);
+    Ogre::SceneNode *node_secondary = node->createChildSceneNode(sec_node);
+    Ogre::SceneNode *node_satellite = node_secondary->createChildSceneNode(finalName, position);
+    ObjectInfo object = ObjectInfo(position, finalName, node_secondary);
+    objects.push_back(object);
+    node_satellite->attachObject(entity);
 
 }
 

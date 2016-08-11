@@ -214,7 +214,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
     }
 
 	/*planet->attachMeshOnGround(sphere1, Scene, "ram.mesh", "Ramiro", 0.0, 270.0);*/
-	planet->attachMesh(sphere1, Scene, "asteroid.mesh", "CK7", 0.0, 180.0);
+    planet->attachMesh(sphere1, Scene, "asteroid.mesh", "CK7", 0.0, 180.0);
 
     /********************************************************************************
      *                          MATERIALS AND TEXTURE
