@@ -357,6 +357,10 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
 {
 	RParameter = resourceParameter;
 	float waterFraction = resourceParameter.getWaterFraction();
+    radius = resourceParameter.getRadius();
+    vertexCount = 0;
+    indexCount = 0;
+
 	// Iters less than 3 are pointless
 	if(iters < 3)
 	{
@@ -376,11 +380,6 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
 	 * anything nasty. Probably need to be tested. */
 	if (gridSize < 2)
 		gridSize = 2;
-
-	radius = resourceParameter.getRadius();
-
-	vertexCount = 0;
-	indexCount = 0;
 
 	/* Calling Sphere::create more than once would cause memory leak if we
 	 * wouldn't delete old allocations first */

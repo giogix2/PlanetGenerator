@@ -230,7 +230,8 @@ void initOgre::setSceneAndRun(PSphere *planet){
     /********************************************************************************
      *                   PLANET ORIENTATION, COLLISION MANAGER, FRAME LISTENER
      * ******************************************************************************/
-	sphere1->setOrientation(0.163149834f, -0.19578641f, -0.314332321f, -0.9144643269f);
+//	sphere1->setOrientation(0.163149834f, -0.19578641f, -0.314332321f, -0.9144643269f);
+    sphere1->setOrientation(0.0f, -0.0f, -0.0f, -0.9144643269f);
 
 	//Collision Manager
 	CollisionDetectionManager = new CollisionManager(planet->getObjects(),Camera);
