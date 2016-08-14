@@ -69,7 +69,8 @@ int initOgre::start(){
 	cf.load(mResourcesCfg);
 	Ogre::String name, locType;
 	Ogre::ConfigFile::SectionIterator secIt = cf.getSectionIterator();
-	while (secIt.hasMoreElements()) {
+    while (secIt.hasMoreElements())
+    {
 		Ogre::ConfigFile::SettingsMultiMap* settings = secIt.getNext();
 		Ogre::ConfigFile::SettingsMultiMap::iterator it;
 		for (it = settings->begin(); it != settings->end(); ++it) {
@@ -79,22 +80,6 @@ int initOgre::start(){
 		}
 
 	}
-
-	//Ogre::ResourceGroupManager::getSingleton().declareResource("ram.mesh", "Mesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	//Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_col.jpg", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	////Ogre::ResourceGroupManager::getSingleton().declareResource("char_ram_nor.png", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	//Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	//Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_eyelids.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	//Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_eyes.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	//Ogre::ResourceGroupManager::getSingleton().declareResource("ram_skin_horns.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-
-	//Ogre::ResourceGroupManager::getSingleton().declareResource("asteroid.mesh", "Mesh", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	//Ogre::ResourceGroupManager::getSingleton().declareResource("Material.001.material", "Material", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-	//Ogre::ResourceGroupManager::getSingleton().declareResource("space rock tex 3.jpg", "Font", Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME, Ogre::NameValuePairList());
-
-	//Ogre::TextureManager::getSingleton().setDefaultNumMipmaps(5);
-	
-	//Ogre::ResourceGroupManager::getSingleton().initialiseResourceGroup(Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
 
 	// Check renderer availability
 	const Ogre::RenderSystemList& RenderSystemList = Root->getAvailableRenderers();
@@ -172,10 +157,10 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	light->setDiffuseColour(1.0, 1.0, 1.0);
 	light->setSpecularColour(1.0, 1.0, 1.0);
 	light->setType(Ogre::Light::LT_POINT);
-	light->setPosition(200, 40, 150);
+    light->setPosition(200, 40, 150);
 
-	// Draw a sphere
-	planet->loadToBuffers("CustomMesh", "sphereTex");
+    // Draw a sphere
+    planet->loadToBuffers("CustomMesh", "sphereTex");
 
     /********************************************************************************
      *                          ATTACH PLANET AND CAMERA TO NODES
@@ -186,6 +171,42 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	Ogre::Entity *entity1 = Scene->createEntity("CustomEntity", "CustomMesh");
 	Ogre::SceneNode *sphere1 = Scene->getRootSceneNode()->createChildSceneNode("planetSphere");
 	sphere1->attachObject(entity1);
+    planet->setNode(sphere1);
+
+
+    // # ################################### TEMP #############################################
+//    float waterfraction = 0.6;
+//    float radius = 7.5;
+//    unsigned int seed = 60;
+//    std::string frequencyAmplitude = "1.0 0.02 0.3 0.008 0.1 0.005 0.06666 0.006666";
+//    std::vector < std::pair < std::string, int > > meshlocs;
+//    std::ResourceParameter *params2;
+//    params2 = new std::ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#32CDFF"
+//        ,(std::string)"#64FFFF",(std::string)"#B4B4B4",(std::string)"#FFFFFF",waterfraction,radius,seed,frequencyAmplitude, meshlocs);
+
+//    PSphere *mySphere2;
+//    mySphere2 = new PSphere(100, 40, 1024, 512, *params2);
+//    mySphere2->loadToBuffers("CustomMesh2", "sphereTex2");
+
+//    Ogre::Entity *entity2 = Scene->createEntity("CustomEntity2", "CustomMesh2");
+////    Ogre::SceneNode *nodeSphere2 = Scene->getRootSceneNode()->createChildSceneNode("planetSphere2");
+//    Ogre::SceneNode *nodeSphere2 = Scene->createSceneNode("planetSphere2");
+//    nodeSphere2->attachObject(entity2);
+//    mySphere2->setNode(nodeSphere2);
+
+//    nodeSphere2->setPosition(-20.0f, 0.0f, -0.0f);
+//    nodeSphere2->setOrientation(0.0f, -0.0f, -0.0f, -0.9144643269f);
+
+//    Ogre::MaterialPtr textureMap2 = Ogre::MaterialManager::getSingleton()
+//            .create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+//    textureMap2->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex2");
+//    textureMap2->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+
+//    // Set texture for the sphere
+//    entity2->setMaterial(textureMap2);
+
+//    planet->attachAstroChild(mySphere2);
+    // ########################################################################################
 
     /********************************************************************************
      *                          ATTACH OBJECTS ON THE PLANET
@@ -214,7 +235,8 @@ void initOgre::setSceneAndRun(PSphere *planet){
     }
 
 	/*planet->attachMeshOnGround(sphere1, Scene, "ram.mesh", "Ramiro", 0.0, 270.0);*/
-    planet->attachMesh(sphere1, Scene, "asteroid.mesh", "CK7", 0.0, 180.0);
+//    planet->attachMesh(sphere1, Scene, "asteroid.mesh", "CK7", 0.0, 180.0);
+//    planet->attachMesh(sphere1, Scene, "planet.mesh", "CK7", 0.0, 180.0, 10.0f);
 
     /********************************************************************************
      *                          MATERIALS AND TEXTURE

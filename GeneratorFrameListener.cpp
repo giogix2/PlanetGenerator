@@ -493,8 +493,8 @@ void GeneratorFrameListener::showDebugOverlay(bool show)
 
 bool GeneratorFrameListener::frameStarted(const Ogre::FrameEvent& evt)
 {
-//    RootSceneNode->getChild("planetSphere")->getChild("sec_node_CK7")->roll(Ogre::Radian(0.04));
-//    RootSceneNode->getChild("planetSphere")->getChild("sec_node_CK7")->getChild("CK7")->roll(Ogre::Radian(0.04));
+//    RootSceneNode->getChild("planetSphere")->getChild("sec_node_CK7")->roll(Ogre::Radian(0.04f));
+//    RootSceneNode->getChild("planetSphere")->getChild("sec_node_CK7")->yaw(Ogre::Radian(0.04f));
 	//pSphere->moveObject("Ramiro", 3, 0.5);
 	//pSphere->moveObject("CK7", 2, 0.5);
 	//pSphere->getObserverDistanceToSurface();

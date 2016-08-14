@@ -72,6 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
 	float radius = 7.5;
     unsigned int seed = 60;
 
+
     ui->lineEdit->setText(""+QString::number(radius));
     ui->lineEdit_2->setText(""+QString::number(waterfraction*100));
     ui->lineEdit_3->setText(""+QString::number(seed));

@@ -62,26 +62,309 @@ PSphere::PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, Ogre::uint16 texture
 
 PSphere::~PSphere()
 {
-	delete[] indexes;
-	delete[] texCoords;
-	delete[] vertexes;
-	delete[] vNorms;
-	delete[] surfaceTexture;
-	delete[] exportImage;
+    delete[] indexes;
+    delete[] texCoords;
+    delete[] vertexes;
+    delete[] vNorms;
+    delete[] surfaceTexture;
+    delete[] exportImage;
 
-	delete faceXM;
-	delete faceXP;
-	delete faceYM;
-	delete faceYP;
-	delete faceZM;
-	delete faceZP;
+    delete faceXM;
+    delete faceXP;
+    delete faceYM;
+    delete faceYP;
+    delete faceZM;
+    delete faceZP;
 
-	delete gridXM;
-	delete gridXP;
-	delete gridYM;
-	delete gridYP;
-	delete gridZM;
-	delete gridZP;
+    delete gridXM;
+    delete gridXP;
+    delete gridYM;
+    delete gridYP;
+    delete gridZM;
+    delete gridZP;
+}
+
+void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter)
+{
+    RParameter = resourceParameter;
+    float waterFraction = resourceParameter.getWaterFraction();
+    radius = resourceParameter.getRadius();
+    vertexCount = 0;
+    indexCount = 0;
+
+    // Iters less than 3 are pointless
+    if(iters < 3)
+    {
+        iters = 3;
+        std::cout << "Sphere needs atleast 3 iters" << std::endl;
+    }
+    // Creating 2D texture with zeros would fail when creating texture with Ogre
+    if (surfaceTextureWidth == 0)
+    {
+        surfaceTextureWidth = 1;
+    }
+    if (surfaceTextureHeight == 0)
+    {
+        surfaceTextureHeight = 1;
+    }
+    /* Make grid big enough, so that so that grid-depending code doesn't make
+     * anything nasty. Probably need to be tested. */
+    if (gridSize < 2)
+        gridSize = 2;
+
+    /* Calling Sphere::create more than once would cause memory leak if we
+     * wouldn't delete old allocations first */
+    if(vertexes != NULL)
+        delete[] vertexes;
+    if(vNorms != NULL)
+        delete[] vNorms;
+    if(texCoords != NULL)
+        delete[] texCoords;
+    if(indexes != NULL)
+        delete[] indexes;
+
+    /* +iter*8 is for texture seam fix, duplicating some vertexes.
+     * Approximate, but should be on a safe side */
+    vertexes =	new Ogre::Vector3[iters*iters*6 + iters*8];
+    vNorms =	new Ogre::Vector3[iters*iters*6 + iters*8];
+    texCoords =	new Ogre::Vector2[iters*iters*6 + iters*8];
+    indexes =	new Ogre::uint32[(iters-1)*(iters-1)*6*6];
+
+    Ogre::Matrix3 noRot, rotZ_90, rotZ_180, rotZ_270, rotX_90, rotX_270;
+
+    noRot = Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+    rotZ_90 = Ogre::Matrix3(0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+    rotZ_180 = Ogre::Matrix3(-1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+    rotZ_270 = Ogre::Matrix3(0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
+    rotX_90 = Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
+    rotX_270 = Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f);
+
+    // No rotation
+    faceYP = new HeightMap(iters, noRot);
+    gridYP = new Grid(gridSize, noRot);
+    // 90 degrees through z-axis
+    faceXM = new HeightMap(iters, rotZ_90);
+    gridXM = new Grid(gridSize, rotZ_90);
+    // 180 degrees through z-axis
+    faceYM = new HeightMap(iters, rotZ_180);
+    gridYM = new Grid(gridSize, rotZ_180);
+    // 270 degrees through z-axis
+    faceXP = new HeightMap(iters, rotZ_270);
+    gridXP = new Grid(gridSize, rotZ_270);
+    // 90 degrees through x-axis
+    faceZP = new HeightMap(iters, rotX_90);
+    gridZP = new Grid(gridSize, rotX_90);
+    // 270 degrees through x-axis
+    faceZM = new HeightMap(iters, rotX_270);
+    gridZM = new Grid(gridSize, rotX_270);
+
+    faceYP->setNeighbours(faceXM, faceXP, faceZP, faceZM);
+    faceXM->setNeighbours(faceYM, faceYP, faceZP, faceZM);
+    faceYM->setNeighbours(faceXP, faceXM, faceZP, faceZM);
+    faceXP->setNeighbours(faceYP, faceYM, faceZP, faceZM);
+    faceZP->setNeighbours(faceXM, faceXP, faceYM, faceYP);
+    faceZM->setNeighbours(faceXM, faceXP, faceYP, faceYM);
+
+    gridYP->setNeighbours(gridXM, gridXP, gridZP, gridZM);
+    gridXM->setNeighbours(gridYM, gridYP, gridZP, gridZM);
+    gridYM->setNeighbours(gridXP, gridXM, gridZP, gridZM);
+    gridXP->setNeighbours(gridYP, gridYM, gridZP, gridZM);
+    gridZP->setNeighbours(gridXM, gridXP, gridYM, gridYP);
+    gridZM->setNeighbours(gridXM, gridXP, gridYP, gridYM);
+
+    srand(RParameter.getSeed());
+    randomTranslate.x = (float)((rand() % 1000)-500)/100.0f;
+    randomTranslate.y = (float)((rand() % 1000)-500)/100.0f;
+    randomTranslate.z = (float)((rand() % 1000)-500)/100.0f;
+
+    deform(faceYP);
+    deform(faceXM);
+    deform(faceYM);
+    deform(faceXP);
+    deform(faceZP);
+    deform(faceZM);
+
+    calculateSeaLevel(minimumHeight, maximumHeight, waterFraction);
+
+    surfaceTexture = new unsigned char[surfaceTextureWidth*surfaceTextureHeight*3];
+    generateImage(surfaceTextureWidth, surfaceTextureHeight, surfaceTexture);//take longtime
+
+    // Requires variable seaHeight that is set by calculateSeaLevel
+    setGridLandInfo(gridYP);
+    setGridLandInfo(gridXM);
+    setGridLandInfo(gridYM);
+    setGridLandInfo(gridXP);
+    setGridLandInfo(gridZP);
+    setGridLandInfo(gridZM);
+
+    smoothSeaArea();
+}
+
+void PSphere::deform(HeightMap *map)
+{
+    unsigned int x, y;
+    Ogre::Vector3 spherePos;
+    Ogre::Real height;
+
+    vector <float> frequency = RParameter.getFrequency();
+    vector <float> amplitude = RParameter.getAmplitude();
+
+    for(x=0; x < map->getSize(); x++)
+    {
+        for(y=0; y < map->getSize(); y++)
+        {
+            spherePos = map->projectToSphere(x, y);
+            height = heightNoise(amplitude, frequency, spherePos + randomTranslate);
+            map->setHeight(x, y, height);
+        }
+    }
+}
+
+void PSphere::calculateSeaLevel(float &minElev, float &maxElev, float seaFraction)
+{
+    Ogre::uint32 i, accumulator=0, histoTotal;
+
+    unsigned int histogram[100]={0};
+    float min[6], max[6];
+
+    // Assume all faces have similar height variations
+    faceYP->getHistogram(histogram, 100);
+    faceXM->getHistogram(histogram, 100);
+    faceYM->getHistogram(histogram, 100);
+    faceXP->getHistogram(histogram, 100);
+    faceZP->getHistogram(histogram, 100);
+    faceZM->getHistogram(histogram, 100);
+
+    faceYP->getMinMax(min[0], max[0]);
+    faceXM->getMinMax(min[1], max[1]);
+    faceYM->getMinMax(min[2], max[2]);
+    faceXP->getMinMax(min[3], max[3]);
+    faceZP->getMinMax(min[4], max[4]);
+    faceZM->getMinMax(min[5], max[5]);
+
+    minElev = min[0];
+    maxElev = max[0];
+    for(i=1; i < 6; i++)
+    {
+        if(minElev > min[i])
+            minElev = min[i];
+        if(maxElev < max[i])
+            maxElev = max[i];
+    }
+    // Find out histogram-bracket that exceeds wanted fraction of all values
+    histoTotal = faceYP->getSize();
+    histoTotal *= histoTotal*6;
+
+    for(i=0; i < 100; i++)
+    {
+        accumulator += histogram[i];
+        if(Ogre::Real(accumulator) > Ogre::Real(histoTotal)*seaFraction)
+            break;
+    }
+    // Figure out offset with i
+    seaHeight = Ogre::Real(i) / 99.0f * (maxElev-minElev) + minElev;
+
+}
+
+void PSphere::generateImage(unsigned short textureWidth, unsigned short textureHeight, unsigned char *image)
+{
+    Ogre::Vector3 spherePoint;
+    Ogre::Real latitude, longitude;
+    Ogre::Real height;
+    Ogre::uint32 x, y;
+    Ogre::ColourValue water1st, water2nd, terrain1st, terrain2nd, mountain1st, mountain2nd, Pixel;
+    unsigned char red, green, blue;
+    vector <float> frequency = RParameter.getFrequency();
+    vector <float> amplitude = RParameter.getAmplitude();
+
+
+    RParameter.getWaterFirstColor(red, green, blue);
+    water1st.r = red;
+    water1st.g = green;
+    water1st.b = blue;
+    RParameter.getWaterSecondColor(red, green, blue);
+    water2nd.r = red;
+    water2nd.g = green;
+    water2nd.b = blue;
+
+    RParameter.getTerrainFirstColor(red, green, blue);
+    terrain1st.r = red;
+    terrain1st.g = green;
+    terrain1st.b = blue;
+    RParameter.getTerrainSecondColor(red, green, blue);
+    terrain2nd.r = red;
+    terrain2nd.g = green;
+    terrain2nd.b = blue;
+
+    RParameter.getMountainFirstColor(red, green, blue);
+    mountain1st.r = red;
+    mountain1st.g = green;
+    mountain1st.b = blue;
+    RParameter.getMountainSecondColor(red, green, blue);
+    mountain2nd.r = red;
+    mountain2nd.g = green;
+    mountain2nd.b = blue;
+
+    for(y=0; y < textureHeight; y++)
+    {
+        for(x=0; x < textureWidth; x++)
+        {
+            longitude = (Ogre::Real(x)+0.5f)/textureWidth*360.0f;
+            latitude = 90.0f - (Ogre::Real(y)+0.5f)/textureHeight*180.0f;
+
+            // Get a point that corresponds to a given pixel
+            spherePoint = convertSphericalToCartesian(latitude, longitude);
+
+            // Get height of a point
+            height = heightNoise(amplitude, frequency, spherePoint + randomTranslate);
+
+            Pixel = generatePixel(height,
+                          water1st,
+                          water2nd,
+                          terrain1st,
+                          terrain2nd,
+                          mountain1st,
+                          mountain2nd);
+
+            image[((textureHeight-1-y)*textureWidth+x)*3] = Pixel.r;
+            image[((textureHeight-1-y)*textureWidth+x)*3+1] = Pixel.g;
+            image[((textureHeight-1-y)*textureWidth+x)*3+2] = Pixel.b;
+        }
+    }
+}
+
+void PSphere::setGridLandInfo(Grid *grid)
+{
+    unsigned int x, y;
+    Ogre::Vector3 spherePos;
+    Ogre::Real height;
+
+    vector <float> frequency = RParameter.getFrequency();
+    vector <float> amplitude = RParameter.getAmplitude();
+
+    for(x=0; x < grid->getSize(); x++)
+    {
+        for(y=0; y < grid->getSize(); y++)
+        {
+            spherePos = grid->projectToSphere(x, y);
+            height = heightNoise(amplitude, frequency, spherePos + randomTranslate);
+
+            if (height > seaHeight)
+                grid->setValue(x, y, 1);
+            else
+                grid->setValue(x, y, 0);
+        }
+    }
+}
+
+void PSphere::smoothSeaArea()
+{
+    faceYP->setToMinimumHeight(seaHeight);
+    faceXM->setToMinimumHeight(seaHeight);
+    faceYM->setToMinimumHeight(seaHeight);
+    faceXP->setToMinimumHeight(seaHeight);
+    faceZP->setToMinimumHeight(seaHeight);
+    faceZM->setToMinimumHeight(seaHeight);
 }
 
 void PSphere::setObserverPosition(Ogre::Vector3 position)
@@ -186,307 +469,24 @@ Ogre::Real PSphere::getRadius()
 	return radius;
 }
 
-void PSphere::generateImage(unsigned short textureWidth, unsigned short textureHeight, unsigned char *image)
-{
-	Ogre::Vector3 spherePoint;
-	Ogre::Real latitude, longitude;
-	Ogre::Real height;
-	Ogre::uint32 x, y;
-	Ogre::ColourValue water1st, water2nd, terrain1st, terrain2nd, mountain1st, mountain2nd, Pixel;
-	unsigned char red, green, blue;
-	vector <float> frequency = RParameter.getFrequency();
-	vector <float> amplitude = RParameter.getAmplitude();
-
-
-	RParameter.getWaterFirstColor(red, green, blue);
-	water1st.r = red;
-	water1st.g = green;
-	water1st.b = blue;
-	RParameter.getWaterSecondColor(red, green, blue);
-	water2nd.r = red;
-	water2nd.g = green;
-	water2nd.b = blue;
-
-	RParameter.getTerrainFirstColor(red, green, blue);
-	terrain1st.r = red;
-	terrain1st.g = green;
-	terrain1st.b = blue;
-	RParameter.getTerrainSecondColor(red, green, blue);
-	terrain2nd.r = red;
-	terrain2nd.g = green;
-	terrain2nd.b = blue;
-
-	RParameter.getMountainFirstColor(red, green, blue);
-	mountain1st.r = red;
-	mountain1st.g = green;
-	mountain1st.b = blue;
-	RParameter.getMountainSecondColor(red, green, blue);
-	mountain2nd.r = red;
-	mountain2nd.g = green;
-	mountain2nd.b = blue;
-
-	for(y=0; y < textureHeight; y++)
-	{
-		for(x=0; x < textureWidth; x++)
-		{
-			longitude = (Ogre::Real(x)+0.5f)/textureWidth*360.0f;
-			latitude = 90.0f - (Ogre::Real(y)+0.5f)/textureHeight*180.0f;
-
-			// Get a point that corresponds to a given pixel
-			spherePoint = convertSphericalToCartesian(latitude, longitude);
-
-			// Get height of a point
-			height = heightNoise(amplitude, frequency, spherePoint + randomTranslate);
-
-			Pixel = generatePixel(height,
-						  water1st,
-						  water2nd,
-						  terrain1st,
-						  terrain2nd,
-						  mountain1st,
-						  mountain2nd);
-
-			image[((textureHeight-1-y)*textureWidth+x)*3] = Pixel.r;
-			image[((textureHeight-1-y)*textureWidth+x)*3+1] = Pixel.g;
-			image[((textureHeight-1-y)*textureWidth+x)*3+2] = Pixel.b;
-		}
-	}
-}
-
-void PSphere::deform(HeightMap *map)
-{
-	unsigned int x, y;
-	Ogre::Vector3 spherePos;
-	Ogre::Real height;
-
-	vector <float> frequency = RParameter.getFrequency();
-	vector <float> amplitude = RParameter.getAmplitude();
-
-	for(x=0; x < map->getSize(); x++)
-	{
-		for(y=0; y < map->getSize(); y++)
-		{
-			spherePos = map->projectToSphere(x, y);
-			height = heightNoise(amplitude, frequency, spherePos + randomTranslate);
-			map->setHeight(x, y, height);
-		}
-	}
-}
-
-void PSphere::setGridLandInfo(Grid *grid)
-{
-	unsigned int x, y;
-	Ogre::Vector3 spherePos;
-	Ogre::Real height;
-
-	vector <float> frequency = RParameter.getFrequency();
-	vector <float> amplitude = RParameter.getAmplitude();
-
-	for(x=0; x < grid->getSize(); x++)
-	{
-		for(y=0; y < grid->getSize(); y++)
-		{
-			spherePos = grid->projectToSphere(x, y);
-			height = heightNoise(amplitude, frequency, spherePos + randomTranslate);
-
-			if (height > seaHeight)
-				grid->setValue(x, y, 1);
-			else
-				grid->setValue(x, y, 0);
-		}
-	}
-}
-
-void PSphere::calculateSeaLevel(float &minElev, float &maxElev, float seaFraction)
-{
-	Ogre::uint32 i, accumulator=0, histoTotal;
-
-	unsigned int histogram[100]={0};
-	float min[6], max[6];
-
-	// Assume all faces have similar height variations
-	faceYP->getHistogram(histogram, 100);
-	faceXM->getHistogram(histogram, 100);
-	faceYM->getHistogram(histogram, 100);
-	faceXP->getHistogram(histogram, 100);
-	faceZP->getHistogram(histogram, 100);
-	faceZM->getHistogram(histogram, 100);
-
-	faceYP->getMinMax(min[0], max[0]);
-	faceXM->getMinMax(min[1], max[1]);
-	faceYM->getMinMax(min[2], max[2]);
-	faceXP->getMinMax(min[3], max[3]);
-	faceZP->getMinMax(min[4], max[4]);
-	faceZM->getMinMax(min[5], max[5]);
-
-	minElev = min[0];
-	maxElev = max[0];
-	for(i=1; i < 6; i++)
-	{
-		if(minElev > min[i])
-			minElev = min[i];
-		if(maxElev < max[i])
-			maxElev = max[i];
-	}
-	// Find out histogram-bracket that exceeds wanted fraction of all values
-	histoTotal = faceYP->getSize();
-	histoTotal *= histoTotal*6;
-
-	for(i=0; i < 100; i++)
-	{
-		accumulator += histogram[i];
-		if(Ogre::Real(accumulator) > Ogre::Real(histoTotal)*seaFraction)
-			break;
-	}
-	// Figure out offset with i
-	seaHeight = Ogre::Real(i) / 99.0f * (maxElev-minElev) + minElev;
-
-}
-
-void PSphere::smoothSeaArea()
-{
-	faceYP->setToMinimumHeight(seaHeight);
-	faceXM->setToMinimumHeight(seaHeight);
-	faceYM->setToMinimumHeight(seaHeight);
-	faceXP->setToMinimumHeight(seaHeight);
-	faceZP->setToMinimumHeight(seaHeight);
-	faceZM->setToMinimumHeight(seaHeight);
-}
-
-void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter)
-{
-	RParameter = resourceParameter;
-	float waterFraction = resourceParameter.getWaterFraction();
-    radius = resourceParameter.getRadius();
-    vertexCount = 0;
-    indexCount = 0;
-
-	// Iters less than 3 are pointless
-	if(iters < 3)
-	{
-		iters = 3;
-		std::cout << "Sphere needs atleast 3 iters" << std::endl;
-	}
-	// Creating 2D texture with zeros would fail when creating texture with Ogre
-	if (surfaceTextureWidth == 0)
-	{
-		surfaceTextureWidth = 1;
-	}
-	if (surfaceTextureHeight == 0)
-	{
-		surfaceTextureHeight = 1;
-	}
-	/* Make grid big enough, so that so that grid-depending code doesn't make
-	 * anything nasty. Probably need to be tested. */
-	if (gridSize < 2)
-		gridSize = 2;
-
-	/* Calling Sphere::create more than once would cause memory leak if we
-	 * wouldn't delete old allocations first */
-	if(vertexes != NULL)
-		delete[] vertexes;
-	if(vNorms != NULL)
-		delete[] vNorms;
-	if(texCoords != NULL)
-		delete[] texCoords;
-	if(indexes != NULL)
-		delete[] indexes;
-
-	/* +iter*8 is for texture seam fix, duplicating some vertexes.
-	 * Approximate, but should be on a safe side */
-	vertexes =	new Ogre::Vector3[iters*iters*6 + iters*8];
-	vNorms =	new Ogre::Vector3[iters*iters*6 + iters*8];
-	texCoords =	new Ogre::Vector2[iters*iters*6 + iters*8];
-	indexes =	new Ogre::uint32[(iters-1)*(iters-1)*6*6];
-
-	Ogre::Matrix3 noRot, rotZ_90, rotZ_180, rotZ_270, rotX_90, rotX_270;
-
-	noRot = Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-	rotZ_90 = Ogre::Matrix3(0.0f, -1.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-	rotZ_180 = Ogre::Matrix3(-1.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-	rotZ_270 = Ogre::Matrix3(0.0f, 1.0f, 0.0f, -1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f);
-	rotX_90 = Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
-	rotX_270 = Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f);
-
-	// No rotation
-	faceYP = new HeightMap(iters, noRot);
-	gridYP = new Grid(gridSize, noRot);
-	// 90 degrees through z-axis
-	faceXM = new HeightMap(iters, rotZ_90);
-	gridXM = new Grid(gridSize, rotZ_90);
-	// 180 degrees through z-axis
-	faceYM = new HeightMap(iters, rotZ_180);
-	gridYM = new Grid(gridSize, rotZ_180);
-	// 270 degrees through z-axis
-	faceXP = new HeightMap(iters, rotZ_270);
-	gridXP = new Grid(gridSize, rotZ_270);
-	// 90 degrees through x-axis
-	faceZP = new HeightMap(iters, rotX_90);
-	gridZP = new Grid(gridSize, rotX_90);
-	// 270 degrees through x-axis
-	faceZM = new HeightMap(iters, rotX_270);
-	gridZM = new Grid(gridSize, rotX_270);
-
-	faceYP->setNeighbours(faceXM, faceXP, faceZP, faceZM);
-	faceXM->setNeighbours(faceYM, faceYP, faceZP, faceZM);
-	faceYM->setNeighbours(faceXP, faceXM, faceZP, faceZM);
-	faceXP->setNeighbours(faceYP, faceYM, faceZP, faceZM);
-	faceZP->setNeighbours(faceXM, faceXP, faceYM, faceYP);
-	faceZM->setNeighbours(faceXM, faceXP, faceYP, faceYM);
-
-	gridYP->setNeighbours(gridXM, gridXP, gridZP, gridZM);
-	gridXM->setNeighbours(gridYM, gridYP, gridZP, gridZM);
-	gridYM->setNeighbours(gridXP, gridXM, gridZP, gridZM);
-	gridXP->setNeighbours(gridYP, gridYM, gridZP, gridZM);
-	gridZP->setNeighbours(gridXM, gridXP, gridYM, gridYP);
-	gridZM->setNeighbours(gridXM, gridXP, gridYP, gridYM);
-
-	srand(RParameter.getSeed());
-	randomTranslate.x = (float)((rand() % 1000)-500)/100.0f;
-	randomTranslate.y = (float)((rand() % 1000)-500)/100.0f;
-	randomTranslate.z = (float)((rand() % 1000)-500)/100.0f;
-
-	deform(faceYP);
-	deform(faceXM);
-	deform(faceYM);
-	deform(faceXP);
-	deform(faceZP);
-	deform(faceZM);
-
-	calculateSeaLevel(minimumHeight, maximumHeight, waterFraction);
-
-	surfaceTexture = new unsigned char[surfaceTextureWidth*surfaceTextureHeight*3];
-	generateImage(surfaceTextureWidth, surfaceTextureHeight, surfaceTexture);//take longtime
-
-	// Requires variable seaHeight that is set by calculateSeaLevel
-	setGridLandInfo(gridYP);
-	setGridLandInfo(gridXM);
-	setGridLandInfo(gridYM);
-	setGridLandInfo(gridXP);
-	setGridLandInfo(gridZP);
-	setGridLandInfo(gridZM);
-
-	smoothSeaArea();
-}
-
 void PSphere::generateMeshData()
 {
 	unsigned int iters;
 
-	faceYP->generateMeshData(radius);
-	faceXM->generateMeshData(radius);
-	faceYM->generateMeshData(radius);
-	faceXP->generateMeshData(radius);
-	faceZP->generateMeshData(radius);
-	faceZM->generateMeshData(radius);
+    faceYP->generateMeshData(radius);
+    faceXM->generateMeshData(radius);
+    faceYM->generateMeshData(radius);
+    faceXP->generateMeshData(radius);
+    faceZP->generateMeshData(radius);
+    faceZM->generateMeshData(radius);
 
 	// Meshes must be done before trying to blend normals
-	faceYP->blendNormalsWithNeighbours();
-	faceXM->blendNormalsWithNeighbours();
-	faceYM->blendNormalsWithNeighbours();
-	faceXP->blendNormalsWithNeighbours();
-	faceZP->blendNormalsWithNeighbours();
-	faceZM->blendNormalsWithNeighbours();
+    faceYP->blendNormalsWithNeighbours();
+    faceXM->blendNormalsWithNeighbours();
+    faceYM->blendNormalsWithNeighbours();
+    faceXP->blendNormalsWithNeighbours();
+    faceZP->blendNormalsWithNeighbours();
+    faceZM->blendNormalsWithNeighbours();
 
 	faceYP->outputMeshData(vertexes, vNorms, texCoords, indexes);
 	// Assuming all faces have same size
@@ -594,30 +594,30 @@ void PSphere::loadToBuffers(const std::string &meshName, const std::string &text
 	mesh->load();
 
 	// Texture stuff
-	Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton()
-			.createManual(textureName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-						  Ogre::TEX_TYPE_2D, surfaceTextureWidth, surfaceTextureHeight, 0, Ogre::PF_R8G8B8, Ogre:: TU_DYNAMIC);
-	Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
-	pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
+    Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton()
+            .createManual(textureName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+                          Ogre::TEX_TYPE_2D, surfaceTextureWidth, surfaceTextureHeight, 0, Ogre::PF_R8G8B8, Ogre:: TU_DYNAMIC);
+    Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
+    pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
 
-	const Ogre::PixelBox &pixelBox = pixelBuffer->getCurrentLock();
-	Ogre::uint8 *exteriorTexture = static_cast<Ogre::uint8*>(pixelBox.data);
+    const Ogre::PixelBox &pixelBox = pixelBuffer->getCurrentLock();
+    Ogre::uint8 *exteriorTexture = static_cast<Ogre::uint8*>(pixelBox.data);
 
-	for(i=0; i < surfaceTextureHeight; i++)
-	{
-		for(j=0; j < surfaceTextureWidth; j++)
-		{
-			/* FIXME: Might be unnecessary memory copy, but was convenient. */
-			/* TextureManager did not honor Ogre::PF_R8G8B8, so need to swap red and blue,
-			 * plus hardware wants alfa channel values too */
-			exteriorTexture[(i*surfaceTextureWidth+j)*4]   = surfaceTexture[(i*surfaceTextureWidth+j)*3+2];   // blue
-			exteriorTexture[(i*surfaceTextureWidth+j)*4+1] = surfaceTexture[(i*surfaceTextureWidth+j)*3+1];   // green
-			exteriorTexture[(i*surfaceTextureWidth+j)*4+2] = surfaceTexture[(i*surfaceTextureWidth+j)*3];     // red
-			exteriorTexture[(i*surfaceTextureWidth+j)*4+3] = 255;                          // Alfa
-		}
-	}
+    for(i=0; i < surfaceTextureHeight; i++)
+    {
+        for(j=0; j < surfaceTextureWidth; j++)
+        {
+            /* FIXME: Might be unnecessary memory copy, but was convenient. */
+            /* TextureManager did not honor Ogre::PF_R8G8B8, so need to swap red and blue,
+             * plus hardware wants alfa channel values too */
+            exteriorTexture[(i*surfaceTextureWidth+j)*4]   = surfaceTexture[(i*surfaceTextureWidth+j)*3+2];   // blue
+            exteriorTexture[(i*surfaceTextureWidth+j)*4+1] = surfaceTexture[(i*surfaceTextureWidth+j)*3+1];   // green
+            exteriorTexture[(i*surfaceTextureWidth+j)*4+2] = surfaceTexture[(i*surfaceTextureWidth+j)*3];     // red
+            exteriorTexture[(i*surfaceTextureWidth+j)*4+3] = 255;                          // Alfa
+        }
+    }
 
-	pixelBuffer->unlock();
+    pixelBuffer->unlock();
 
 }
 
@@ -649,7 +649,7 @@ bool PSphere::checkIfObjectIsIn (std::string &objectName) {
 	return false;
 }
 
-void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, Ogre::Real x, Ogre::Real y, Ogre::Real z) {
+void PSphere::attachMeshSphereCoord(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, Ogre::Real x, Ogre::Real y, Ogre::Real z) {
     int temp_int = 0;
     string newName = meshName;
     string result;
@@ -678,7 +678,7 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 
 }
 
-void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z) {
+void PSphere::attachMeshSphereCoord(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z) {
 	int temp_int = 0;
 	string newName = objectName;
 	string result;
@@ -705,31 +705,27 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
     objects.push_back(object);
     node_satellite->attachObject(entity);
 
-    // OLD CODE (TO REMOVE)
-    //	Ogre::Vector3 position = Ogre::Vector3(x, y, z);
-    //	Ogre::Entity *entity = scene->createEntity(finalName, meshName);
-    //    Ogre::SceneNode *cube = node->createChildSceneNode(finalName, position);
-    //    ObjectInfo object = ObjectInfo(position, finalName, node);
-    //    objects.push_back(object);
-    //    cube->attachObject(entity);
-
 }
 
-void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude) {
-	Ogre::Vector3 cart_coord = convertSphericalToCartesian(latitude, longitude);
-	Ogre::Real x = radius*2*cart_coord.x;
-	Ogre::Real y = radius*2*cart_coord.y;
-	Ogre::Real z = radius*2*cart_coord.z;
+void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude, Ogre::Real dist) {
+    if (dist == 0.0f)
+        dist = radius;
+    Ogre::Vector3 cart_coord = convertSphericalToCartesian(latitude, longitude);
+    Ogre::Real x = dist*2*cart_coord.x;
+    Ogre::Real y = dist*2*cart_coord.y;
+    Ogre::Real z = dist*2*cart_coord.z;
 
-	this->attachMesh(node, scene, meshName, objectName, x, y, z);
+    this->attachMeshSphereCoord(node, scene, meshName, objectName, x, y, z);
 }
 
-void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, Ogre::Real latitude, Ogre::Real longitude) {
-	Ogre::Vector3 cart_coord = convertSphericalToCartesian(latitude, longitude);
+void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, Ogre::Real latitude, Ogre::Real longitude, Ogre::Real dist) {
+    if (dist == 0.0f)
+        dist = radius;
+    Ogre::Vector3 cart_coord = convertSphericalToCartesian(latitude, longitude);
 	Ogre::Real x = radius*1.2*cart_coord.x;
 	Ogre::Real y = radius*1.2*cart_coord.y;
 	Ogre::Real z = radius*1.2*cart_coord.z;
-	this->attachMesh(node, scene, meshName, x, y, z);
+    this->attachMeshSphereCoord(node, scene, meshName, x, y, z);
 
 }
 
@@ -773,6 +769,28 @@ void PSphere::attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scen
 
 	ObjectInfo object = ObjectInfo(position, finalName, node);
 	objects.push_back(object);
+}
+
+void PSphere::attachAstroChild(PSphere *object)
+{
+    astroObjectsChild.push_back(object);
+    Ogre::SceneNode* nodeObject;
+    nodeObject = object->getNode();
+    string nodeObjectName = nodeObject->getName();
+    string secNodeName = "sec_node_";
+    secNodeName = secNodeName+nodeObjectName;
+    Ogre::SceneNode *nodeSecondary = this->node->createChildSceneNode(secNodeName);
+    nodeSecondary->addChild(nodeObject);
+}
+
+void PSphere::setNode(Ogre::SceneNode *node)
+{
+    this->node = node;
+}
+
+Ogre::SceneNode* PSphere::getNode()
+{
+    return node;
 }
 
 bool PSphere::getGridLocation(Ogre::Vector3 location, Grid **face,
@@ -1340,7 +1358,6 @@ void PSphere::moveObjectRevolution(const std::string &objectName, int direction,
 ResourceParameter *PSphere::getParameters() {
 	return &RParameter;
 }
-
 
 Ogre::Real PSphere::heightNoise(vector<float> &amplitude,
                                vector<float> &frequency, Ogre::Vector3 Point)

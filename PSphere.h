@@ -44,19 +44,27 @@ public:
 
 	bool checkIfObjectIsIn (std::string &objectName);
 
-	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, Ogre::Real x, Ogre::Real y, Ogre::Real z);
+    void attachMeshSphereCoord(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, Ogre::Real x, Ogre::Real y, Ogre::Real z);
 
-	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z);
+    void attachMeshSphereCoord(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real x, Ogre::Real y, Ogre::Real z);
 
-	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude);
+    void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude, Ogre::Real dist = 0.0f);
 
-	void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, Ogre::Real latitude, Ogre::Real longitude);
+    void attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, Ogre::Real latitude, Ogre::Real longitude, Ogre::Real dist = 0.0f);
 
     /* To skip collision detection while moving object, I try to attach it on the ground and set the initial orientation
     *Maybe later we need object in air or outer space, so I leave attachmesh() and create this function which could put the object on ground. */
 	void attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude);
 
-	void moveObject(const std::string &objectName, int direction, float pace);
+    /* Attach another astrological object (star, planet, satellite, etc.) to this one.
+    The astrological object attached will be connected to this one with a childNode*/
+    void attachAstroChild(PSphere *object);
+
+    void setNode(Ogre::SceneNode *node);
+
+    Ogre::SceneNode* getNode();
+
+    void moveObject(const std::string &objectName, int direction, float pace);
 
     void moveObjectRevolution(const std::string &objectName, int direction, float pace);
 
@@ -120,6 +128,7 @@ private:
 	Ogre::uint32		indexCount;
 	Ogre::Real			radius;
 	Ogre::Real			seaHeight;
+    Ogre::SceneNode     *node;
 	unsigned char		*surfaceTexture;
 	unsigned short		surfaceTextureWidth;
 	unsigned short		surfaceTextureHeight;
@@ -140,6 +149,8 @@ private:
 	ResourceParameter	RParameter;
 	Ogre::Vector3		randomTranslate;
 	vector<ObjectInfo>	objects;
+    vector<PSphere*>    astroObjectsParent;
+    vector<PSphere*>    astroObjectsChild;
 	CollisionManager	*CollisionDetectionManager;
 	Ogre::Real			maximumHeight;
 	Ogre::Real			minimumHeight;
@@ -147,18 +158,22 @@ private:
     // Makes a sphere out of a cube that is made of 6 squares
 	void create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter);
 
+    void deform(HeightMap *map);
+
+    void calculateSeaLevel(float &minElev, float &maxElev, float seaFraction);
+
+    /* Generates surface-texturemap using noise-generated height differences.
+     * Expects pointer to be already correctly allocated. */
+    void generateImage(unsigned short width, unsigned short height, unsigned char *image);
+
+    void setGridLandInfo(Grid *grid);
+
+    void smoothSeaArea();
+
 	void calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour);
 
     /* Fix a seam by adding vertex duplicates with texture u going over 1.0 */
 	void fixTextureSeam();
-
-	void calculateSeaLevel(float &minElev, float &maxElev, float seaFraction);
-
-	void smoothSeaArea();
-
-	void deform(HeightMap *map);
-
-	void setGridLandInfo(Grid *grid);
 
 	Ogre::Vector3 calculateSphereCoordsFromTexCoords(Ogre::Vector2 *texCoord);
 
@@ -169,10 +184,6 @@ private:
 	Ogre::ColourValue generatePixel(Ogre::Real height,
 									   Ogre::ColourValue water1st, Ogre::ColourValue water2nd, Ogre::ColourValue terrain1st,
 									   Ogre::ColourValue terrain2nd, Ogre::ColourValue mountain1st, Ogre::ColourValue mountain2nd);
-
-    /* Generates surface-texturemap using noise-generated height differences.
-     * Expects pointer to be already correctly allocated. */
-	void generateImage(unsigned short width, unsigned short height, unsigned char *image);
 
 	void generateMeshData();
 
