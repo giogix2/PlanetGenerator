@@ -197,14 +197,14 @@ void initOgre::setSceneAndRun(PSphere *planet){
 //    nodeSphere2->setOrientation(0.0f, -0.0f, -0.0f, -0.9144643269f);
 
 //    mySphere2->setNode(nodeSphere2);
-//    mySphere2->setEntity(entity2);
+    mySphere2->setEntity(entity2);
 
-//    Ogre::MaterialPtr textureMap2 = Ogre::MaterialManager::getSingleton()
-//            .create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-//    textureMap2->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex2");
-//    textureMap2->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-//    // Set texture for the sphere
-//    entity2->setMaterial(textureMap2);
+    Ogre::MaterialPtr textureMap2 = Ogre::MaterialManager::getSingleton()
+            .create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    textureMap2->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex2");
+    textureMap2->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+    // Set texture for the sphere
+    entity2->setMaterial(textureMap2);
 
     planet->attachAstroChild(mySphere2);
     // ########################################################################################

@@ -66,6 +66,8 @@ public:
 
     Ogre::SceneNode* getNode();
 
+    Ogre::Entity* getEntity();
+
     void moveObject(const std::string &objectName, int direction, float pace);
 
     void moveObjectRevolution(const std::string &objectName, int direction, float pace);

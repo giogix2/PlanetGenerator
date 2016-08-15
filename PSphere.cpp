@@ -790,14 +790,23 @@ void PSphere::attachAstroChild(PSphere *object)
 
     astroObjectsChild.push_back(object);
 
+    Ogre::Entity* entity = object->getEntity();
+//    Ogre::SceneNode* parent = entity->getParentSceneNode();
 //    Ogre::SceneNode* nodeObject;
 //    nodeObject = object->getNode();
 //    string nodeObjectName = nodeObject->getName();
-//    string secNodeName = "sec_node_";
-//    secNodeName = secNodeName+nodeObjectName;
-//    Ogre::SceneNode *nodeSecondary = this->node->createChildSceneNode(secNodeName);
+
+    string secNodeName = "sec_node_";
+    string nodeObjectName = "node_";
+    secNodeName = secNodeName + objectMeshName;
+    nodeObjectName = nodeObjectName + objectMeshName;
+    Ogre::SceneNode *nodeSecondary = this->node->createChildSceneNode(secNodeName);
 //    nodeSecondary->addChild(nodeObject);
-//    nodeSecondary->createChildSceneNode(nodeObjectName);
+    nodeSecondary->createChildSceneNode(nodeObjectName);
+    nodeSecondary->attachObject(entity);
+
+    nodeSecondary->setPosition(20.0f, 0.0f, -0.0f);
+    nodeSecondary->setOrientation(0.0f, -0.0f, -0.0f, -0.9144643269f);
 }
 
 void PSphere::setNode(Ogre::SceneNode *node)
@@ -813,6 +822,11 @@ void PSphere::setEntity(Ogre::Entity *entity)
 Ogre::SceneNode* PSphere::getNode()
 {
     return node;
+}
+
+Ogre::Entity* PSphere::getEntity()
+{
+    return entity;
 }
 
 bool PSphere::getGridLocation(Ogre::Vector3 location, Grid **face,
