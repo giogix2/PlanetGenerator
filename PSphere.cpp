@@ -469,6 +469,16 @@ Ogre::Real PSphere::getRadius()
 	return radius;
 }
 
+string PSphere::getMeshName()
+{
+    return meshName;
+}
+
+string PSphere::getTextureName()
+{
+    return textureName;
+}
+
 void PSphere::generateMeshData()
 {
 	unsigned int iters;
@@ -527,6 +537,8 @@ void PSphere::generateMeshData()
 
 void PSphere::loadToBuffers(const std::string &meshName, const std::string &textureName)
 {
+    this->meshName = meshName;
+    this->textureName = textureName;
 	Ogre::uint32 i, j;
 
 	generateMeshData();
@@ -780,7 +792,8 @@ void PSphere::attachAstroChild(PSphere *object)
     string secNodeName = "sec_node_";
     secNodeName = secNodeName+nodeObjectName;
     Ogre::SceneNode *nodeSecondary = this->node->createChildSceneNode(secNodeName);
-    nodeSecondary->addChild(nodeObject);
+//    nodeSecondary->addChild(nodeObject);
+    nodeSecondary->createChildSceneNode(nodeObjectName);
 }
 
 void PSphere::setNode(Ogre::SceneNode *node)

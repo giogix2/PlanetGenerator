@@ -91,6 +91,10 @@ public:
     /* return radius */
 	Ogre::Real getRadius();
 
+    string getMeshName();
+
+    string getTextureName();
+
     /* Figures which one of the cubefaces 3D-location lands, and what 2D-coordinates
      * that face has.
      * Returns:
@@ -154,6 +158,8 @@ private:
 	CollisionManager	*CollisionDetectionManager;
 	Ogre::Real			maximumHeight;
 	Ogre::Real			minimumHeight;
+    string              meshName;
+    string              textureName;
 
     // Makes a sphere out of a cube that is made of 6 squares
 	void create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter);
