@@ -785,20 +785,29 @@ void PSphere::attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scen
 
 void PSphere::attachAstroChild(PSphere *object)
 {
+    string objectMeshName = object->getMeshName();
+    string objectTextName = object->getTextureName();
+
     astroObjectsChild.push_back(object);
-    Ogre::SceneNode* nodeObject;
-    nodeObject = object->getNode();
-    string nodeObjectName = nodeObject->getName();
-    string secNodeName = "sec_node_";
-    secNodeName = secNodeName+nodeObjectName;
-    Ogre::SceneNode *nodeSecondary = this->node->createChildSceneNode(secNodeName);
+
+//    Ogre::SceneNode* nodeObject;
+//    nodeObject = object->getNode();
+//    string nodeObjectName = nodeObject->getName();
+//    string secNodeName = "sec_node_";
+//    secNodeName = secNodeName+nodeObjectName;
+//    Ogre::SceneNode *nodeSecondary = this->node->createChildSceneNode(secNodeName);
 //    nodeSecondary->addChild(nodeObject);
-    nodeSecondary->createChildSceneNode(nodeObjectName);
+//    nodeSecondary->createChildSceneNode(nodeObjectName);
 }
 
 void PSphere::setNode(Ogre::SceneNode *node)
 {
     this->node = node;
+}
+
+void PSphere::setEntity(Ogre::Entity *entity)
+{
+    this->entity = entity;
 }
 
 Ogre::SceneNode* PSphere::getNode()

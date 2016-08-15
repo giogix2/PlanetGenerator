@@ -188,8 +188,8 @@ void initOgre::setSceneAndRun(PSphere *planet){
     mySphere2 = new PSphere(100, 40, 1024, 512, *params2);
     mySphere2->loadToBuffers("CustomMesh2", "sphereTex2");
 
-//    Ogre::Entity *entity2 = Scene->createEntity("CustomEntity2", "CustomMesh2");
-////    Ogre::SceneNode *nodeSphere2 = Scene->getRootSceneNode()->createChildSceneNode("planetSphere2");
+    Ogre::Entity *entity2 = Scene->createEntity("CustomEntity2", "CustomMesh2");
+//    Ogre::SceneNode *nodeSphere2 = Scene->getRootSceneNode()->createChildSceneNode("planetSphere2");
 //    Ogre::SceneNode *nodeSphere2 = Scene->createSceneNode("planetSphere2");
 //    nodeSphere2->attachObject(entity2);
 
@@ -197,6 +197,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
 //    nodeSphere2->setOrientation(0.0f, -0.0f, -0.0f, -0.9144643269f);
 
 //    mySphere2->setNode(nodeSphere2);
+//    mySphere2->setEntity(entity2);
 
 //    Ogre::MaterialPtr textureMap2 = Ogre::MaterialManager::getSingleton()
 //            .create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
@@ -205,7 +206,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
 //    // Set texture for the sphere
 //    entity2->setMaterial(textureMap2);
 
-//    planet->attachAstroChild(mySphere2);
+    planet->attachAstroChild(mySphere2);
     // ########################################################################################
 
     /********************************************************************************

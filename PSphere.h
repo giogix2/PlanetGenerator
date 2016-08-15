@@ -62,6 +62,8 @@ public:
 
     void setNode(Ogre::SceneNode *node);
 
+    void setEntity(Ogre::Entity *entity);
+
     Ogre::SceneNode* getNode();
 
     void moveObject(const std::string &objectName, int direction, float pace);
@@ -133,6 +135,7 @@ private:
 	Ogre::Real			radius;
 	Ogre::Real			seaHeight;
     Ogre::SceneNode     *node;
+    Ogre::Entity        *entity;
 	unsigned char		*surfaceTexture;
 	unsigned short		surfaceTextureWidth;
 	unsigned short		surfaceTextureHeight;
