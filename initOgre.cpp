@@ -173,7 +173,6 @@ void initOgre::setSceneAndRun(PSphere *planet){
 	sphere1->attachObject(entity1);
     planet->setNode(sphere1);
 
-
     // # ################################### TEMP #############################################
     float waterfraction = 0.6;
     float radius = 7.5;

@@ -801,12 +801,16 @@ void PSphere::attachAstroChild(PSphere *object)
     secNodeName = secNodeName + objectMeshName;
     nodeObjectName = nodeObjectName + objectMeshName;
     Ogre::SceneNode *nodeSecondary = this->node->createChildSceneNode(secNodeName);
+    Ogre::SceneNode *nodeAstroChild = nodeSecondary->createChildSceneNode(objectMeshName);
 //    nodeSecondary->addChild(nodeObject);
-    nodeSecondary->createChildSceneNode(nodeObjectName);
-    nodeSecondary->attachObject(entity);
+    nodeAstroChild->createChildSceneNode(nodeObjectName);
+    nodeAstroChild->attachObject(entity);
 
-    nodeSecondary->setPosition(20.0f, 0.0f, -0.0f);
-    nodeSecondary->setOrientation(0.0f, -0.0f, -0.0f, -0.9144643269f);
+    nodeAstroChild->setPosition(20.0f, 0.0f, 0.0f);
+    nodeAstroChild->setOrientation(0.0f, 0.0f, 0.0f, 0.9144643269f);
+
+    cout << "###############################";
+    cout << this->node->getOrientation();
 }
 
 void PSphere::setNode(Ogre::SceneNode *node)
