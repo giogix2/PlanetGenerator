@@ -498,6 +498,7 @@ bool GeneratorFrameListener::frameStarted(const Ogre::FrameEvent& evt)
 	//pSphere->moveObject("Ramiro", 3, 0.5);
 	//pSphere->moveObject("CK7", 2, 0.5);
 	//pSphere->getObserverDistanceToSurface();
+    pSphere->moveAstroChild("CustomMesh2", 10, 2.0);
 
 	return true;
 }

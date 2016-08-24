@@ -786,15 +786,8 @@ void PSphere::attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scen
 void PSphere::attachAstroChild(PSphere *object)
 {
     string objectMeshName = object->getMeshName();
-    string objectTextName = object->getTextureName();
-
     astroObjectsChild.push_back(object);
-
     Ogre::Entity* entity = object->getEntity();
-//    Ogre::SceneNode* parent = entity->getParentSceneNode();
-//    Ogre::SceneNode* nodeObject;
-//    nodeObject = object->getNode();
-//    string nodeObjectName = nodeObject->getName();
 
     string secNodeName = "sec_node_";
     string nodeObjectName = "node_";
@@ -802,15 +795,10 @@ void PSphere::attachAstroChild(PSphere *object)
     nodeObjectName = nodeObjectName + objectMeshName;
     Ogre::SceneNode *nodeSecondary = this->node->createChildSceneNode(secNodeName);
     Ogre::SceneNode *nodeAstroChild = nodeSecondary->createChildSceneNode(objectMeshName);
-//    nodeSecondary->addChild(nodeObject);
-    nodeAstroChild->createChildSceneNode(nodeObjectName);
+
     nodeAstroChild->attachObject(entity);
-
+    object->setNode(nodeAstroChild);
     nodeAstroChild->setPosition(20.0f, 0.0f, 0.0f);
-    nodeAstroChild->setOrientation(0.0f, 0.0f, 0.0f, 0.9144643269f);
-
-    cout << "###############################";
-    cout << this->node->getOrientation();
 }
 
 void PSphere::setNode(Ogre::SceneNode *node)
@@ -1393,6 +1381,15 @@ void PSphere::moveObjectRevolution(const std::string &objectName, int direction,
             }
         }
     }
+}
+
+void PSphere::moveAstroChild(const std::string &objectName, int direction, float pace)
+{
+    string sec_node;
+    sec_node = "sec_node_" + objectName;
+    Ogre::Node* nodeSecondary;
+    nodeSecondary = node->getChild(sec_node);
+
 }
 
 ResourceParameter *PSphere::getParameters() {

@@ -57,7 +57,8 @@ public:
 	void attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude);
 
     /* Attach another astrological object (star, planet, satellite, etc.) to this one.
-    The astrological object attached will be connected to this one with a childNode*/
+    The astrological object attached will be connected to this one with a childNode
+    Two node are put between the actual planet and the astrological object*/
     void attachAstroChild(PSphere *object);
 
     void setNode(Ogre::SceneNode *node);
@@ -71,6 +72,8 @@ public:
     void moveObject(const std::string &objectName, int direction, float pace);
 
     void moveObjectRevolution(const std::string &objectName, int direction, float pace);
+
+    void moveAstroChild(const std::string &objectName, int direction, float pace);
 
     /* Set position for the observer. This must be position vector in modelspace,
      * not in worldspace. In other words, one must undo rotations. */
