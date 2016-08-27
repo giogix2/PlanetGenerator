@@ -535,6 +535,18 @@ void PSphere::generateMeshData()
 	fixTextureSeam();
 }
 
+PSphere* PSphere::getAstroChild(const std::string &objectName)
+{
+    for (vector<PSphere*>::iterator it = astroObjectsChild.begin() ; it != astroObjectsChild.end(); ++it)
+    {
+        if ((*it)->getMeshName().compare(objectName) == 0)
+        {
+            return (*it);
+        }
+    }
+    return NULL;
+}
+
 void PSphere::loadToBuffers(const std::string &meshName, const std::string &textureName)
 {
     this->meshName = meshName;
@@ -783,10 +795,16 @@ void PSphere::attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scen
 	objects.push_back(object);
 }
 
+void PSphere::attachAstroParent(PSphere *object)
+{
+    astroObjectsParent.push_back(object);
+}
+
 void PSphere::attachAstroChild(PSphere *object, Ogre::Real x, Ogre::Real y, Ogre::Real z)
 {
     string objectMeshName = object->getMeshName();
     astroObjectsChild.push_back(object);
+    object->attachAstroParent(this);
     Ogre::Entity* entity = object->getEntity();
 
     string secNodeName = "sec_node_";

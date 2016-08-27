@@ -500,6 +500,7 @@ bool GeneratorFrameListener::frameStarted(const Ogre::FrameEvent& evt)
 	//pSphere->getObserverDistanceToSurface();
     pSphere->moveAstroChild("CustomMesh2", 0.0f, 0.03f, 0.03f);
 
+
 	return true;
 }
 

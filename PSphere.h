@@ -56,6 +56,8 @@ public:
     *Maybe later we need object in air or outer space, so I leave attachmesh() and create this function which could put the object on ground. */
 	void attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude);
 
+    void attachAstroParent(PSphere *object);
+
     /* Attach another astrological object (star, planet, satellite, etc.) to this one.
     The astrological object attached will be connected to this one with a childNode
     Two node are put between the actual planet and the astrological object*/
@@ -99,6 +101,8 @@ public:
 	Ogre::Real getRadius();
 
     string getMeshName();
+
+    PSphere* getAstroChild(const std::string &objectName);
 
     string getTextureName();
 

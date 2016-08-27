@@ -207,24 +207,38 @@ void initOgre::setSceneAndRun(PSphere *planet){
     std::string frequencyAmplitude = "1.0 0.02 0.3 0.008 0.1 0.005 0.06666 0.006666";
     std::vector < std::pair < std::string, int > > meshlocs;
     std::ResourceParameter *params2;
+    std::ResourceParameter *params3;
     params2 = new std::ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#32CDFF"
         ,(std::string)"#64FFFF",(std::string)"#B4B4B4",(std::string)"#FFFFFF",waterfraction,radius,seed,frequencyAmplitude, meshlocs);
+    params3 = new std::ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#c88500"
+        ,(std::string)"#d6c502",(std::string)"#874300",(std::string)"#FFFFFF",0.4, 4.5,70,frequencyAmplitude, meshlocs);
 
     PSphere *mySphere2;
+    PSphere *mySphere3;
     mySphere2 = new PSphere(100, 40, 1024, 512, *params2);
+    mySphere3 = new PSphere(100, 40, 1024, 512, *params3);
     mySphere2->loadToBuffers("CustomMesh2", "sphereTex2");
+    mySphere3->loadToBuffers("CustomMesh3", "sphereTex3");
 
     Ogre::Entity *entity2 = Scene->createEntity("CustomEntity2", "CustomMesh2");
+    Ogre::Entity *entity3 = Scene->createEntity("CustomEntity3", "CustomMesh3");
     mySphere2->setEntity(entity2);
+    mySphere3->setEntity(entity3);
 
     Ogre::MaterialPtr textureMap2 = Ogre::MaterialManager::getSingleton()
             .create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    Ogre::MaterialPtr textureMap3 = Ogre::MaterialManager::getSingleton()
+            .create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
     textureMap2->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex2");
+    textureMap3->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex3");
     textureMap2->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+    textureMap3->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
     // Set texture for the sphere
     entity2->setMaterial(textureMap2);
+    entity3->setMaterial(textureMap3);
 
     planet->attachAstroChild(mySphere2, 40.0f, 0.0f, 0.0f);
+    mySphere2->attachAstroChild(mySphere3, 20.0f, 0.0f, 0.0f);
 
 	/*planet->attachMeshOnGround(sphere1, Scene, "ram.mesh", "Ramiro", 0.0, 270.0);*/
 //    planet->attachMesh(sphere1, Scene, "asteroid.mesh", "CK7", 0.0, 180.0);
