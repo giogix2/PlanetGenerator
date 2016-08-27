@@ -59,7 +59,7 @@ public:
     /* Attach another astrological object (star, planet, satellite, etc.) to this one.
     The astrological object attached will be connected to this one with a childNode
     Two node are put between the actual planet and the astrological object*/
-    void attachAstroChild(PSphere *object);
+    void attachAstroChild(PSphere *object, Ogre::Real x, Ogre::Real y, Ogre::Real z);
 
     void setNode(Ogre::SceneNode *node);
 
@@ -73,7 +73,7 @@ public:
 
     void moveObjectRevolution(const std::string &objectName, int direction, float pace);
 
-    void moveAstroChild(const std::string &objectName, int direction, float pace);
+    void moveAstroChild(const std::string &objectName, Ogre::Real pitch, Ogre::Real yaw, Ogre::Real roll);
 
     /* Set position for the observer. This must be position vector in modelspace,
      * not in worldspace. In other words, one must undo rotations. */

@@ -783,7 +783,7 @@ void PSphere::attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scen
 	objects.push_back(object);
 }
 
-void PSphere::attachAstroChild(PSphere *object)
+void PSphere::attachAstroChild(PSphere *object, Ogre::Real x, Ogre::Real y, Ogre::Real z)
 {
     string objectMeshName = object->getMeshName();
     astroObjectsChild.push_back(object);
@@ -798,7 +798,7 @@ void PSphere::attachAstroChild(PSphere *object)
 
     nodeAstroChild->attachObject(entity);
     object->setNode(nodeAstroChild);
-    nodeAstroChild->setPosition(20.0f, 0.0f, 0.0f);
+    nodeAstroChild->setPosition(x, y, z);
 }
 
 void PSphere::setNode(Ogre::SceneNode *node)
@@ -1383,12 +1383,24 @@ void PSphere::moveObjectRevolution(const std::string &objectName, int direction,
     }
 }
 
-void PSphere::moveAstroChild(const std::string &objectName, int direction, float pace)
+void PSphere::moveAstroChild(const std::string &objectName, Ogre::Real pitch, Ogre::Real yaw, Ogre::Real roll)
 {
     string sec_node;
     sec_node = "sec_node_" + objectName;
     Ogre::Node* nodeSecondary;
     nodeSecondary = node->getChild(sec_node);
+    if (pitch != 0.0f)
+    {
+        nodeSecondary->pitch(Ogre::Radian(pitch));
+    }
+    if (yaw != 0.0f)
+    {
+        nodeSecondary->yaw(Ogre::Radian(yaw));
+    }
+    if (roll != 0.0f)
+    {
+        nodeSecondary->roll(Ogre::Radian(roll));
+    }
 
 }
 

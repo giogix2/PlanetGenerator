@@ -224,7 +224,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
     // Set texture for the sphere
     entity2->setMaterial(textureMap2);
 
-    planet->attachAstroChild(mySphere2);
+    planet->attachAstroChild(mySphere2, 40.0f, 0.0f, 0.0f);
 
 	/*planet->attachMeshOnGround(sphere1, Scene, "ram.mesh", "Ramiro", 0.0, 270.0);*/
 //    planet->attachMesh(sphere1, Scene, "asteroid.mesh", "CK7", 0.0, 180.0);
