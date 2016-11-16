@@ -471,18 +471,16 @@ Ogre::Real PSphere::getRadius()
 
 string PSphere::getMeshName()
 {
-    return meshName;
+    return meshName[0];
 }
 
 string PSphere::getTextureName()
 {
-    return textureName;
+    return textureName[0];
 }
 
 void PSphere::generateMeshData()
 {
-	unsigned int iters;
-
     faceYP->generateMeshData(radius);
     faceXM->generateMeshData(radius);
     faceYM->generateMeshData(radius);
@@ -497,42 +495,6 @@ void PSphere::generateMeshData()
     faceXP->blendNormalsWithNeighbours();
     faceZP->blendNormalsWithNeighbours();
     faceZM->blendNormalsWithNeighbours();
-
-	faceYP->outputMeshData(vertexes, vNorms, texCoords, indexes);
-	// Assuming all faces have same size
-	iters = faceYP->getSize();
-	indexCount = (iters-1)*(iters-1)*6;
-	vertexCount = iters*iters;
-	faceXM->outputMeshData(&vertexes[vertexCount], &vNorms[vertexCount], &texCoords[vertexCount], &indexes[indexCount]);
-
-	indexCount += (iters-1)*(iters-1)*6;
-	vertexCount += iters*iters;
-	faceYM->outputMeshData(&vertexes[vertexCount], &vNorms[vertexCount], &texCoords[vertexCount], &indexes[indexCount]);
-
-	indexCount += (iters-1)*(iters-1)*6;
-	vertexCount += iters*iters;
-	faceXP->outputMeshData(&vertexes[vertexCount], &vNorms[vertexCount], &texCoords[vertexCount], &indexes[indexCount]);
-
-	indexCount += (iters-1)*(iters-1)*6;
-	vertexCount += iters*iters;
-	faceZP->outputMeshData(&vertexes[vertexCount], &vNorms[vertexCount], &texCoords[vertexCount], &indexes[indexCount]);
-
-	indexCount += (iters-1)*(iters-1)*6;
-	vertexCount += iters*iters;
-	faceZM->outputMeshData(&vertexes[vertexCount], &vNorms[vertexCount], &texCoords[vertexCount], &indexes[indexCount]);
-
-	indexCount += (iters-1)*(iters-1)*6;
-	vertexCount += iters*iters;
-
-	// Modify index-values, because same vertex-array is shared between faces.
-	unsigned int faceNum, i;
-	for(i=0; i < indexCount; i++)
-	{
-		faceNum = i / ( (iters-1)*(iters-1)*6 );
-		indexes[i] += faceNum*iters*iters;
-	}
-
-	fixTextureSeam();
 }
 
 PSphere* PSphere::getAstroChild(const std::string &objectName)
@@ -547,81 +509,91 @@ PSphere* PSphere::getAstroChild(const std::string &objectName)
     return NULL;
 }
 
-void PSphere::loadToBuffers(const std::string &meshName, const std::string &textureName)
+void PSphere::bufferMesh(const std::string &meshName, Ogre::Vector3 *verts, Ogre::Vector3 *norms, Ogre::Vector2 *txCrds, Ogre::uint32 *indxs, Ogre::uint32 vCount, Ogre::uint32 iCount)
 {
-    this->meshName = meshName;
-    this->textureName = textureName;
-	Ogre::uint32 i, j;
+    Ogre::uint32 i;
 
-	generateMeshData();
+    // Create mesh and subMesh
+    Ogre::MeshPtr mesh;
+    Ogre::SubMesh *subMesh;
+    mesh = Ogre::MeshManager::getSingleton()
+           .createManual(meshName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    subMesh = mesh->createSubMesh();
 
-	// Create mesh and subMesh
-	Ogre::MeshPtr mesh = Ogre::MeshManager::getSingleton()
-			.createManual(meshName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-	Ogre::SubMesh *subMesh = mesh->createSubMesh();
+    mesh->sharedVertexData = new Ogre::VertexData;
 
-	mesh->sharedVertexData = new Ogre::VertexData;
+    // Pointer to declaration of vertexData
+    Ogre::VertexDeclaration* vertexDecl = mesh->sharedVertexData->vertexDeclaration;
 
-	// Pointer to declaration of vertexData
-	Ogre::VertexDeclaration* vertexDecl = mesh->sharedVertexData->vertexDeclaration;
+    mesh->sharedVertexData->vertexCount = vCount;
 
-	mesh->sharedVertexData->vertexCount = vertexCount;
+    // define elements position, normal and tex coordinate
+    vertexDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+    vertexDecl->addElement(0, sizeof(float)*3, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
+    vertexDecl->addElement(0, sizeof(float)*6, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
 
-	// define elements position, normal and tex coordinate
-	vertexDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
-	vertexDecl->addElement(0, sizeof(float)*3, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
-	vertexDecl->addElement(0, sizeof(float)*6, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
+    // Vertex buffer
+    Ogre::HardwareVertexBufferSharedPtr vBuf;
+    vBuf = Ogre::HardwareBufferManager::getSingleton()
+           .createVertexBuffer(8*sizeof(float), vertexCount,
+           Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
 
-	// Vertex buffer
-	Ogre::HardwareVertexBufferSharedPtr vBuf = Ogre::HardwareBufferManager::getSingleton()
-			.createVertexBuffer(8*sizeof(float), vertexCount,
-								Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
-	mesh->sharedVertexData->vertexBufferBinding->setBinding(0, vBuf);
+    mesh->sharedVertexData->vertexBufferBinding->setBinding(0, vBuf);
 
-	// Lock the buffer and write vertex data to it
-	float *pVertex = static_cast<float *>(vBuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
-	for(i=0; i < vertexCount; i++)
-	{
-		pVertex[i*8+0] = vertexes[i].x;
-		pVertex[i*8+1] = vertexes[i].y;
-		pVertex[i*8+2] = vertexes[i].z;
+    // Lock the buffer and write vertex data to it
+    float *pVertex = static_cast<float *>(vBuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
+    for(i=0; i < vertexCount; i++)
+    {
+        pVertex[i*8+0] = verts[i].x;
+        pVertex[i*8+1] = verts[i].y;
+        pVertex[i*8+2] = verts[i].z;
 
-		pVertex[i*8+3] = vNorms[i].x;
-		pVertex[i*8+4] = vNorms[i].y;
-		pVertex[i*8+5] = vNorms[i].z;
+        pVertex[i*8+3] = norms[i].x;
+        pVertex[i*8+4] = norms[i].y;
+        pVertex[i*8+5] = norms[i].z;
 
-		pVertex[i*8+6] = texCoords[i].x;
-		pVertex[i*8+7] = texCoords[i].y;
-	}
-	vBuf->unlock();
+        pVertex[i*8+6] = txCrds[i].x;
+        pVertex[i*8+7] = txCrds[i].y;
+    }
+    vBuf->unlock();
 
-	// Index buffer
-	Ogre::HardwareIndexBufferSharedPtr iBuf = Ogre::HardwareBufferManager::getSingleton()
-			.createIndexBuffer(Ogre::HardwareIndexBuffer::IT_32BIT, indexCount,
-							   Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
-	// Lock index buffer
-	unsigned int *pIdx = static_cast<unsigned int *>(iBuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
-	for(i=0; i < indexCount; i++)
-	{
-		pIdx[i] = indexes[i];
-	}
-	iBuf->unlock();
+    // Index buffer
+    Ogre::HardwareIndexBufferSharedPtr iBuf;
+    iBuf = Ogre::HardwareBufferManager::getSingleton()
+           .createIndexBuffer(Ogre::HardwareIndexBuffer::IT_32BIT, indexCount,
+           Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
 
-	subMesh->useSharedVertices = true;
-	subMesh->indexData->indexBuffer = iBuf;
-	subMesh->indexData->indexCount = indexCount;
-	subMesh->indexData->indexStart = 0;
+    // Lock index buffer
+    unsigned int *pIdx;
+    pIdx = static_cast<unsigned int *>(iBuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
+    for(i=0; i < iCount; i++)
+    {
+        pIdx[i] = indxs[i];
+    }
+    iBuf->unlock();
 
-	mesh->_setBounds(Ogre::AxisAlignedBox(-radius, -radius, -radius, radius, radius, radius));
-	mesh->_setBoundingSphereRadius(radius);
+    subMesh->useSharedVertices = true;
+    subMesh->indexData->indexBuffer = iBuf;
+    subMesh->indexData->indexCount = indexCount;
+    subMesh->indexData->indexStart = 0;
 
-	mesh->load();
+    mesh->_setBounds(Ogre::AxisAlignedBox(-radius, -radius, -radius, radius, radius, radius));
+    mesh->_setBoundingSphereRadius(radius);
 
-	// Texture stuff
-    Ogre::TexturePtr texture = Ogre::TextureManager::getSingleton()
-            .createManual(textureName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-                          Ogre::TEX_TYPE_2D, surfaceTextureWidth, surfaceTextureHeight, 0, Ogre::PF_R8G8B8, Ogre:: TU_DYNAMIC);
-    Ogre::HardwarePixelBufferSharedPtr pixelBuffer = texture->getBuffer();
+    mesh->load();
+}
+
+void PSphere::bufferTexture(const std::string &textureName)
+{
+    Ogre::uint32 i, j;
+    Ogre::TexturePtr texture;
+    Ogre::HardwarePixelBufferSharedPtr pixelBuffer;
+
+    // Texture stuff
+    texture = Ogre::TextureManager::getSingleton()
+              .createManual(textureName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
+              Ogre::TEX_TYPE_2D, surfaceTextureWidth, surfaceTextureHeight, 0, Ogre::PF_R8G8B8, Ogre:: TU_DYNAMIC);
+    pixelBuffer = texture->getBuffer();
     pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
 
     const Ogre::PixelBox &pixelBox = pixelBuffer->getCurrentLock();
@@ -643,6 +615,95 @@ void PSphere::loadToBuffers(const std::string &meshName, const std::string &text
 
     pixelBuffer->unlock();
 
+}
+
+void PSphere::load(Ogre::SceneNode *parent, Ogre::SceneManager *scene, const std::string &planetName, const std::string &textureName)
+{
+    Ogre::uint32 iters;
+
+    generateMeshData();
+
+    // Assuming all faces have same size
+    iters = faceYP->getSize();
+    indexCount = (iters-1)*(iters-1)*6;
+    vertexCount = iters*iters;
+
+    this->node = parent->createChildSceneNode(planetName);
+
+    faceZP->outputMeshData(vertexes, vNorms, texCoords, indexes);
+    this->meshName[0] = planetName+"_meshZP";
+    bufferMesh(meshName[0], vertexes, vNorms, texCoords, indexes, vertexCount, indexCount);
+    this->entity[0] = scene->createEntity(planetName+"_entZP", planetName+"_meshZP");
+    this->node->attachObject(this->entity[0]);
+
+    faceZM->outputMeshData(vertexes, vNorms, texCoords, indexes);
+    this->meshName[1] = planetName+"_meshZM";
+    bufferMesh(meshName[1], vertexes, vNorms, texCoords, indexes, vertexCount, indexCount);
+    this->entity[1] = scene->createEntity(planetName+"_entZM", planetName+"_meshZM");
+    this->node->attachObject(this->entity[1]);
+
+    faceYP->outputMeshData(vertexes, vNorms, texCoords, indexes);
+    this->meshName[2] = planetName+"_meshYP";
+    bufferMesh(meshName[2], vertexes, vNorms, texCoords, indexes, vertexCount, indexCount);
+    this->entity[2] = scene->createEntity(planetName+"_entYP", planetName+"_meshYP");
+    this->node->attachObject(this->entity[2]);
+
+    faceYM->outputMeshData(vertexes, vNorms, texCoords, indexes);
+    this->meshName[3] = planetName+"_meshYM";
+    bufferMesh(meshName[3], vertexes, vNorms, texCoords, indexes, vertexCount, indexCount);
+    this->entity[3] = scene->createEntity(planetName+"_entYM", planetName+"_meshYM");
+    this->node->attachObject(this->entity[3]);
+
+    faceXP->outputMeshData(vertexes, vNorms, texCoords, indexes);
+    this->meshName[4] = planetName+"_meshXP";
+    bufferMesh(meshName[4], vertexes, vNorms, texCoords, indexes, vertexCount, indexCount);
+    this->entity[4] = scene->createEntity(planetName+"_entXP", planetName+"_meshXP");
+    this->node->attachObject(this->entity[4]);
+
+    faceXM->outputMeshData(vertexes, vNorms, texCoords, indexes);
+    this->meshName[5] = planetName+"_meshXM";
+    bufferMesh(meshName[5], vertexes, vNorms, texCoords, indexes, vertexCount, indexCount);
+    this->entity[5] = scene->createEntity(planetName+"_entXM", planetName+"_meshXM");
+    this->node->attachObject(this->entity[5]);
+
+    this->textureName[0] = textureName;
+    bufferTexture(textureName);
+
+    Ogre::MaterialPtr textureMap;
+
+    textureMap = Ogre::MaterialManager::getSingleton()
+                 .create(planetName+"_TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
+    textureMap->getTechnique(0)->getPass(0)->createTextureUnitState(textureName);
+    textureMap->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+
+    entity[0]->getMesh()->getSubMesh(0)->setMaterialName(planetName+"_TextureObject");
+    entity[1]->getMesh()->getSubMesh(0)->setMaterialName(planetName+"_TextureObject");
+    entity[2]->getMesh()->getSubMesh(0)->setMaterialName(planetName+"_TextureObject");
+    entity[3]->getMesh()->getSubMesh(0)->setMaterialName(planetName+"_TextureObject");
+    entity[4]->getMesh()->getSubMesh(0)->setMaterialName(planetName+"_TextureObject");
+    entity[5]->getMesh()->getSubMesh(0)->setMaterialName(planetName+"_TextureObject");
+
+    // Set texture for the sphere
+    entity[0]->setMaterial(textureMap);
+    entity[1]->setMaterial(textureMap);
+    entity[2]->setMaterial(textureMap);
+    entity[3]->setMaterial(textureMap);
+    entity[4]->setMaterial(textureMap);
+    entity[5]->setMaterial(textureMap);
+}
+
+void PSphere::unload(Ogre::SceneManager *scene)
+{
+    this->node->detachAllObjects();
+
+    scene->destroyEntity(entity[0]);
+    scene->destroyEntity(entity[1]);
+    scene->destroyEntity(entity[2]);
+    scene->destroyEntity(entity[3]);
+    scene->destroyEntity(entity[4]);
+    scene->destroyEntity(entity[5]);
+
+    scene->destroySceneNode(this->node);
 }
 
 void PSphere::loadMeshFile(const std::string &path, const std::string &meshName) {
@@ -826,7 +887,7 @@ void PSphere::setNode(Ogre::SceneNode *node)
 
 void PSphere::setEntity(Ogre::Entity *entity)
 {
-    this->entity = entity;
+    this->entity[0] = entity;
 }
 
 Ogre::SceneNode* PSphere::getNode()
@@ -836,7 +897,7 @@ Ogre::SceneNode* PSphere::getNode()
 
 Ogre::Entity* PSphere::getEntity()
 {
-    return entity;
+    return entity[0];
 }
 
 bool PSphere::getGridLocation(Ogre::Vector3 location, Grid **face,

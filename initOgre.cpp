@@ -160,19 +160,13 @@ void initOgre::setSceneAndRun(PSphere *planet){
     light->setPosition(200, 40, 150);
 
     // Draw a sphere
-    planet->loadToBuffers("CustomMesh", "sphereTex");
+    planet->load(Scene->getRootSceneNode(), Scene, "pl", "sphereTex");
 
     /********************************************************************************
-     *                          ATTACH PLANET AND CAMERA TO NODES
+     *                          ATTACH CAMERA TO NODE
      * ******************************************************************************/
 	Ogre::SceneNode *CameraNode = RootSceneNode->createChildSceneNode("DefaultCameraNode");
 	CameraNode->attachObject(Camera);
-
-	Ogre::Entity *entity1 = Scene->createEntity("CustomEntity", "CustomMesh");
-	Ogre::SceneNode *sphere1 = Scene->getRootSceneNode()->createChildSceneNode("planetSphere");
-	sphere1->attachObject(entity1);
-    planet->setNode(sphere1);
-    planet->setEntity(entity1);
 
     /********************************************************************************
      *                          ATTACH OBJECTS ON THE PLANET
@@ -188,7 +182,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
 			// Check if location is on land
 			if (planet->checkAccessibility(convertSphericalToCartesian(latitude, longitude)) == true)
 			{
-				planet->attachMeshOnGround(sphere1, Scene, iter->first, iter->first, latitude, longitude);
+                planet->attachMeshOnGround(planet->getNode(), Scene, iter->first, iter->first, latitude, longitude);
 			}
 			// Try same iteration again
 			else
@@ -217,49 +211,25 @@ void initOgre::setSceneAndRun(PSphere *planet){
     PSphere *mySphere3;
     mySphere2 = new PSphere(100, 40, 1024, 512, *params2);
     mySphere3 = new PSphere(100, 40, 1024, 512, *params3);
-    mySphere2->loadToBuffers("CustomMesh2", "sphereTex2");
-    mySphere3->loadToBuffers("CustomMesh3", "sphereTex3");
+    mySphere2->load(planet->getNode(), Scene, "planet2", "sphereTex2");
+    mySphere3->load(mySphere2->getNode(), Scene, "planet3", "sphereTex3");
 
-    Ogre::Entity *entity2 = Scene->createEntity("CustomEntity2", "CustomMesh2");
-    Ogre::Entity *entity3 = Scene->createEntity("CustomEntity3", "CustomMesh3");
-    mySphere2->setEntity(entity2);
-    mySphere3->setEntity(entity3);
 
-    Ogre::MaterialPtr textureMap2 = Ogre::MaterialManager::getSingleton()
-            .create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    Ogre::MaterialPtr textureMap3 = Ogre::MaterialManager::getSingleton()
-            .create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    textureMap2->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex2");
-    textureMap3->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex3");
-    textureMap2->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-    textureMap3->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-    // Set texture for the sphere
-    entity2->setMaterial(textureMap2);
-    entity3->setMaterial(textureMap3);
-
-    planet->attachAstroChild(mySphere2, 40.0f, 0.0f, 0.0f);
-    mySphere2->attachAstroChild(mySphere3, 20.0f, 0.0f, 0.0f);
+//    planet->attachAstroChild(mySphere2, 40.0f, 0.0f, 0.0f);
+    mySphere2->getNode()->setPosition(40.0f, 0.0f, 0.0f);
+//    mySphere2->attachAstroChild(mySphere3, 20.0f, 0.0f, 0.0f);
+    mySphere3->getNode()->setPosition(20.0f, 0.0f, 0.0f);
 
 	/*planet->attachMeshOnGround(sphere1, Scene, "ram.mesh", "Ramiro", 0.0, 270.0);*/
 //    planet->attachMesh(sphere1, Scene, "asteroid.mesh", "CK7", 0.0, 180.0);
 //    planet->attachMesh(sphere1, Scene, "planet.mesh", "CK7", 0.0, 180.0, 10.0f);
 
-    /********************************************************************************
-     *                          MATERIALS AND TEXTURE
-     * ******************************************************************************/
-	Ogre::MaterialPtr textureMap = Ogre::MaterialManager::getSingleton()
-			.create("TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-	textureMap->getTechnique(0)->getPass(0)->createTextureUnitState("sphereTex");
-	textureMap->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-
-	// Set texture for the sphere
-	entity1->setMaterial(textureMap);
 
     /********************************************************************************
      *                   PLANET ORIENTATION, COLLISION MANAGER, FRAME LISTENER
      * ******************************************************************************/
 //	sphere1->setOrientation(0.163149834f, -0.19578641f, -0.314332321f, -0.9144643269f);
-    sphere1->setOrientation(1.0f, 0.0f, 0.0f, 0.0f);
+    planet->getNode()->setOrientation(1.0f, 0.0f, 0.0f, 0.0f);
 
 	//Collision Manager
 	CollisionDetectionManager = new CollisionManager(planet->getObjects(),Camera);
@@ -275,10 +245,6 @@ void initOgre::setSceneAndRun(PSphere *planet){
 void initOgre::cleanup(){
 
 	// Clean up our mess before exiting
-	Ogre::MaterialManager::getSingleton().remove("TextureObject");
-	Ogre::TextureManager::getSingleton().remove("sphereTex");
-	Scene->destroyEntity("CustomEntity");
-	Scene->destroySceneNode("planetSphere");
 	Scene->destroySceneNode("DefaultCameraNode");
 	Scene->destroyCamera(Camera);
 	Scene->destroyLight("PointLight");
@@ -301,9 +267,6 @@ void initOgre::cleanup(){
 void initOgre::cleanupSavePlanetAsMesh(){
 
 	// Clean up our mess before exiting
-	Ogre::MaterialManager::getSingleton().remove("TextureObject");
-	Ogre::TextureManager::getSingleton().remove("sphereTex");
-	Scene->destroyEntity("CustomEntity");
 	Ogre::Root::getSingleton().getRenderSystem()->destroyRenderWindow("My little planet");
 	Scene->clearScene();
 	Root->destroySceneManager(Scene);
@@ -372,61 +335,35 @@ void initOgre::savePlanetAsMesh(PSphere *planet, const std::string &exportFile)
 	name.erase(0, last_slash + 1);
 	name.erase(name.length()-5, name.length()); // Name of files without extension
 
-	// Materials name
-	std::string materialName = name + "_Material";
-
-
 	// Create mesh
-	planet->loadToBuffers("CustomMesh", "sphereTex");
+    planet->load(Scene->getRootSceneNode(), Scene, "planet", "sphereTex");
 
-	Ogre::Entity *sphereEntity = Scene->createEntity("CustomEntity", "CustomMesh");
-
-	/* Material parameters are probably useless to set up as we are only
-	 * interested on setting material name for a mesh */
-	Ogre::MaterialPtr matSphere;
-	matSphere = Ogre::MaterialManager::getSingleton().create(materialName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-	Ogre::Pass *pass = matSphere->getTechnique(0)->getPass(0);
-	pass->setLightingEnabled(true);
-	pass->setDepthCheckEnabled(true);
-	pass->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-
-	Ogre::TextureUnitState *tex = pass->createTextureUnitState("sphereTex", 0);
-	tex->setColourOperation(Ogre::LBO_MODULATE);
-	tex->setTextureFiltering(Ogre::TFO_TRILINEAR);
-
-	matSphere->load();
-	/* Set texture for the sphere, does nothing if you want to export mesh with
-	 * material. */
-	sphereEntity->setMaterial(matSphere);
-	// Mesh has now information for material name
-	sphereEntity->getMesh()->getSubMesh(0)->setMaterialName(materialName);
-
-	//Export the shape in a mesh file before destroying it
-	Ogre::MeshPtr mesh;
-	mesh = sphereEntity->getMesh();
-	Ogre::MeshSerializer ser;
-	ser.exportMesh(mesh.getPointer(), exportFile,  Ogre::MeshSerializer::ENDIAN_NATIVE);
+    //Export the shape in a mesh file before destroying it
+    Ogre::MeshPtr mesh;
+    mesh = planet->getEntity()->getMesh();
+    Ogre::MeshSerializer ser;
+    ser.exportMesh(mesh.getPointer(), exportFile,  Ogre::MeshSerializer::ENDIAN_NATIVE);
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_WIN32
-	std::string materialPath = "media\\materials\\scripts\\";
-	std::string texturePath = "media\\materials\\textures\\";
+    std::string materialPath = "media\\materials\\scripts\\";
+    std::string texturePath = "media\\materials\\textures\\";
 #else
-	std::string materialPath = "media/materials/scripts/";
-	std::string texturePath = "media/materials/textures/";
+    std::string materialPath = "media/materials/scripts/";
+    std::string texturePath = "media/materials/textures/";
 #endif
 
-	std::string textureFile = name + ".png";
-	if (!planet->exportMap(1024, 512, texturePath+textureFile, PSphere::MAP_EQUIRECTANGULAR))
-	{
-		Ogre::LogManager::getSingleton().logMessage("Saving texture failed!");
-	}
-	else
-	{
-		Ogre::LogManager::getSingleton().logMessage("Saving texture succeeded!");
-	}
+    std::string textureFile = name + ".png";
+    if (!planet->exportMap(1024, 512, texturePath+textureFile, PSphere::MAP_EQUIRECTANGULAR))
+    {
+        Ogre::LogManager::getSingleton().logMessage("Saving texture failed!");
+    }
+    else
+    {
+        Ogre::LogManager::getSingleton().logMessage("Saving texture succeeded!");
+    }
 
-	std::string materialFile = name + ".material";
-	saveMaterialFile(materialPath+materialFile, sphereEntity->getMesh()->getSubMesh(0)->getMaterialName(), textureFile);
+    std::string materialFile = name + ".material";
+    saveMaterialFile(materialPath+materialFile, planet->getEntity()->getMesh()->getSubMesh(0)->getMaterialName(), textureFile);
 }
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX

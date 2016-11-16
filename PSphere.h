@@ -38,7 +38,9 @@ public:
 
 	enum MapType {MAP_EQUIRECTANGULAR, MAP_CUBE};
 
-	void loadToBuffers(const std::string &meshName, const std::string &textureName);
+    void load(Ogre::SceneNode *parent, Ogre::SceneManager *scene, const std::string &planetName, const std::string &textureName);
+
+    void unload(Ogre::SceneManager *scene);
 
 	void loadMeshFile(const std::string &path, const std::string &meshName);
 
@@ -144,7 +146,7 @@ private:
 	Ogre::Real			radius;
 	Ogre::Real			seaHeight;
     Ogre::SceneNode     *node;
-    Ogre::Entity        *entity;
+    Ogre::Entity        *entity[6];
 	unsigned char		*surfaceTexture;
 	unsigned short		surfaceTextureWidth;
 	unsigned short		surfaceTextureHeight;
@@ -170,8 +172,8 @@ private:
 	CollisionManager	*CollisionDetectionManager;
 	Ogre::Real			maximumHeight;
 	Ogre::Real			minimumHeight;
-    string              meshName;
-    string              textureName;
+    string              meshName[6];
+    string              textureName[6];
 
     // Makes a sphere out of a cube that is made of 6 squares
 	void create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter);
@@ -204,6 +206,10 @@ private:
 									   Ogre::ColourValue terrain2nd, Ogre::ColourValue mountain1st, Ogre::ColourValue mountain2nd);
 
 	void generateMeshData();
+
+    void bufferMesh(const std::string &meshName, Ogre::Vector3 *verts, Ogre::Vector3 *norms, Ogre::Vector2 *txCrds, Ogre::uint32 *indxs, Ogre::uint32 vCount, Ogre::uint32 iCount);
+
+    void bufferTexture(const std::string &textureName);
 
 };
 
