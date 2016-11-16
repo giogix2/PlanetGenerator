@@ -50,26 +50,6 @@ HeightMap::~HeightMap()
 	delete[] indexes;
 }
 
-void HeightMap::getHistogram(unsigned int histogram[], unsigned short brackets)
-{
-	unsigned int x, y, slot;
-	float mult;
-
-	for(y=0; y < gridSize; y++)
-	{
-		for(x=0; x < gridSize; x++)
-		{
-			// Calculate histogram-slot for a given height
-			mult = static_cast<float>(brackets-1) + 0.5f;
-			slot = static_cast<unsigned int>((height[y][x]-minHeight) / (maxHeight-minHeight) * mult);
-
-			// Let's be sure
-			assert(slot < brackets);
-			histogram[slot] += 1;
-		}
-	}
-}
-
 void HeightMap::getMinMax(float &min, float &max)
 {
 	min = minHeight;

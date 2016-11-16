@@ -38,6 +38,7 @@
 #include <qdebug.h>
 #define FREEIMAGE_LIB
 #include "FreeImage.h"
+#include <assert.h>
 
 using namespace std;
 
@@ -45,6 +46,9 @@ using namespace std;
 #define DOWN 2
 #define LEFT 3
 #define RIGHT 4
+
+#define TESTVECS 40000  // Number of vectors to get height statistics
+#define BRACKETS 100    // Number of histogram-slots between min and max height
 
 PSphere::PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, Ogre::uint16 textureWidth, Ogre::uint16 textureHeight, ResourceParameter resourceParameter){
 	vertexes =	NULL;
@@ -222,47 +226,57 @@ void PSphere::deform(HeightMap *map)
 
 void PSphere::calculateSeaLevel(float &minElev, float &maxElev, float seaFraction)
 {
-    Ogre::uint32 i, accumulator=0, histoTotal;
+    Ogre::uint32 i, accumulator=0;
 
-    unsigned int histogram[100]={0};
-    float min[6], max[6];
+    unsigned int histogram[BRACKETS]={0};
+    Ogre::Real testHeight[TESTVECS];
+    Ogre::Vector3 testVec;
 
-    // Assume all faces have similar height variations
-    faceYP->getHistogram(histogram, 100);
-    faceXM->getHistogram(histogram, 100);
-    faceYM->getHistogram(histogram, 100);
-    faceXP->getHistogram(histogram, 100);
-    faceZP->getHistogram(histogram, 100);
-    faceZM->getHistogram(histogram, 100);
+    vector <float> frequency = RParameter.getFrequency();
+    vector <float> amplitude = RParameter.getAmplitude();
 
-    faceYP->getMinMax(min[0], max[0]);
-    faceXM->getMinMax(min[1], max[1]);
-    faceYM->getMinMax(min[2], max[2]);
-    faceXP->getMinMax(min[3], max[3]);
-    faceZP->getMinMax(min[4], max[4]);
-    faceZM->getMinMax(min[5], max[5]);
+    minElev = 1e6f;
+    maxElev = -1e6f;
 
-    minElev = min[0];
-    maxElev = max[0];
-    for(i=1; i < 6; i++)
+    /* Create random (hopefully evenly distributed) test-vectors to gather
+     * statistics for height-histogram */
+    for(i=0; i < TESTVECS; i++)
     {
-        if(minElev > min[i])
-            minElev = min[i];
-        if(maxElev < max[i])
-            maxElev = max[i];
+        testVec = Ogre::Vector3(static_cast<float>((rand() % 65536)-32768),
+                                static_cast<float>((rand() % 65536)-32768),
+                                static_cast<float>((rand() % 65536)-32768));
+        testVec.normalise();
+        testHeight[i] = heightNoise(amplitude, frequency, testVec + randomTranslate);
+        if (minElev > testHeight[i])
+            minElev = testHeight[i];
+        if (maxElev < testHeight[i])
+            maxElev = testHeight[i];
     }
-    // Find out histogram-bracket that exceeds wanted fraction of all values
-    histoTotal = faceYP->getSize();
-    histoTotal *= histoTotal*6;
 
-    for(i=0; i < 100; i++)
+    float mult = static_cast<float>(BRACKETS-1) + 0.5f;
+    unsigned int slot;
+    /* Divide height variations into slots */
+    for(i=0; i < TESTVECS; i++)
+    {
+        slot = static_cast<unsigned int>((testHeight[i]-minElev)
+                                         / (maxElev-minElev) * mult);
+
+        // Let's be sure
+        assert(slot < BRACKETS);
+        histogram[slot] += 1;
+    }
+
+    /* Go through slots, until it accumulates more samples than all
+     * samples * seaFraction */
+    for(i=0; i < BRACKETS; i++)
     {
         accumulator += histogram[i];
-        if(Ogre::Real(accumulator) > Ogre::Real(histoTotal)*seaFraction)
+        if(Ogre::Real(accumulator) > Ogre::Real(TESTVECS)*seaFraction)
             break;
     }
     // Figure out offset with i
-    seaHeight = Ogre::Real(i) / 99.0f * (maxElev-minElev) + minElev;
+    seaHeight = Ogre::Real(i) / static_cast<float>(BRACKETS-1)
+                                 * (maxElev-minElev) + minElev;
 
 }
 
