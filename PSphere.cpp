@@ -54,9 +54,6 @@ PSphere::PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, Ogre::uint16 texture
 	vNorms =	NULL;
 	texCoords =	NULL;
 	indexes =	NULL;
-	surfaceTexture =NULL;
-	surfaceTextureWidth = textureWidth;
-	surfaceTextureHeight = textureHeight;
 	exportImage =	NULL;
 	observer =	Ogre::Vector3(0.0f, 0.0f, 0.0f);
 
@@ -69,7 +66,6 @@ PSphere::~PSphere()
     delete[] texCoords;
     delete[] vertexes;
     delete[] vNorms;
-    delete[] surfaceTexture;
     delete[] exportImage;
 
     delete faceXM;
@@ -101,15 +97,7 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
         iters = 3;
         std::cout << "Sphere needs atleast 3 iters" << std::endl;
     }
-    // Creating 2D texture with zeros would fail when creating texture with Ogre
-    if (surfaceTextureWidth == 0)
-    {
-        surfaceTextureWidth = 1;
-    }
-    if (surfaceTextureHeight == 0)
-    {
-        surfaceTextureHeight = 1;
-    }
+
     /* Make grid big enough, so that so that grid-depending code doesn't make
      * anything nasty. Probably need to be tested. */
     if (gridSize < 2)
@@ -175,10 +163,6 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
     gridZP->setNeighbours(gridXM, gridXP, gridYM, gridYP);
     gridZM->setNeighbours(gridXM, gridXP, gridYP, gridYM);
 
-
-    surfaceTexture = new unsigned char[surfaceTextureWidth*surfaceTextureHeight*3];
-    generateImage(surfaceTextureWidth, surfaceTextureHeight, surfaceTexture);//take longtime
-
     // Requires variable seaHeight that is set by calculateSeaLevel
     setGridLandInfo(gridYP);
     setGridLandInfo(gridXM);
@@ -186,7 +170,6 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
     setGridLandInfo(gridXP);
     setGridLandInfo(gridZP);
     setGridLandInfo(gridZM);
-
 }
 
 void PSphere::calculateSeaLevel(float &minElev, float &maxElev, float seaFraction)

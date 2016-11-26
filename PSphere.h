@@ -146,9 +146,6 @@ private:
 	Ogre::Real			radius;
 	Ogre::Real			seaHeight;
     Ogre::SceneNode     *node;
-	unsigned char		*surfaceTexture;
-	unsigned short		surfaceTextureWidth;
-	unsigned short		surfaceTextureHeight;
 	unsigned char		*exportImage;
 	Ogre::Vector3		observer;
 	HeightMap			*faceYP;
