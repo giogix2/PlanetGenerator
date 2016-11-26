@@ -39,7 +39,7 @@ bool initTest(PSphere **Sphere,Ogre::Root **Root, Ogre::SceneManager **Scene, Og
 	std::ResourceParameter *params = new std::ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#32CDFF"
         ,(std::string)"#64FFFF",(std::string)"#B4B4B4",(std::string)"#FFFFFF",0.6f,7.5f,60,"1.0 0.02 0.3 0.008 0.1 0.005 0.06666 0.006666", meshlocs);
 
-	*Sphere = new PSphere(100, 0, 0, 0, *params);
+    *Sphere = new PSphere(100, 0, *params);
 
 	//Root Initialization
 	Ogre::String PluginName;

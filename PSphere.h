@@ -38,7 +38,7 @@ public:
 
 	enum MapType {MAP_EQUIRECTANGULAR, MAP_CUBE};
 
-    void load(Ogre::SceneNode *parent, Ogre::SceneManager *scene, const std::string &planetName, const std::string &textureName);
+    void load(Ogre::SceneNode *parent, Ogre::SceneManager *scene, const std::string &planetName);
 
     void unload(Ogre::SceneManager *scene);
 
@@ -67,11 +67,7 @@ public:
 
     void setNode(Ogre::SceneNode *node);
 
-    void setEntity(Ogre::Entity *entity);
-
     Ogre::SceneNode* getNode();
-
-    Ogre::Entity* getEntity();
 
     void moveObject(const std::string &objectName, int direction, float pace);
 
@@ -102,11 +98,7 @@ public:
     /* return radius */
 	Ogre::Real getRadius();
 
-    string getMeshName();
-
     PSphere* getAstroChild(const std::string &objectName);
-
-    string getTextureName();
 
     /* Figures which one of the cubefaces 3D-location lands, and what 2D-coordinates
      * that face has.
@@ -130,19 +122,13 @@ public:
      * With wrong type, returns NULL-pointer. */
 	unsigned char *exportMap(unsigned short width, unsigned short height, MapType type);
 
-	PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, Ogre::uint16 textureWidth, Ogre::uint16 textureHeight, ResourceParameter resourceParameter);
+    PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter);
 
 	ResourceParameter *getParameters();
 
 	~PSphere();
 
 private:
-	Ogre::Vector3		*vertexes;
-	Ogre::Vector3		*vNorms;
-	Ogre::Vector2		*texCoords;
-	Ogre::uint32		*indexes;
-	Ogre::uint32		vertexCount;
-	Ogre::uint32		indexCount;
 	Ogre::Real			radius;
 	Ogre::Real			seaHeight;
     Ogre::SceneNode     *node;
@@ -181,15 +167,6 @@ private:
     void generateImage(unsigned short width, unsigned short height, unsigned char *image);
 
     void setGridLandInfo(Grid *grid);
-
-	void calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour);
-
-    /* Fix a seam by adding vertex duplicates with texture u going over 1.0 */
-	void fixTextureSeam();
-
-	Ogre::Vector3 calculateSphereCoordsFromTexCoords(Ogre::Vector2 *texCoord);
-
-	void generateMeshData();
 };
 
 #endif

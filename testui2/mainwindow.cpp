@@ -97,7 +97,7 @@ void MainWindow::on_pushButton_clicked()
 {
     addParameters();
 
-    mySphere = new PSphere(100, 40, 1024, 512, *params);
+    mySphere = new PSphere(100, 40, *params);
 	rendering = new initOgre();
 	rendering->start();
 	rendering->setSceneAndRun(mySphere);
@@ -263,7 +263,7 @@ void MainWindow::on_pushButton_10_clicked()
 
 		//create planet
 		addParameters();
-        mySphere = new PSphere(100, 0, 0, 0, *params);
+        mySphere = new PSphere(100, 0, *params);
 		//push to pshere export-method with filename + resolution
 		if(ui->comboBox_2->currentIndex() == 0)
 		{
@@ -297,7 +297,7 @@ void MainWindow::on_pushButton_10_clicked()
 void MainWindow::on_pushButton_11_clicked()
 {    
     addParameters();
-    mySphere = new PSphere(100, 0, 0, 0, *params);
+    mySphere = new PSphere(100, 0, *params);
 
 	unsigned short width =  196;
 	unsigned short height =  98;
@@ -417,7 +417,7 @@ void MainWindow::on_pushButton_12_clicked()
 
         //call initogre exportmesh function
 		initOgre *temp = new initOgre;
-		PSphere *tempPlanet = new PSphere(100, 0, 1024, 512, *params);
+        PSphere *tempPlanet = new PSphere(100, 0, *params);
 		temp->savePlanetAsMesh(tempPlanet, filename.toStdString());
 		// Must delete PSphere before cleaning initOgre
 		delete tempPlanet;

@@ -49,11 +49,8 @@ using namespace std;
 #define TESTVECS 40000  // Number of vectors to get height statistics
 #define BRACKETS 100    // Number of histogram-slots between min and max height
 
-PSphere::PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, Ogre::uint16 textureWidth, Ogre::uint16 textureHeight, ResourceParameter resourceParameter){
-	vertexes =	NULL;
-	vNorms =	NULL;
-	texCoords =	NULL;
-	indexes =	NULL;
+PSphere::PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter){
+
 	exportImage =	NULL;
 	observer =	Ogre::Vector3(0.0f, 0.0f, 0.0f);
 
@@ -62,10 +59,6 @@ PSphere::PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, Ogre::uint16 texture
 
 PSphere::~PSphere()
 {
-    delete[] indexes;
-    delete[] texCoords;
-    delete[] vertexes;
-    delete[] vNorms;
     delete[] exportImage;
 
     delete faceXM;
@@ -88,8 +81,6 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
     RParameter = resourceParameter;
     float waterFraction = resourceParameter.getWaterFraction();
     radius = resourceParameter.getRadius();
-    vertexCount = 0;
-    indexCount = 0;
 
     // Iters less than 3 are pointless
     if(iters < 3)
@@ -102,24 +93,6 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
      * anything nasty. Probably need to be tested. */
     if (gridSize < 2)
         gridSize = 2;
-
-    /* Calling Sphere::create more than once would cause memory leak if we
-     * wouldn't delete old allocations first */
-    if(vertexes != NULL)
-        delete[] vertexes;
-    if(vNorms != NULL)
-        delete[] vNorms;
-    if(texCoords != NULL)
-        delete[] texCoords;
-    if(indexes != NULL)
-        delete[] indexes;
-
-    /* +iter*8 is for texture seam fix, duplicating some vertexes.
-     * Approximate, but should be on a safe side */
-    vertexes =	new Ogre::Vector3[iters*iters*6 + iters*8];
-    vNorms =	new Ogre::Vector3[iters*iters*6 + iters*8];
-    texCoords =	new Ogre::Vector2[iters*iters*6 + iters*8];
-    indexes =	new Ogre::uint32[(iters-1)*(iters-1)*6*6];
 
     Ogre::Matrix3 noRot, rotZ_90, rotZ_180, rotZ_270, rotX_90, rotX_270;
 
@@ -327,55 +300,6 @@ void PSphere::setObserverPosition(Ogre::Vector3 position)
 	observer = position;
 }
 
-void PSphere::fixTextureSeam()
-{
-	Ogre::uint32 i, j, affectedTriangleCount=0, vCntBeforeFix;
-	Ogre::Real absDiff1, absDiff2, absDiff3;
-
-	vCntBeforeFix = vertexCount;
-
-	for(i=0; i < indexCount; i = i + 3)
-	{
-		absDiff1 = Ogre::Math::Abs(texCoords[indexes[i]].x - texCoords[indexes[i+1]].x);
-		absDiff2 = Ogre::Math::Abs(texCoords[indexes[i]].x - texCoords[indexes[i+2]].x);
-		absDiff3 = Ogre::Math::Abs(texCoords[indexes[i+1]].x - texCoords[indexes[i+2]].x);
-
-		/* Check for an abrupt change in triangles u-coordinates
-		 * (texture-coordinate(u, v)). */
-		if(absDiff1 > 0.3f || absDiff2 > 0.3f || absDiff3 > 0.3f)
-		{
-			for(j=0; j < 3; j++)
-			{
-				if(texCoords[indexes[i+j]].x < 0.3f)
-				{
-					// Duplicate offending vertex data
-					vertexes[vertexCount] = vertexes[indexes[i+j]];
-					vNorms[vertexCount] = vNorms[indexes[i+j]];
-					texCoords[vertexCount] = texCoords[indexes[i+j]];
-
-					// Give correct u
-					texCoords[vertexCount].x += 1.0f;
-
-					// update index to point to the new vertex
-					indexes[i+j] = vertexCount;
-
-					vertexCount++;
-
-				}
-			}
-			affectedTriangleCount++;
-		}
-	}
-
-	/* FIXME: Might still have some problems in the poles. Revise if necessary */
-
-	std::cout << "fixTextureSeam:" << std::endl
-			  << "  number of fixed triangles "
-			  << affectedTriangleCount << std::endl
-			  << "  number of individual vertexes duplicated "
-			  << vertexCount - vCntBeforeFix << std::endl;
-}
-
 Ogre::Real PSphere::getObserverDistanceToSurface()
 {
 	Ogre::Real height;
@@ -424,21 +348,11 @@ Ogre::Real PSphere::getRadius()
 	return radius;
 }
 
-string PSphere::getMeshName()
-{
-    return meshName[0];
-}
-
-string PSphere::getTextureName()
-{
-    return textureName[0];
-}
-
 PSphere* PSphere::getAstroChild(const std::string &objectName)
 {
     for (vector<PSphere*>::iterator it = astroObjectsChild.begin() ; it != astroObjectsChild.end(); ++it)
     {
-        if ((*it)->getMeshName().compare(objectName) == 0)
+//        if ((*it)->getMeshName().compare(objectName) == 0)
         {
             return (*it);
         }
@@ -446,7 +360,7 @@ PSphere* PSphere::getAstroChild(const std::string &objectName)
     return NULL;
 }
 
-void PSphere::load(Ogre::SceneNode *parent, Ogre::SceneManager *scene, const std::string &planetName, const std::string &textureName)
+void PSphere::load(Ogre::SceneNode *parent, Ogre::SceneManager *scene, const std::string &planetName)
 {
     this->node = parent->createChildSceneNode(planetName);
 
@@ -627,21 +541,21 @@ void PSphere::attachAstroParent(PSphere *object)
 
 void PSphere::attachAstroChild(PSphere *object, Ogre::Real x, Ogre::Real y, Ogre::Real z)
 {
-    string objectMeshName = object->getMeshName();
-    astroObjectsChild.push_back(object);
-    object->attachAstroParent(this);
+//    string objectMeshName = object->getMeshName();
+//    astroObjectsChild.push_back(object);
+//    object->attachAstroParent(this);
 //    Ogre::Entity* entity = object->getEntity();
 
-    string secNodeName = "sec_node_";
-    string nodeObjectName = "node_";
-    secNodeName = secNodeName + objectMeshName;
-    nodeObjectName = nodeObjectName + objectMeshName;
-    Ogre::SceneNode *nodeSecondary = this->node->createChildSceneNode(secNodeName);
-    Ogre::SceneNode *nodeAstroChild = nodeSecondary->createChildSceneNode(objectMeshName);
+//    string secNodeName = "sec_node_";
+//    string nodeObjectName = "node_";
+//    secNodeName = secNodeName + objectMeshName;
+//    nodeObjectName = nodeObjectName + objectMeshName;
+//    Ogre::SceneNode *nodeSecondary = this->node->createChildSceneNode(secNodeName);
+//    Ogre::SceneNode *nodeAstroChild = nodeSecondary->createChildSceneNode(objectMeshName);
 
 //    nodeAstroChild->attachObject(entity);
-    object->setNode(nodeAstroChild);
-    nodeAstroChild->setPosition(x, y, z);
+//    object->setNode(nodeAstroChild);
+//    nodeAstroChild->setPosition(x, y, z);
 }
 
 void PSphere::setNode(Ogre::SceneNode *node)

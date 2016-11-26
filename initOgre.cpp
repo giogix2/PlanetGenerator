@@ -160,7 +160,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
     light->setPosition(200, 40, 150);
 
     // Draw a sphere
-    planet->load(Scene->getRootSceneNode(), Scene, "pl", "sphereTex");
+    planet->load(Scene->getRootSceneNode(), Scene, "pl");
 
     /********************************************************************************
      *                          ATTACH CAMERA TO NODE
@@ -209,10 +209,10 @@ void initOgre::setSceneAndRun(PSphere *planet){
 
     PSphere *mySphere2;
     PSphere *mySphere3;
-    mySphere2 = new PSphere(100, 40, 1024, 512, *params2);
-    mySphere3 = new PSphere(100, 40, 1024, 512, *params3);
-    mySphere2->load(planet->getNode(), Scene, "planet2", "sphereTex2");
-    mySphere3->load(mySphere2->getNode(), Scene, "planet3", "sphereTex3");
+    mySphere2 = new PSphere(100, 40, *params2);
+    mySphere3 = new PSphere(100, 40, *params3);
+    mySphere2->load(planet->getNode(), Scene, "planet2");
+    mySphere3->load(mySphere2->getNode(), Scene, "planet3");
 
 
 //    planet->attachAstroChild(mySphere2, 40.0f, 0.0f, 0.0f);
@@ -336,7 +336,7 @@ void initOgre::savePlanetAsMesh(PSphere *planet, const std::string &exportFile)
 	name.erase(name.length()-5, name.length()); // Name of files without extension
 
 	// Create mesh
-    planet->load(Scene->getRootSceneNode(), Scene, "planet", "sphereTex");
+    planet->load(Scene->getRootSceneNode(), Scene, "planet");
 
     //Export the shape in a mesh file before destroying it
     Ogre::MeshPtr mesh;
