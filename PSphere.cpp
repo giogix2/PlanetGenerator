@@ -168,13 +168,6 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
     faceZM = new HeightMap(iters, rotX_270, &RParameter, seaHeight);
     gridZM = new Grid(gridSize, rotX_270);
 
-    faceYP->setNeighbours(faceXM, faceXP, faceZP, faceZM);
-    faceXM->setNeighbours(faceYM, faceYP, faceZP, faceZM);
-    faceYM->setNeighbours(faceXP, faceXM, faceZP, faceZM);
-    faceXP->setNeighbours(faceYP, faceYM, faceZP, faceZM);
-    faceZP->setNeighbours(faceXM, faceXP, faceYM, faceYP);
-    faceZM->setNeighbours(faceXM, faceXP, faceYP, faceYM);
-
     gridYP->setNeighbours(gridXM, gridXP, gridZP, gridZM);
     gridXM->setNeighbours(gridYM, gridYP, gridZP, gridZM);
     gridYM->setNeighbours(gridXP, gridXM, gridZP, gridZM);
@@ -458,24 +451,6 @@ string PSphere::getTextureName()
     return textureName[0];
 }
 
-void PSphere::generateMeshData()
-{
-    faceYP->generateMeshData(radius);
-    faceXM->generateMeshData(radius);
-    faceYM->generateMeshData(radius);
-    faceXP->generateMeshData(radius);
-    faceZP->generateMeshData(radius);
-    faceZM->generateMeshData(radius);
-
-	// Meshes must be done before trying to blend normals
-    faceYP->blendNormalsWithNeighbours();
-    faceXM->blendNormalsWithNeighbours();
-    faceYM->blendNormalsWithNeighbours();
-    faceXP->blendNormalsWithNeighbours();
-    faceZP->blendNormalsWithNeighbours();
-    faceZM->blendNormalsWithNeighbours();
-}
-
 PSphere* PSphere::getAstroChild(const std::string &objectName)
 {
     for (vector<PSphere*>::iterator it = astroObjectsChild.begin() ; it != astroObjectsChild.end(); ++it)
@@ -490,16 +465,14 @@ PSphere* PSphere::getAstroChild(const std::string &objectName)
 
 void PSphere::load(Ogre::SceneNode *parent, Ogre::SceneManager *scene, const std::string &planetName, const std::string &textureName)
 {
-    generateMeshData();
-
     this->node = parent->createChildSceneNode(planetName);
 
-    faceYP->load(this->node, scene, planetName+"_YP");
-    faceXM->load(this->node, scene, planetName+"_XM");
-    faceYM->load(this->node, scene, planetName+"_YM");
-    faceXP->load(this->node, scene, planetName+"_XP");
-    faceZP->load(this->node, scene, planetName+"_ZP");
-    faceZM->load(this->node, scene, planetName+"_ZM");
+    faceYP->load(this->node, scene, planetName+"_YP", radius);
+    faceXM->load(this->node, scene, planetName+"_XM", radius);
+    faceYM->load(this->node, scene, planetName+"_YM", radius);
+    faceXP->load(this->node, scene, planetName+"_XP", radius);
+    faceZP->load(this->node, scene, planetName+"_ZP", radius);
+    faceZM->load(this->node, scene, planetName+"_ZM", radius);
 }
 
 void PSphere::unload(Ogre::SceneManager *scene)

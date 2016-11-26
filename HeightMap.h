@@ -38,20 +38,14 @@ public:
               Ogre::Real Height_sea);
 	~HeightMap();
 	void setHeight(unsigned int x, unsigned int y, float elevation);
-	float getHeight(unsigned int x, unsigned int y);
-	void getMinMax(float &min, float &max);
 	Ogre::Vector3 projectToSphere(unsigned int x, unsigned int y);
-
-	void generateMeshData(float scalingFactor);
-	Ogre::Vector3 getNormal(unsigned short x,unsigned short y);
-	void setNormal(Ogre::Vector3 normal, unsigned short x, unsigned short y);
-	void blendNormalsWithNeighbours();
 
     /* Fills hardware-buffers with vertice- and texture-data. Creates entity
      * called Name, mesh called Name+"_mesh", material called Name+"_material",
      * textureUnitState called Name+"_texture".
      * Attachs entity to a given node. */
-    void load(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &Name);
+    void load(Ogre::SceneNode *node, Ogre::SceneManager *scene,
+              const std::string &Name, float scalingFactor);
 
     /* Detach and destroy entity */
     void unload(Ogre::SceneNode *node, Ogre::SceneManager *scene);
@@ -74,6 +68,9 @@ private:
 
 	void calculateNormals();
 
+    /* Creates vertex-data and indexes */
+    void generateMeshData(float scalingFactor);
+
     /* Creates geometry for heightmap */
     void createGeometry();
 
@@ -81,7 +78,7 @@ private:
     void createTexture();
 
     /* Creates and fills hardware-buffer with vertex-data */
-    void bufferMesh(const std::string &meshName);
+    void bufferMesh(const std::string &meshName, float scalingFactor);
 
     /* Creates and fills hardware-buffer with texture-data */
     void bufferTexture(const std::string &textureName);

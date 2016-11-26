@@ -75,20 +75,9 @@ HeightMap::~HeightMap()
     delete[] squareTexture;
 }
 
-void HeightMap::getMinMax(float &min, float &max)
-{
-	min = minHeight;
-	max = maxHeight;
-}
-
 void HeightMap::setHeight(unsigned int x, unsigned int y, float elevation)
 {
 	height[y][x] = elevation;
-}
-
-float HeightMap::getHeight(unsigned int x, unsigned int y)
-{
-	return height[y][x];
 }
 
 /* Return vector for a normalized (radius 1.0) sphere */
@@ -202,110 +191,6 @@ void HeightMap::calculateNormals()
 	}
 }
 
-/* Make sure you have valid normals on your neighbours before calling this */
-void HeightMap::blendNormalsWithNeighbours()
-{
-	unsigned int i;
-	unsigned int entry_x, entry_y;
-	HeightMap *neighbour;
-	Ogre::Vector3 norm, normNeighbour, blendedNorm;
-
-	/* Get neighbours pointer. Needs a cast, because getNeighbourPtr
-	 * returns Grid *, but we need HeightMap * to manipulate normal-data */
-	neighbour = static_cast<HeightMap *>(getNeighbourPtr(neighbour_XM));
-	if (neighbour != NULL)
-	{
-		for(i=0; i < gridSize; i++)
-		{
-			entry_x = 0;
-			entry_y = i;
-			// get neighboring coordinate
-			if (getNeighbourEntryCoordinates(neighbour_XM, entry_x, entry_y))
-			{
-				// Get normals
-				normNeighbour = neighbour->getNormal(entry_x, entry_y);
-				norm = getNormal(0, i);
-
-				// Blend and save
-				blendedNorm = norm+normNeighbour;
-				blendedNorm.normalise();
-				setNormal(blendedNorm, 0, i);
-				neighbour->setNormal(blendedNorm, entry_x, entry_y);
-			}
-		}
-	}
-
-	neighbour = static_cast<HeightMap *>(getNeighbourPtr(neighbour_XP));
-	if (neighbour != NULL)
-	{
-		for(i=0; i < gridSize; i++)
-		{
-			entry_x = gridSize-1;
-			entry_y = i;
-			if (getNeighbourEntryCoordinates(neighbour_XP, entry_x, entry_y))
-			{
-				normNeighbour = neighbour->getNormal(entry_x, entry_y);
-				norm = getNormal(gridSize-1, i);
-
-				blendedNorm = norm+normNeighbour;
-				blendedNorm.normalise();
-				setNormal(blendedNorm, gridSize-1, i);
-				neighbour->setNormal(blendedNorm, entry_x, entry_y);
-			}
-		}
-	}
-
-	neighbour = static_cast<HeightMap *>(getNeighbourPtr(neighbour_YM));
-	if (neighbour != NULL)
-	{
-		for(i=0; i < gridSize; i++)
-		{
-			entry_x = i;
-			entry_y = 0;
-			if (getNeighbourEntryCoordinates(neighbour_YM, entry_x, entry_y))
-			{
-				normNeighbour = neighbour->getNormal(entry_x, entry_y);
-				norm = getNormal(i, 0);
-
-				blendedNorm = norm+normNeighbour;
-				blendedNorm.normalise();
-				setNormal(blendedNorm, i, 0);
-				neighbour->setNormal(blendedNorm, entry_x, entry_y);
-			}
-		}
-	}
-
-	neighbour = static_cast<HeightMap *>(getNeighbourPtr(neighbour_YP));
-	if (neighbour != NULL)
-	{
-		for(i=0; i < gridSize; i++)
-		{
-			entry_x = i;
-			entry_y = gridSize-1;
-			if (getNeighbourEntryCoordinates(neighbour_YP, entry_x, entry_y))
-			{
-				normNeighbour = neighbour->getNormal(entry_x, entry_y);
-				norm = getNormal(i, gridSize-1);
-
-				blendedNorm = norm+normNeighbour;
-				blendedNorm.normalise();
-				setNormal(blendedNorm, i, gridSize-1);
-				neighbour->setNormal(blendedNorm, entry_x, entry_y);
-			}
-		}
-	}
-}
-
-Ogre::Vector3 HeightMap::getNormal(unsigned short x,unsigned short y)
-{
-	return verNorms[x*gridSize+y];
-}
-
-void HeightMap::setNormal(Ogre::Vector3 normal, unsigned short x, unsigned short y)
-{
-	verNorms[x*gridSize+y] = normal;
-}
-
 void HeightMap::createGeometry()
 {
     Ogre::uint16 x, y, gSize;
@@ -398,14 +283,15 @@ void HeightMap::createTexture()
 }
 
 void HeightMap::load(Ogre::SceneNode *node, Ogre::SceneManager *scene,
-                     const std::string &Name)
+                     const std::string &Name, float scalingFactor)
 {
     const std::string meshName = Name + "_mesh";
     const std::string textureName = Name + "_texture";
     const std::string matName = Name + "_material";
     std::string defGrpName = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
 
-    bufferMesh(meshName);
+    generateMeshData(scalingFactor);
+    bufferMesh(meshName, scalingFactor);
     bufferTexture(textureName);
 
     this->entity = scene->createEntity(Name, meshName);
@@ -432,7 +318,7 @@ void HeightMap::unload(Ogre::SceneNode *node, Ogre::SceneManager *scene)
     scene->destroyEntity(this->entity->getName());
 }
 
-void HeightMap::bufferMesh(const std::string &meshName)
+void HeightMap::bufferMesh(const std::string &meshName, float scalingFactor)
 {
     Ogre::uint32 i, gSize = this->gridSize;
     Ogre::MeshPtr mesh;
@@ -503,12 +389,11 @@ void HeightMap::bufferMesh(const std::string &meshName)
     subMesh->indexData->indexCount = (gSize-1)*(gSize-1)*6;
     subMesh->indexData->indexStart = 0;
 
-    /* FIXME: Review boxsize, mesh fits to a lot smaller box and radius should
-     * not be hardcoded. */
-    Ogre::Real radius = 8.0f;
-    mesh->_setBounds(Ogre::AxisAlignedBox(-radius, -radius, -radius,
-                                          radius, radius, radius));
-    mesh->_setBoundingSphereRadius(radius);
+    /* FIXME: Review boxsize, mesh fits to a lot smaller box */
+    mesh->_setBounds(Ogre::AxisAlignedBox(-scalingFactor, -scalingFactor,
+                                          -scalingFactor,  scalingFactor,
+                                           scalingFactor,  scalingFactor));
+    mesh->_setBoundingSphereRadius(scalingFactor);
 
     mesh->load();
 }
