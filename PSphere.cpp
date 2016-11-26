@@ -28,7 +28,6 @@
 #include <vector>
 #include "OGRE/Ogre.h"
 #include "PSphere.h"
-#include "simplexnoise1234.h"
 #include <OgreMeshSerializer.h>
 #include <OgreDataStream.h>
 #include <OgreException.h>
@@ -143,23 +142,30 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
     rotX_90 = Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
     rotX_270 = Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f);
 
+    srand(RParameter.getSeed());
+    randomTranslate.x = (float)((rand() % 1000)-500)/100.0f;
+    randomTranslate.y = (float)((rand() % 1000)-500)/100.0f;
+    randomTranslate.z = (float)((rand() % 1000)-500)/100.0f;
+
+    calculateSeaLevel(minimumHeight, maximumHeight, waterFraction);
+
     // No rotation
-    faceYP = new HeightMap(iters, noRot);
+    faceYP = new HeightMap(iters, noRot, &RParameter, seaHeight);
     gridYP = new Grid(gridSize, noRot);
     // 90 degrees through z-axis
-    faceXM = new HeightMap(iters, rotZ_90);
+    faceXM = new HeightMap(iters, rotZ_90, &RParameter, seaHeight);
     gridXM = new Grid(gridSize, rotZ_90);
     // 180 degrees through z-axis
-    faceYM = new HeightMap(iters, rotZ_180);
+    faceYM = new HeightMap(iters, rotZ_180, &RParameter, seaHeight);
     gridYM = new Grid(gridSize, rotZ_180);
     // 270 degrees through z-axis
-    faceXP = new HeightMap(iters, rotZ_270);
+    faceXP = new HeightMap(iters, rotZ_270, &RParameter, seaHeight);
     gridXP = new Grid(gridSize, rotZ_270);
     // 90 degrees through x-axis
-    faceZP = new HeightMap(iters, rotX_90);
+    faceZP = new HeightMap(iters, rotX_90, &RParameter, seaHeight);
     gridZP = new Grid(gridSize, rotX_90);
     // 270 degrees through x-axis
-    faceZM = new HeightMap(iters, rotX_270);
+    faceZM = new HeightMap(iters, rotX_270, &RParameter, seaHeight);
     gridZM = new Grid(gridSize, rotX_270);
 
     faceYP->setNeighbours(faceXM, faceXP, faceZP, faceZM);
@@ -176,19 +182,6 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
     gridZP->setNeighbours(gridXM, gridXP, gridYM, gridYP);
     gridZM->setNeighbours(gridXM, gridXP, gridYP, gridYM);
 
-    srand(RParameter.getSeed());
-    randomTranslate.x = (float)((rand() % 1000)-500)/100.0f;
-    randomTranslate.y = (float)((rand() % 1000)-500)/100.0f;
-    randomTranslate.z = (float)((rand() % 1000)-500)/100.0f;
-
-    deform(faceYP);
-    deform(faceXM);
-    deform(faceYM);
-    deform(faceXP);
-    deform(faceZP);
-    deform(faceZM);
-
-    calculateSeaLevel(minimumHeight, maximumHeight, waterFraction);
 
     surfaceTexture = new unsigned char[surfaceTextureWidth*surfaceTextureHeight*3];
     generateImage(surfaceTextureWidth, surfaceTextureHeight, surfaceTexture);//take longtime
@@ -201,27 +194,6 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
     setGridLandInfo(gridZP);
     setGridLandInfo(gridZM);
 
-    smoothSeaArea();
-}
-
-void PSphere::deform(HeightMap *map)
-{
-    unsigned int x, y;
-    Ogre::Vector3 spherePos;
-    Ogre::Real height;
-
-    vector <float> frequency = RParameter.getFrequency();
-    vector <float> amplitude = RParameter.getAmplitude();
-
-    for(x=0; x < map->getSize(); x++)
-    {
-        for(y=0; y < map->getSize(); y++)
-        {
-            spherePos = map->projectToSphere(x, y);
-            height = heightNoise(amplitude, frequency, spherePos + randomTranslate);
-            map->setHeight(x, y, height);
-        }
-    }
 }
 
 void PSphere::calculateSeaLevel(float &minElev, float &maxElev, float seaFraction)
@@ -333,6 +305,9 @@ void PSphere::generateImage(unsigned short textureWidth, unsigned short textureH
             height = heightNoise(amplitude, frequency, spherePoint + randomTranslate);
 
             Pixel = generatePixel(height,
+                                  seaHeight,
+                                  minimumHeight,
+                                  maximumHeight,
                           water1st,
                           water2nd,
                           terrain1st,
@@ -369,16 +344,6 @@ void PSphere::setGridLandInfo(Grid *grid)
                 grid->setValue(x, y, 0);
         }
     }
-}
-
-void PSphere::smoothSeaArea()
-{
-    faceYP->setToMinimumHeight(seaHeight);
-    faceXM->setToMinimumHeight(seaHeight);
-    faceYM->setToMinimumHeight(seaHeight);
-    faceXP->setToMinimumHeight(seaHeight);
-    faceZP->setToMinimumHeight(seaHeight);
-    faceZM->setToMinimumHeight(seaHeight);
 }
 
 void PSphere::setObserverPosition(Ogre::Vector3 position)
@@ -523,199 +488,28 @@ PSphere* PSphere::getAstroChild(const std::string &objectName)
     return NULL;
 }
 
-void PSphere::bufferMesh(const std::string &meshName, Ogre::Vector3 *verts, Ogre::Vector3 *norms, Ogre::Vector2 *txCrds, Ogre::uint32 *indxs, Ogre::uint32 vCount, Ogre::uint32 iCount)
-{
-    Ogre::uint32 i;
-
-    // Create mesh and subMesh
-    Ogre::MeshPtr mesh;
-    Ogre::SubMesh *subMesh;
-    mesh = Ogre::MeshManager::getSingleton()
-           .createManual(meshName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    subMesh = mesh->createSubMesh();
-
-    mesh->sharedVertexData = new Ogre::VertexData;
-
-    // Pointer to declaration of vertexData
-    Ogre::VertexDeclaration* vertexDecl = mesh->sharedVertexData->vertexDeclaration;
-
-    mesh->sharedVertexData->vertexCount = vCount;
-
-    // define elements position, normal and tex coordinate
-    vertexDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
-    vertexDecl->addElement(0, sizeof(float)*3, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
-    vertexDecl->addElement(0, sizeof(float)*6, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
-
-    // Vertex buffer
-    Ogre::HardwareVertexBufferSharedPtr vBuf;
-    vBuf = Ogre::HardwareBufferManager::getSingleton()
-           .createVertexBuffer(8*sizeof(float), vertexCount,
-           Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
-
-    mesh->sharedVertexData->vertexBufferBinding->setBinding(0, vBuf);
-
-    // Lock the buffer and write vertex data to it
-    float *pVertex = static_cast<float *>(vBuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
-    for(i=0; i < vertexCount; i++)
-    {
-        pVertex[i*8+0] = verts[i].x;
-        pVertex[i*8+1] = verts[i].y;
-        pVertex[i*8+2] = verts[i].z;
-
-        pVertex[i*8+3] = norms[i].x;
-        pVertex[i*8+4] = norms[i].y;
-        pVertex[i*8+5] = norms[i].z;
-
-        pVertex[i*8+6] = txCrds[i].x;
-        pVertex[i*8+7] = txCrds[i].y;
-    }
-    vBuf->unlock();
-
-    // Index buffer
-    Ogre::HardwareIndexBufferSharedPtr iBuf;
-    iBuf = Ogre::HardwareBufferManager::getSingleton()
-           .createIndexBuffer(Ogre::HardwareIndexBuffer::IT_32BIT, indexCount,
-           Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
-
-    // Lock index buffer
-    unsigned int *pIdx;
-    pIdx = static_cast<unsigned int *>(iBuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
-    for(i=0; i < iCount; i++)
-    {
-        pIdx[i] = indxs[i];
-    }
-    iBuf->unlock();
-
-    subMesh->useSharedVertices = true;
-    subMesh->indexData->indexBuffer = iBuf;
-    subMesh->indexData->indexCount = indexCount;
-    subMesh->indexData->indexStart = 0;
-
-    mesh->_setBounds(Ogre::AxisAlignedBox(-radius, -radius, -radius, radius, radius, radius));
-    mesh->_setBoundingSphereRadius(radius);
-
-    mesh->load();
-}
-
-void PSphere::bufferTexture(const std::string &textureName)
-{
-    Ogre::uint32 i, j;
-    Ogre::TexturePtr texture;
-    Ogre::HardwarePixelBufferSharedPtr pixelBuffer;
-
-    // Texture stuff
-    texture = Ogre::TextureManager::getSingleton()
-              .createManual(textureName, Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME,
-              Ogre::TEX_TYPE_2D, surfaceTextureWidth, surfaceTextureHeight, 0, Ogre::PF_R8G8B8, Ogre:: TU_DYNAMIC);
-    pixelBuffer = texture->getBuffer();
-    pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
-
-    const Ogre::PixelBox &pixelBox = pixelBuffer->getCurrentLock();
-    Ogre::uint8 *exteriorTexture = static_cast<Ogre::uint8*>(pixelBox.data);
-
-    for(i=0; i < surfaceTextureHeight; i++)
-    {
-        for(j=0; j < surfaceTextureWidth; j++)
-        {
-            /* FIXME: Might be unnecessary memory copy, but was convenient. */
-            /* TextureManager did not honor Ogre::PF_R8G8B8, so need to swap red and blue,
-             * plus hardware wants alfa channel values too */
-            exteriorTexture[(i*surfaceTextureWidth+j)*4]   = surfaceTexture[(i*surfaceTextureWidth+j)*3+2];   // blue
-            exteriorTexture[(i*surfaceTextureWidth+j)*4+1] = surfaceTexture[(i*surfaceTextureWidth+j)*3+1];   // green
-            exteriorTexture[(i*surfaceTextureWidth+j)*4+2] = surfaceTexture[(i*surfaceTextureWidth+j)*3];     // red
-            exteriorTexture[(i*surfaceTextureWidth+j)*4+3] = 255;                          // Alfa
-        }
-    }
-
-    pixelBuffer->unlock();
-
-}
-
 void PSphere::load(Ogre::SceneNode *parent, Ogre::SceneManager *scene, const std::string &planetName, const std::string &textureName)
 {
-    Ogre::uint32 iters;
-
     generateMeshData();
-
-    // Assuming all faces have same size
-    iters = faceYP->getSize();
-    indexCount = (iters-1)*(iters-1)*6;
-    vertexCount = iters*iters;
 
     this->node = parent->createChildSceneNode(planetName);
 
-    faceZP->outputMeshData(vertexes, vNorms, texCoords, indexes);
-    this->meshName[0] = planetName+"_meshZP";
-    bufferMesh(meshName[0], vertexes, vNorms, texCoords, indexes, vertexCount, indexCount);
-    this->entity[0] = scene->createEntity(planetName+"_entZP", planetName+"_meshZP");
-    this->node->attachObject(this->entity[0]);
-
-    faceZM->outputMeshData(vertexes, vNorms, texCoords, indexes);
-    this->meshName[1] = planetName+"_meshZM";
-    bufferMesh(meshName[1], vertexes, vNorms, texCoords, indexes, vertexCount, indexCount);
-    this->entity[1] = scene->createEntity(planetName+"_entZM", planetName+"_meshZM");
-    this->node->attachObject(this->entity[1]);
-
-    faceYP->outputMeshData(vertexes, vNorms, texCoords, indexes);
-    this->meshName[2] = planetName+"_meshYP";
-    bufferMesh(meshName[2], vertexes, vNorms, texCoords, indexes, vertexCount, indexCount);
-    this->entity[2] = scene->createEntity(planetName+"_entYP", planetName+"_meshYP");
-    this->node->attachObject(this->entity[2]);
-
-    faceYM->outputMeshData(vertexes, vNorms, texCoords, indexes);
-    this->meshName[3] = planetName+"_meshYM";
-    bufferMesh(meshName[3], vertexes, vNorms, texCoords, indexes, vertexCount, indexCount);
-    this->entity[3] = scene->createEntity(planetName+"_entYM", planetName+"_meshYM");
-    this->node->attachObject(this->entity[3]);
-
-    faceXP->outputMeshData(vertexes, vNorms, texCoords, indexes);
-    this->meshName[4] = planetName+"_meshXP";
-    bufferMesh(meshName[4], vertexes, vNorms, texCoords, indexes, vertexCount, indexCount);
-    this->entity[4] = scene->createEntity(planetName+"_entXP", planetName+"_meshXP");
-    this->node->attachObject(this->entity[4]);
-
-    faceXM->outputMeshData(vertexes, vNorms, texCoords, indexes);
-    this->meshName[5] = planetName+"_meshXM";
-    bufferMesh(meshName[5], vertexes, vNorms, texCoords, indexes, vertexCount, indexCount);
-    this->entity[5] = scene->createEntity(planetName+"_entXM", planetName+"_meshXM");
-    this->node->attachObject(this->entity[5]);
-
-    this->textureName[0] = textureName;
-    bufferTexture(textureName);
-
-    Ogre::MaterialPtr textureMap;
-
-    textureMap = Ogre::MaterialManager::getSingleton()
-                 .create(planetName+"_TextureObject",Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME);
-    textureMap->getTechnique(0)->getPass(0)->createTextureUnitState(textureName);
-    textureMap->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
-
-    entity[0]->getMesh()->getSubMesh(0)->setMaterialName(planetName+"_TextureObject");
-    entity[1]->getMesh()->getSubMesh(0)->setMaterialName(planetName+"_TextureObject");
-    entity[2]->getMesh()->getSubMesh(0)->setMaterialName(planetName+"_TextureObject");
-    entity[3]->getMesh()->getSubMesh(0)->setMaterialName(planetName+"_TextureObject");
-    entity[4]->getMesh()->getSubMesh(0)->setMaterialName(planetName+"_TextureObject");
-    entity[5]->getMesh()->getSubMesh(0)->setMaterialName(planetName+"_TextureObject");
-
-    // Set texture for the sphere
-    entity[0]->setMaterial(textureMap);
-    entity[1]->setMaterial(textureMap);
-    entity[2]->setMaterial(textureMap);
-    entity[3]->setMaterial(textureMap);
-    entity[4]->setMaterial(textureMap);
-    entity[5]->setMaterial(textureMap);
+    faceYP->load(this->node, scene, planetName+"_YP");
+    faceXM->load(this->node, scene, planetName+"_XM");
+    faceYM->load(this->node, scene, planetName+"_YM");
+    faceXP->load(this->node, scene, planetName+"_XP");
+    faceZP->load(this->node, scene, planetName+"_ZP");
+    faceZM->load(this->node, scene, planetName+"_ZM");
 }
 
 void PSphere::unload(Ogre::SceneManager *scene)
 {
-    this->node->detachAllObjects();
-
-    scene->destroyEntity(entity[0]);
-    scene->destroyEntity(entity[1]);
-    scene->destroyEntity(entity[2]);
-    scene->destroyEntity(entity[3]);
-    scene->destroyEntity(entity[4]);
-    scene->destroyEntity(entity[5]);
+    faceYP->unload(this->node, scene);
+    faceXM->unload(this->node, scene);
+    faceYM->unload(this->node, scene);
+    faceXP->unload(this->node, scene);
+    faceZP->unload(this->node, scene);
+    faceZM->unload(this->node, scene);
 
     scene->destroySceneNode(this->node);
 }
@@ -880,7 +674,7 @@ void PSphere::attachAstroChild(PSphere *object, Ogre::Real x, Ogre::Real y, Ogre
     string objectMeshName = object->getMeshName();
     astroObjectsChild.push_back(object);
     object->attachAstroParent(this);
-    Ogre::Entity* entity = object->getEntity();
+//    Ogre::Entity* entity = object->getEntity();
 
     string secNodeName = "sec_node_";
     string nodeObjectName = "node_";
@@ -889,7 +683,7 @@ void PSphere::attachAstroChild(PSphere *object, Ogre::Real x, Ogre::Real y, Ogre
     Ogre::SceneNode *nodeSecondary = this->node->createChildSceneNode(secNodeName);
     Ogre::SceneNode *nodeAstroChild = nodeSecondary->createChildSceneNode(objectMeshName);
 
-    nodeAstroChild->attachObject(entity);
+//    nodeAstroChild->attachObject(entity);
     object->setNode(nodeAstroChild);
     nodeAstroChild->setPosition(x, y, z);
 }
@@ -899,19 +693,9 @@ void PSphere::setNode(Ogre::SceneNode *node)
     this->node = node;
 }
 
-void PSphere::setEntity(Ogre::Entity *entity)
-{
-    this->entity[0] = entity;
-}
-
 Ogre::SceneNode* PSphere::getNode()
 {
     return node;
-}
-
-Ogre::Entity* PSphere::getEntity()
-{
-    return entity[0];
 }
 
 bool PSphere::getGridLocation(Ogre::Vector3 location, Grid **face,
@@ -1191,6 +975,9 @@ unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, M
 				{
 					elev = heightNoise(RParameter.getAmplitude(), RParameter.getFrequency(), temp[i]->projectToSphere(x, y)+randomTranslate);
 					Output = generatePixel(elev,
+                                           seaHeight,
+                                           minimumHeight,
+                                           maximumHeight,
 								  water1st,
 								  water2nd,
 								  terrain1st,
@@ -1211,6 +998,9 @@ unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, M
 			{
 				elev = heightNoise(RParameter.getAmplitude(), RParameter.getFrequency(), temp[4]->projectToSphere(x, y)+randomTranslate);
 				Output = generatePixel(elev,
+                                       seaHeight,
+                                       minimumHeight,
+                                       maximumHeight,
 							  water1st,
 							  water2nd,
 							  terrain1st,
@@ -1230,6 +1020,9 @@ unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, M
 			{
 				elev = heightNoise(RParameter.getAmplitude(), RParameter.getFrequency(), temp[5]->projectToSphere(x, y)+randomTranslate);
 				Output = generatePixel(elev,
+                                       seaHeight,
+                                       minimumHeight,
+                                       maximumHeight,
 							  water1st,
 							  water2nd,
 							  terrain1st,
@@ -1499,60 +1292,4 @@ void PSphere::moveAstroChild(const std::string &objectName, Ogre::Real pitch, Og
 
 ResourceParameter *PSphere::getParameters() {
 	return &RParameter;
-}
-
-Ogre::Real PSphere::heightNoise(vector<float> &amplitude,
-                               vector<float> &frequency, Ogre::Vector3 Point)
-{
-    Ogre::uint32 i;
-    Ogre::Real height = 0.0f;
-
-    // Run through the amplitude.size
-    for(i=0; i < amplitude.size(); i++)
-    {
-        height += amplitude[i] * SimplexNoise1234::noise(Point.x/frequency[i],
-                                                          Point.y/frequency[i],
-                                                          Point.z/frequency[i]);
-    }
-
-    return height;
-}
-
-Ogre::ColourValue PSphere::generatePixel(Ogre::Real height,
-                                   Ogre::ColourValue water1st,
-                                   Ogre::ColourValue water2nd,
-                                   Ogre::ColourValue terrain1st,
-                                   Ogre::ColourValue terrain2nd,
-                                   Ogre::ColourValue mountain1st,
-                                   Ogre::ColourValue mountain2nd)
-{
-    float const multiplyer = 0.6;
-    Ogre::ColourValue ColorOut;
-
-    // Set sea-colors
-    if(height < seaHeight)
-    {
-        /* FIXME: Unsigned char underflow can happen here, but probably affects
-         * output visibly only when water1st-colors are around zero. */
-        ColorOut =  water1st + (water2nd-water1st)*(height-minimumHeight)/(seaHeight-minimumHeight);
-    }
-    else
-    {
-        // Set low (terrain) elevations
-        ColorOut =  terrain1st + (terrain2nd-terrain1st)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
-
-        // Set highest elevations
-        if(height > maximumHeight * multiplyer)
-        {
-            ColorOut = mountain2nd - (mountain2nd-mountain1st)*(maximumHeight-height)/(maximumHeight*(1.0f-multiplyer));
-            /* to avoid unsigned char overflow later on. HeightMaps are
-             * approximations of simplex-noise generated geometry, and can't
-             * guarantee maximumHeight is really the max value of elevations. */
-            ColorOut.r < 0.0f ? ColorOut.r = 0.0f : (ColorOut.r >= 256.0f ? ColorOut.r = 255.0f : ColorOut.r);
-            ColorOut.g < 0.0f ? ColorOut.g = 0.0f : (ColorOut.g >= 256.0f ? ColorOut.g = 255.0f : ColorOut.g);
-            ColorOut.b < 0.0f ? ColorOut.b = 0.0f : (ColorOut.b >= 256.0f ? ColorOut.b = 255.0f : ColorOut.b);
-        }
-    }
-
-    return ColorOut;
 }

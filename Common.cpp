@@ -21,6 +21,7 @@
  * THE SOFTWARE. */
 
 #include "Common.h"
+#include "simplexnoise1234.h"
 
 
 Ogre::Vector3 convertSphericalToCartesian (Ogre::Real latitude, Ogre::Real longitude)   {
@@ -76,4 +77,63 @@ Ogre::Vector2 convertCartesianToPlateCarree(Ogre::Vector3 position) {
 	v = v/Ogre::Math::PI;
 
 	return Ogre::Vector2(u, v);
+}
+
+Ogre::Real heightNoise(std::vector<float> &amplitude,
+                       std::vector<float> &frequency, Ogre::Vector3 Point)
+{
+    Ogre::uint32 i;
+    Ogre::Real height = 0.0f;
+
+    // Run through the amplitude.size
+    for(i=0; i < amplitude.size(); i++)
+    {
+        height += amplitude[i] * SimplexNoise1234::noise(Point.x/frequency[i],
+                                                          Point.y/frequency[i],
+                                                          Point.z/frequency[i]);
+    }
+
+    return height;
+}
+
+Ogre::ColourValue generatePixel(Ogre::Real height,
+                                Ogre::Real seaHeight,
+                                Ogre::Real minimumHeight,
+                                Ogre::Real maximumHeight,
+                                Ogre::ColourValue water1st,
+                                Ogre::ColourValue water2nd,
+                                Ogre::ColourValue terrain1st,
+                                Ogre::ColourValue terrain2nd,
+                                Ogre::ColourValue mountain1st,
+                                Ogre::ColourValue mountain2nd)
+{
+    float const multiplyer = 0.6;
+    Ogre::ColourValue ColorOut;
+
+    // Set sea-colors
+    if(height < seaHeight)
+    {
+        /* FIXME: Unsigned char underflow can happen here, but probably affects
+         * output visibly only when water1st-colors are around zero. */
+        ColorOut =  water1st + (water2nd-water1st)*(height-minimumHeight)/(seaHeight-minimumHeight);
+    }
+    else
+    {
+        // Set low (terrain) elevations
+        ColorOut =  terrain1st + (terrain2nd-terrain1st)*(height-seaHeight)/(maximumHeight*multiplyer-seaHeight);
+
+        // Set highest elevations
+        if(height > maximumHeight * multiplyer)
+        {
+            ColorOut = mountain2nd - (mountain2nd-mountain1st)*(maximumHeight-height)/(maximumHeight*(1.0f-multiplyer));
+            /* to avoid unsigned char overflow later on. HeightMaps are
+             * approximations of simplex-noise generated geometry, and can't
+             * guarantee maximumHeight is really the max value of elevations. */
+            ColorOut.r < 0.0f ? ColorOut.r = 0.0f : (ColorOut.r >= 256.0f ? ColorOut.r = 255.0f : ColorOut.r);
+            ColorOut.g < 0.0f ? ColorOut.g = 0.0f : (ColorOut.g >= 256.0f ? ColorOut.g = 255.0f : ColorOut.g);
+            ColorOut.b < 0.0f ? ColorOut.b = 0.0f : (ColorOut.b >= 256.0f ? ColorOut.b = 255.0f : ColorOut.b);
+        }
+    }
+
+    return ColorOut;
 }

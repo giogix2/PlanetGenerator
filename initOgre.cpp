@@ -340,7 +340,7 @@ void initOgre::savePlanetAsMesh(PSphere *planet, const std::string &exportFile)
 
     //Export the shape in a mesh file before destroying it
     Ogre::MeshPtr mesh;
-    mesh = planet->getEntity()->getMesh();
+//    mesh = planet->getEntity()->getMesh();
     Ogre::MeshSerializer ser;
     ser.exportMesh(mesh.getPointer(), exportFile,  Ogre::MeshSerializer::ENDIAN_NATIVE);
 
@@ -363,7 +363,7 @@ void initOgre::savePlanetAsMesh(PSphere *planet, const std::string &exportFile)
     }
 
     std::string materialFile = name + ".material";
-    saveMaterialFile(materialPath+materialFile, planet->getEntity()->getMesh()->getSubMesh(0)->getMaterialName(), textureFile);
+//    saveMaterialFile(materialPath+materialFile, planet->getEntity()->getMesh()->getSubMesh(0)->getMaterialName(), textureFile);
 }
 
 #if OGRE_PLATFORM == OGRE_PLATFORM_LINUX

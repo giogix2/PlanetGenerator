@@ -30,6 +30,20 @@ Ogre::Vector3 convertSphericalToCartesian (Ogre::Real latitude, Ogre::Real longi
 
 Ogre::Vector2 convertCartesianToPlateCarree(Ogre::Vector3 position);
 
+Ogre::Real heightNoise(std::vector<float> &amplitude,
+                       std::vector<float> &frequency, Ogre::Vector3 Point);
+
+Ogre::ColourValue generatePixel(Ogre::Real height,
+                                Ogre::Real seaHeight,
+                                Ogre::Real minimumHeight,
+                                Ogre::Real maximumHeight,
+                                Ogre::ColourValue water1st,
+                                Ogre::ColourValue water2nd,
+                                Ogre::ColourValue terrain1st,
+                                Ogre::ColourValue terrain2nd,
+                                Ogre::ColourValue mountain1st,
+                                Ogre::ColourValue mountain2nd);
+
 /* 2d-array allocator. Because of templating, the whole definition must be in a header */
 template <typename T>
 T **allocate2DArray(unsigned short sizeY, unsigned short sizeX)

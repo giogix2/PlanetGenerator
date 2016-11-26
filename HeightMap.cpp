@@ -20,24 +20,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE. */
 
-#include <assert.h>
-
 #include "HeightMap.h"
 #include "Common.h"
 
-HeightMap::HeightMap(unsigned int size, const Ogre::Matrix3 face)
+HeightMap::HeightMap(unsigned int size,
+                     const Ogre::Matrix3 face,
+                     std::ResourceParameter *param,
+                     Ogre::Real Height_sea)
 	: Grid(size, face)
 {
+    Ogre::Real maxAmplitude=0;
+
+    RParam = param;
+    seaHeight = Height_sea;
+    textureResolution = 256;
+
 	height = allocate2DArray<float>(size, size);
 	memset(height[0], 0, sizeof(float)*size*size);
 
-	minHeight = std::numeric_limits<float>::max();
-	maxHeight = std::numeric_limits<float>::min();
+    /* Calculate minimum and maximum possible height assuming noise
+     * range between -1 - +1 */
+    for(unsigned int i=0; i < RParam->getAmplitude().size(); i++)
+        maxAmplitude += Ogre::Math::Abs(RParam->getAmplitude()[i]);
+
+    /* Simplexnoise represents white noise poorly, so actual min and max can be
+     * quite a bit less. */
+    minHeight = -maxAmplitude;
+    maxHeight = +maxAmplitude;
 
 	vertexes = new Ogre::Vector3[gridSize*gridSize];
 	verNorms = new Ogre::Vector3[gridSize*gridSize];
 	txCoords = new Ogre::Vector2[gridSize*gridSize];
 	indexes = new Ogre::uint32[(gridSize-1)*(gridSize-1)*6];
+
+    /* Re-create randomTranslate using seed. Avoids passing it as a costructor
+     * parameter. */
+    srand(RParam->getSeed());
+    randomTranslate.x = (float)((rand() % 1000)-500)/100.0f;
+    randomTranslate.y = (float)((rand() % 1000)-500)/100.0f;
+    randomTranslate.z = (float)((rand() % 1000)-500)/100.0f;
+
+    createGeometry();
+    createTexture();
 }
 
 HeightMap::~HeightMap()
@@ -48,6 +72,7 @@ HeightMap::~HeightMap()
 	delete[] verNorms;
 	delete[] txCoords;
 	delete[] indexes;
+    delete[] squareTexture;
 }
 
 void HeightMap::getMinMax(float &min, float &max)
@@ -59,28 +84,11 @@ void HeightMap::getMinMax(float &min, float &max)
 void HeightMap::setHeight(unsigned int x, unsigned int y, float elevation)
 {
 	height[y][x] = elevation;
-
-	if(elevation < minHeight)
-		minHeight = elevation;
-	if(elevation > maxHeight)
-		maxHeight = elevation;
 }
 
 float HeightMap::getHeight(unsigned int x, unsigned int y)
 {
 	return height[y][x];
-}
-
-void HeightMap::setToMinimumHeight(float minimumHeight)
-{
-	unsigned int x, y;
-
-	for(y=0; y < gridSize; y++)
-		for(x=0; x < gridSize; x++)
-			if(height[y][x] < minimumHeight)
-				height[y][x] = minimumHeight;
-
-	minHeight = minimumHeight;
 }
 
 /* Return vector for a normalized (radius 1.0) sphere */
@@ -119,8 +127,16 @@ void HeightMap::generateMeshData(float scalingFactor)
 			// Project height-map location to a sphere
 			vertexes[idx] = projectToSphere(x, y) * scalingFactor;
 
+            // Flatten vertices that are under sea-level
+            if (vertexes[idx].length() < (1.0f+seaHeight)*scalingFactor)
+            {
+                vertexes[idx].normalise();
+                vertexes[idx] = (vertexes[idx] + seaHeight)*scalingFactor;
+            }
+
 			// Calculate texture-coordinate for the vertex
-			txCoords[idx] = convertCartesianToPlateCarree(vertexes[idx]);
+            txCoords[idx].x = static_cast<float>(x)/static_cast<float>(gridSize-1);
+            txCoords[idx].y = static_cast<float>(y)/static_cast<float>(gridSize-1);
 			idx++;
 		}
 	}
@@ -290,21 +306,244 @@ void HeightMap::setNormal(Ogre::Vector3 normal, unsigned short x, unsigned short
 	verNorms[x*gridSize+y] = normal;
 }
 
-/* Returns vertex-, normal-, texture- and index-arrays through a pointer.
- * Assumes correctly sized arrays are already allocated. */
-void HeightMap::outputMeshData(Ogre::Vector3 *verArray, Ogre::Vector3 *norArray, Ogre::Vector2 *texArray,
-							   unsigned int *idxArray)
+void HeightMap::createGeometry()
 {
-	unsigned int i;
+    Ogre::uint16 x, y, gSize;
+    Ogre::Real elev;
+    Ogre::Vector3 spherePos;
 
-	for(i=0; i < gridSize*gridSize; i++)
-	{
-		verArray[i] = vertexes[i];
-		norArray[i] = verNorms[i];
-		texArray[i] = txCoords[i];
-	}
-	for(i=0; i < (gridSize-1)*(gridSize-1)*6; i++)
-	{
-		idxArray[i] = indexes[i];
-	}
+    gSize = this->getSize();
+    for(y=0; y < gSize; y++)
+    {
+        for(x=0; x < gSize; x++)
+        {
+            spherePos = this->projectToSphere(x, y);
+            elev = heightNoise(RParam->getAmplitude(), RParam->getFrequency(),
+                               spherePos+this->randomTranslate);
+            this->setHeight(x, y, elev);
+        }
+    }
+}
+
+void HeightMap::createTexture()
+{
+    Grid *tGrid;
+    Ogre::uint16 gSize, x, y;
+    unsigned char red, green, blue;
+    Ogre::Real elev;
+    Ogre::ColourValue Output;
+
+    gSize = this->textureResolution;
+    squareTexture = new Ogre::uint8[gSize*gSize*3];
+
+    tGrid = new Grid(gSize, this->getOrientation());
+
+    Ogre::ColourValue water1st, water2nd;
+
+    RParam->getWaterFirstColor(red, green, blue);
+    water1st.r = red;
+    water1st.g = green;
+    water1st.b = blue;
+    RParam->getWaterSecondColor(red, green, blue);
+    water2nd.r = red;
+    water2nd.g = green;
+    water2nd.b = blue;
+
+    Ogre::ColourValue terrain1st, terrain2nd;
+
+    RParam->getTerrainFirstColor(red, green, blue);
+    terrain1st.r = red;
+    terrain1st.g = green;
+    terrain1st.b = blue;
+    RParam->getTerrainSecondColor(red, green, blue);
+    terrain2nd.r = red;
+    terrain2nd.g = green;
+    terrain2nd.b = blue;
+
+    Ogre::ColourValue mountain1st, mountain2nd;
+
+    RParam->getMountainFirstColor(red, green, blue);
+    mountain1st.r = red;
+    mountain1st.g = green;
+    mountain1st.b = blue;
+    RParam->getMountainSecondColor(red, green, blue);
+    mountain2nd.r = red;
+    mountain2nd.g = green;
+    mountain2nd.b = blue;
+
+    for(y=0; y < gSize; y++)
+    {
+        for(x=0; x < gSize; x++)
+        {
+            elev = heightNoise(RParam->getAmplitude(), RParam->getFrequency(),
+                               tGrid->projectToSphere(x,y)+randomTranslate);
+            Output = generatePixel(elev,
+                                   seaHeight,
+                                   minHeight,
+                                   maxHeight,
+                                   water1st,
+                                   water2nd,
+                                   terrain1st,
+                                   terrain2nd,
+                                   mountain1st,
+                                   mountain2nd);
+
+            squareTexture[(y*gSize+x)*3] = Output.r;
+            squareTexture[(y*gSize+x)*3+1] = Output.g;
+            squareTexture[(y*gSize+x)*3+2] = Output.b;
+        }
+    }
+
+    delete tGrid;
+}
+
+void HeightMap::load(Ogre::SceneNode *node, Ogre::SceneManager *scene,
+                     const std::string &Name)
+{
+    const std::string meshName = Name + "_mesh";
+    const std::string textureName = Name + "_texture";
+    const std::string matName = Name + "_material";
+    std::string defGrpName = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
+
+    bufferMesh(meshName);
+    bufferTexture(textureName);
+
+    this->entity = scene->createEntity(Name, meshName);
+    node->attachObject(this->entity);
+
+    Ogre::MaterialPtr texMap;
+
+    /* FIXME: Should texMap and subMesh have a different (material) name?
+     * Same name works, but different name works as well. */
+    texMap = Ogre::MaterialManager::getSingleton().create(matName ,defGrpName);
+
+    texMap->getTechnique(0)->getPass(0)->createTextureUnitState(textureName);
+    texMap->getTechnique(0)->getPass(0)->setSceneBlending(Ogre::SBT_TRANSPARENT_ALPHA);
+
+    this->entity->getMesh()->getSubMesh(0)->setMaterialName(matName);
+
+    // Set texture for the entity
+    this->entity->setMaterial(texMap);
+}
+
+void HeightMap::unload(Ogre::SceneNode *node, Ogre::SceneManager *scene)
+{
+    node->detachObject(this->entity->getName());
+    scene->destroyEntity(this->entity->getName());
+}
+
+void HeightMap::bufferMesh(const std::string &meshName)
+{
+    Ogre::uint32 i, gSize = this->gridSize;
+    Ogre::MeshPtr mesh;
+    Ogre::SubMesh *subMesh;
+    std::string defGrpName = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
+
+    // Create mesh and subMesh
+    mesh = Ogre::MeshManager::getSingleton().createManual(meshName, defGrpName);
+    subMesh = mesh->createSubMesh();
+
+    mesh->sharedVertexData = new Ogre::VertexData;
+    mesh->sharedVertexData->vertexCount = gSize*gSize;
+
+    // Pointer to declaration of vertexData
+    Ogre::VertexDeclaration* vertexDecl = mesh->sharedVertexData->vertexDeclaration;
+
+    // define elements position, normal and tex coordinate
+    vertexDecl->addElement(0, 0, Ogre::VET_FLOAT3, Ogre::VES_POSITION);
+    vertexDecl->addElement(0, 4*3, Ogre::VET_FLOAT3, Ogre::VES_NORMAL);
+    vertexDecl->addElement(0, 4*6, Ogre::VET_FLOAT2, Ogre::VES_TEXTURE_COORDINATES);
+
+    // Vertex buffer
+    Ogre::HardwareVertexBufferSharedPtr vBuf;
+
+    vBuf = Ogre::HardwareBufferManager::getSingleton()
+           .createVertexBuffer(8*sizeof(float), gSize*gSize,
+                               Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
+
+    mesh->sharedVertexData->vertexBufferBinding->setBinding(0, vBuf);
+
+    // Lock the buffer and write vertex data to it
+    float *pVertex;
+    pVertex = static_cast<float *>(vBuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
+    for(i=0; i < gSize*gSize; i++)
+    {
+        pVertex[i*8+0] = vertexes[i].x;
+        pVertex[i*8+1] = vertexes[i].y;
+        pVertex[i*8+2] = vertexes[i].z;
+
+        pVertex[i*8+3] = verNorms[i].x;
+        pVertex[i*8+4] = verNorms[i].y;
+        pVertex[i*8+5] = verNorms[i].z;
+
+        pVertex[i*8+6] = txCoords[i].x;
+        pVertex[i*8+7] = txCoords[i].y;
+    }
+    vBuf->unlock();
+
+    // Index buffer
+    Ogre::HardwareIndexBufferSharedPtr iBuf;
+    Ogre::HardwareIndexBuffer::IndexType itype = Ogre::HardwareIndexBuffer::IT_32BIT;
+
+    iBuf = Ogre::HardwareBufferManager::getSingleton()
+           .createIndexBuffer(itype, (gSize-1)*(gSize-1)*6,
+           Ogre::HardwareBuffer::HBU_STATIC_WRITE_ONLY, false);
+
+    // Lock index buffer
+    unsigned int *pIdx;
+    pIdx = static_cast<unsigned int *>(iBuf->lock(Ogre::HardwareBuffer::HBL_DISCARD));
+    for(i=0; i < (gSize-1)*(gSize-1)*6; i++)
+    {
+        pIdx[i] = indexes[i];
+    }
+    iBuf->unlock();
+
+    subMesh->useSharedVertices = true;
+    subMesh->indexData->indexBuffer = iBuf;
+    subMesh->indexData->indexCount = (gSize-1)*(gSize-1)*6;
+    subMesh->indexData->indexStart = 0;
+
+    /* FIXME: Review boxsize, mesh fits to a lot smaller box and radius should
+     * not be hardcoded. */
+    Ogre::Real radius = 8.0f;
+    mesh->_setBounds(Ogre::AxisAlignedBox(-radius, -radius, -radius,
+                                          radius, radius, radius));
+    mesh->_setBoundingSphereRadius(radius);
+
+    mesh->load();
+}
+
+void HeightMap::bufferTexture(const std::string &textureName)
+{
+    Ogre::uint32 y, x;
+    Ogre::TexturePtr texture;
+    Ogre::HardwarePixelBufferSharedPtr pixelBuffer;
+    std::string defGrpName = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
+    Ogre::uint16 tRes = this->textureResolution;
+
+    texture = Ogre::TextureManager::getSingleton()
+              .createManual(textureName, defGrpName, Ogre::TEX_TYPE_2D,
+                            tRes, tRes, 0, Ogre::PF_R8G8B8, Ogre:: TU_DYNAMIC);
+
+    pixelBuffer = texture->getBuffer();
+    pixelBuffer->lock(Ogre::HardwareBuffer::HBL_DISCARD);
+
+    const Ogre::PixelBox &pixelBox = pixelBuffer->getCurrentLock();
+    Ogre::uint8 *Texture = static_cast<Ogre::uint8*>(pixelBox.data);
+
+    for(y=0; y < tRes; y++)
+    {
+        for(x=0; x < tRes; x++)
+        {
+            /* FIXME: Might be unnecessary memory copy, but was convenient. */
+            /* TextureManager did not honor Ogre::PF_R8G8B8, so need to swap
+             * red and blue, plus hardware wants alfa channel values too */
+            Texture[(y*tRes+x)*4]   = squareTexture[(y*tRes+x)*3+2];   // blue
+            Texture[(y*tRes+x)*4+1] = squareTexture[(y*tRes+x)*3+1];   // green
+            Texture[(y*tRes+x)*4+2] = squareTexture[(y*tRes+x)*3];     // red
+            Texture[(y*tRes+x)*4+3] = 255;                             // Alfa
+        }
+    }
+
+    pixelBuffer->unlock();
 }

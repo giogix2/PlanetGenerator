@@ -146,7 +146,6 @@ private:
 	Ogre::Real			radius;
 	Ogre::Real			seaHeight;
     Ogre::SceneNode     *node;
-    Ogre::Entity        *entity[6];
 	unsigned char		*surfaceTexture;
 	unsigned short		surfaceTextureWidth;
 	unsigned short		surfaceTextureHeight;
@@ -178,8 +177,6 @@ private:
     // Makes a sphere out of a cube that is made of 6 squares
 	void create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter);
 
-    void deform(HeightMap *map);
-
     void calculateSeaLevel(float &minElev, float &maxElev, float seaFraction);
 
     /* Generates surface-texturemap using noise-generated height differences.
@@ -188,8 +185,6 @@ private:
 
     void setGridLandInfo(Grid *grid);
 
-    void smoothSeaArea();
-
 	void calculate(Ogre::Vector3 vertex, Ogre::Real radius, Ogre::ColourValue colour);
 
     /* Fix a seam by adding vertex duplicates with texture u going over 1.0 */
@@ -197,20 +192,7 @@ private:
 
 	Ogre::Vector3 calculateSphereCoordsFromTexCoords(Ogre::Vector2 *texCoord);
 
-	Ogre::Real heightNoise(vector<float> &amplitude,
-						   vector<float> &frequency, Ogre::Vector3 Point);
-
-    // Returns colour-values for one pixel
-	Ogre::ColourValue generatePixel(Ogre::Real height,
-									   Ogre::ColourValue water1st, Ogre::ColourValue water2nd, Ogre::ColourValue terrain1st,
-									   Ogre::ColourValue terrain2nd, Ogre::ColourValue mountain1st, Ogre::ColourValue mountain2nd);
-
 	void generateMeshData();
-
-    void bufferMesh(const std::string &meshName, Ogre::Vector3 *verts, Ogre::Vector3 *norms, Ogre::Vector2 *txCrds, Ogre::uint32 *indxs, Ogre::uint32 vCount, Ogre::uint32 iCount);
-
-    void bufferTexture(const std::string &textureName);
-
 };
 
 #endif

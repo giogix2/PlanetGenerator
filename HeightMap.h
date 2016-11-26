@@ -27,15 +27,18 @@
 #include <OgreVector3.h>
 #include <OgreMatrix3.h>
 #include "Grid.h"
+#include "ResourceParameter.h"
 
 class HeightMap: public Grid
 {
 public:
-	HeightMap(unsigned int size, const Ogre::Matrix3 face);
+    HeightMap(unsigned int size,
+              const Ogre::Matrix3 face,
+              std::ResourceParameter *param,
+              Ogre::Real Height_sea);
 	~HeightMap();
 	void setHeight(unsigned int x, unsigned int y, float elevation);
 	float getHeight(unsigned int x, unsigned int y);
-	void setToMinimumHeight(float minimumHeight);
 	void getMinMax(float &min, float &max);
 	Ogre::Vector3 projectToSphere(unsigned int x, unsigned int y);
 
@@ -43,20 +46,45 @@ public:
 	Ogre::Vector3 getNormal(unsigned short x,unsigned short y);
 	void setNormal(Ogre::Vector3 normal, unsigned short x, unsigned short y);
 	void blendNormalsWithNeighbours();
-	void outputMeshData(Ogre::Vector3 *verArray, Ogre::Vector3 *norArray, Ogre::Vector2 *texArray,
-								   unsigned int *idxArray);
 
+    /* Fills hardware-buffers with vertice- and texture-data. Creates entity
+     * called Name, mesh called Name+"_mesh", material called Name+"_material",
+     * textureUnitState called Name+"_texture".
+     * Attachs entity to a given node. */
+    void load(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &Name);
+
+    /* Detach and destroy entity */
+    void unload(Ogre::SceneNode *node, Ogre::SceneManager *scene);
 private:
-	float	**height;
-	float	minHeight;
-	float	maxHeight;
+    float           **height;
+    float           minHeight;
+    float           maxHeight;
+    float           seaHeight;
+    Ogre::uint16    textureResolution;
+    Ogre::uint8     *squareTexture;
+    Ogre::Vector3   randomTranslate;
 
 	Ogre::Vector3	*vertexes;
 	Ogre::Vector3	*verNorms;
 	Ogre::Vector2	*txCoords;
 	Ogre::uint32	*indexes;
 
+    Ogre::Entity    *entity;
+    std::ResourceParameter *RParam;
+
 	void calculateNormals();
+
+    /* Creates geometry for heightmap */
+    void createGeometry();
+
+    /* Creates square bitmap to be used as a texture */
+    void createTexture();
+
+    /* Creates and fills hardware-buffer with vertex-data */
+    void bufferMesh(const std::string &meshName);
+
+    /* Creates and fills hardware-buffer with texture-data */
+    void bufferTexture(const std::string &textureName);
 };
 
 #endif // HEIGHTMAP_H
