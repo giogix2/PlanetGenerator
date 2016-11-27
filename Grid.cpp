@@ -23,13 +23,16 @@
 #include "Grid.h"
 #include "Common.h"
 
-Grid::Grid(unsigned int size, const Ogre::Matrix3 face)
+Grid::Grid(unsigned int size, const Ogre::Matrix3 face,
+           Ogre::Vector2 UpperLeft, Ogre::Vector2 LowerRight)
 {
 	value = allocate2DArray<int>(size, size);
 	memset(value[0], 0, sizeof(int)*size*size);
 
 	gridSize = size;
 	orientation = face;
+    this->UpperLeft = UpperLeft;
+    this->LowerRight = LowerRight;
 
 	xplusNeighbour = NULL;
 	xminusNeighbour = NULL;
@@ -66,20 +69,25 @@ int Grid::getValue(unsigned int x, unsigned int y)
 Ogre::Vector3 Grid::projectToSphere(unsigned int x, unsigned int y)
 {
 	Ogre::Vector3 pos;
-	float mSizeFloat, xFloat, yFloat, halfStep;
+    Ogre::Vector2 subtracted, xyPos, posTemp;
+    float mSizeFloat;
 
-	mSizeFloat = static_cast<float>(gridSize);
-	xFloat = static_cast<float>(x)/mSizeFloat;
-	yFloat = static_cast<float>(y)/mSizeFloat;
-	halfStep = 1.0f/(mSizeFloat*2.0f);
+    mSizeFloat = static_cast<float>(gridSize-1);
+    xyPos.x = static_cast<float>(x)/mSizeFloat;
+    xyPos.y = static_cast<float>(y)/mSizeFloat;
 
-	// For convenience treat xy-heightmap as a xz-plane in sphere-coordinates
-	pos.x = 1.0f-halfStep - xFloat*2.0f;
-	pos.z = -1.0f+halfStep + yFloat*2.0f;
+    subtracted = this->LowerRight - this->UpperLeft;
+    posTemp = this->UpperLeft + xyPos*subtracted;
+
+    /* For convenience treat xy-grid as a xz-plane in sphere-coordinates which
+     * means that rotating with identity matrix, normal of a grid-plane points
+     * toward +y. */
+    pos.x = posTemp.x;
+    pos.z = posTemp.y;
 	pos.y = 1.0f;
-	// Simple re-orientation
+    // reorientate
 	pos = orientation*pos;
-	// project heightMap to sphere
+    // project grid to unit sphere
 	pos.normalise();
 
 	return pos;

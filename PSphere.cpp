@@ -94,6 +94,11 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
     if (gridSize < 2)
         gridSize = 2;
 
+    Ogre::Vector2 upperL, lowerR, upperL_g, lowerR_g;
+    upperL = Ogre::Vector2(-1.0f, 1.0f);
+    lowerR = Ogre::Vector2(1.0f, -1.0f);
+    upperL_g = Ogre::Vector2(-1.0f+0.5f/(gridSize-1), 1.0f-0.5f/(gridSize-1));
+    lowerR_g = Ogre::Vector2(1.0f-0.5f/(gridSize-1), -1.0f+0.5f/(gridSize-1));
     Ogre::Matrix3 noRot, rotZ_90, rotZ_180, rotZ_270, rotX_90, rotX_270;
 
     noRot = Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, 0.0f, 1.0f);
@@ -111,23 +116,23 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
     calculateSeaLevel(minimumHeight, maximumHeight, waterFraction);
 
     // No rotation
-    faceYP = new HeightMap(iters, noRot, &RParameter, seaHeight);
-    gridYP = new Grid(gridSize, noRot);
+    faceYP = new HeightMap(iters, noRot, upperL, lowerR, &RParameter, seaHeight);
+    gridYP = new Grid(gridSize, noRot, upperL_g, lowerR_g);
     // 90 degrees through z-axis
-    faceXM = new HeightMap(iters, rotZ_90, &RParameter, seaHeight);
-    gridXM = new Grid(gridSize, rotZ_90);
+    faceXM = new HeightMap(iters, rotZ_90, upperL, lowerR, &RParameter, seaHeight);
+    gridXM = new Grid(gridSize, rotZ_90, upperL_g, lowerR_g);
     // 180 degrees through z-axis
-    faceYM = new HeightMap(iters, rotZ_180, &RParameter, seaHeight);
-    gridYM = new Grid(gridSize, rotZ_180);
+    faceYM = new HeightMap(iters, rotZ_180, upperL, lowerR, &RParameter, seaHeight);
+    gridYM = new Grid(gridSize, rotZ_180, upperL_g, lowerR_g);
     // 270 degrees through z-axis
-    faceXP = new HeightMap(iters, rotZ_270, &RParameter, seaHeight);
-    gridXP = new Grid(gridSize, rotZ_270);
+    faceXP = new HeightMap(iters, rotZ_270, upperL, lowerR, &RParameter, seaHeight);
+    gridXP = new Grid(gridSize, rotZ_270, upperL_g, lowerR_g);
     // 90 degrees through x-axis
-    faceZP = new HeightMap(iters, rotX_90, &RParameter, seaHeight);
-    gridZP = new Grid(gridSize, rotX_90);
+    faceZP = new HeightMap(iters, rotX_90, upperL, lowerR, &RParameter, seaHeight);
+    gridZP = new Grid(gridSize, rotX_90, upperL_g, lowerR_g);
     // 270 degrees through x-axis
-    faceZM = new HeightMap(iters, rotX_270, &RParameter, seaHeight);
-    gridZM = new Grid(gridSize, rotX_270);
+    faceZM = new HeightMap(iters, rotX_270, upperL, lowerR, &RParameter, seaHeight);
+    gridZM = new Grid(gridSize, rotX_270, upperL_g, lowerR_g);
 
     gridYP->setNeighbours(gridXM, gridXP, gridZP, gridZM);
     gridXM->setNeighbours(gridYM, gridYP, gridZP, gridZM);
@@ -829,12 +834,16 @@ unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, M
 		memset(exportImage, 0, width*(width/4*3)*3);
 
 		gSize = width/4;
-		temp[0] = new Grid(gSize, gridYP->getOrientation());
-		temp[1] = new Grid(gSize, gridXM->getOrientation());
-		temp[2] = new Grid(gSize, gridYM->getOrientation());
-		temp[3] = new Grid(gSize, gridXP->getOrientation());
-		temp[4] = new Grid(gSize, gridZP->getOrientation());
-		temp[5] = new Grid(gSize, gridZM->getOrientation());
+        Ogre::Vector2 upperL, lowerR;
+        // Scale window size by half a pixel
+        upperL = Ogre::Vector2(-1.0f+0.5f/(gSize-1), 1.0f-0.5f/(gSize-1));
+        lowerR = Ogre::Vector2(1.0f-0.5f/(gSize-1), -1.0f+0.5f/(gSize-1));
+        temp[3] = new Grid(gSize, gridYP->getOrientation(), upperL, lowerR);
+        temp[2] = new Grid(gSize, gridXM->getOrientation(), upperL, lowerR);
+        temp[1] = new Grid(gSize, gridYM->getOrientation(), upperL, lowerR);
+        temp[0] = new Grid(gSize, gridXP->getOrientation(), upperL, lowerR);
+        temp[5] = new Grid(gSize, gridZP->getOrientation(), upperL, lowerR);
+        temp[4] = new Grid(gSize, gridZM->getOrientation(), upperL, lowerR);
 
 		// 4 equatorial tiles
 		for(i=0; i < 4; i++)
@@ -861,7 +870,7 @@ unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, M
 				}
 			}
 		}
-		// +Z tile
+        // -Z tile
 		for(y=0; y < gSize; y++)
 		{
 			for(x=0; x < gSize; x++)
@@ -878,12 +887,12 @@ unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, M
 							  mountain1st,
 							  mountain2nd);
 
-				exportImage[((gSize*2+y)*width+x)*3] = Output.r;
-				exportImage[((gSize*2+y)*width+x)*3+1] = Output.g;
-				exportImage[((gSize*2+y)*width+x)*3+2] = Output.b;
+                exportImage[((gSize*2+y)*width+x+width-gSize)*3] = Output.r;
+                exportImage[((gSize*2+y)*width+x+width-gSize)*3+1] = Output.g;
+                exportImage[((gSize*2+y)*width+x+width-gSize)*3+2] = Output.b;
 			}
 		}
-		// -Z tile
+        // +Z tile
 		for(y=0; y < gSize; y++)
 		{
 			for(x=0; x < gSize; x++)
@@ -900,9 +909,9 @@ unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, M
 							  mountain1st,
 							  mountain2nd);
 
-				exportImage[((y)*width+x)*3] = Output.r;
-				exportImage[((y)*width+x)*3+1] = Output.g;
-				exportImage[((y)*width+x)*3+2] = Output.b;
+                exportImage[((y)*width+x+width-gSize)*3] = Output.r;
+                exportImage[((y)*width+x+width-gSize)*3+1] = Output.g;
+                exportImage[((y)*width+x+width-gSize)*3+2] = Output.b;
 			}
 		}
 		// Delete temporary grids

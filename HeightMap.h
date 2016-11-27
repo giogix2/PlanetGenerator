@@ -34,6 +34,8 @@ class HeightMap: public Grid
 public:
     HeightMap(unsigned int size,
               const Ogre::Matrix3 face,
+              Ogre::Vector2 UpperLeft,
+              Ogre::Vector2 LowerRight,
               std::ResourceParameter *param,
               Ogre::Real Height_sea);
 	~HeightMap();

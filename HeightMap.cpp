@@ -25,9 +25,11 @@
 
 HeightMap::HeightMap(unsigned int size,
                      const Ogre::Matrix3 face,
+                     Ogre::Vector2 UpperLeft,
+                     Ogre::Vector2 LowerRight,
                      std::ResourceParameter *param,
                      Ogre::Real Height_sea)
-	: Grid(size, face)
+    : Grid(size, face, UpperLeft, LowerRight)
 {
     Ogre::Real maxAmplitude=0;
 
@@ -84,20 +86,9 @@ void HeightMap::setHeight(unsigned int x, unsigned int y, float elevation)
 Ogre::Vector3 HeightMap::projectToSphere(unsigned int x, unsigned int y)
 {
 	Ogre::Vector3 pos;
-	float mSizeFloat, xFloat, yFloat;
 
-	mSizeFloat = static_cast<float>(gridSize-1);
-	xFloat = static_cast<float>(x)/mSizeFloat;
-	yFloat = static_cast<float>(y)/mSizeFloat;
-
-	// For convenience treat xy-heightmap as a xz-plane in sphere-coordinates
-	pos.x = 1.0f - xFloat*2.0f;
-	pos.z = -1.0f + yFloat*2.0f;
-	pos.y = 1.0f;
-	// Simple re-orientation
-	pos = orientation*pos;
-	// project heightMap to sphere
-	pos.normalise();
+    // project heightMap to unit sphere by calling parent-class function
+    pos = Grid::projectToSphere(x, y);
 	/* add height */
 	pos = pos + pos*height[y][x];
 	return pos;
@@ -221,7 +212,18 @@ void HeightMap::createTexture()
     gSize = this->textureResolution;
     squareTexture = new Ogre::uint8[gSize*gSize*3];
 
-    tGrid = new Grid(gSize, this->getOrientation());
+    Ogre::Vector2 upperL, lowerR, edges, sub;
+
+    // Move sample point half a pixel away from edges
+    edges = Ogre::Vector2(0.5f/(gSize-1));
+    // Calculate tile range
+    sub = this->LowerRight - this->UpperLeft;
+    // Scale edges
+    edges = sub*edges;
+    // Add edges to limit the tile by half a pixel
+    upperL = this->UpperLeft + edges;
+    lowerR = this->LowerRight - edges;
+    tGrid = new Grid(gSize, this->getOrientation(), upperL, lowerR);
 
     Ogre::ColourValue water1st, water2nd;
 

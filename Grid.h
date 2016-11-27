@@ -32,7 +32,8 @@ class Grid
 public:
 	enum Grid_neighbour {neighbour_XP, neighbour_XM, neighbour_YP, neighbour_YM};
 
-	Grid(unsigned int size, const Ogre::Matrix3 face);
+    Grid(unsigned int size, const Ogre::Matrix3 face,
+         Ogre::Vector2 UpperLeft, Ogre::Vector2 LowerRight);
 	~Grid();
 	unsigned int getSize();
 	Ogre::Matrix3 getOrientation();
@@ -46,6 +47,8 @@ public:
 protected:
 	unsigned int	gridSize;
 	Ogre::Matrix3	orientation;
+    Ogre::Vector2   UpperLeft;
+    Ogre::Vector2   LowerRight;
 	Grid		*xplusNeighbour;
 	Grid		*xminusNeighbour;
 	Grid		*yplusNeighbour;
