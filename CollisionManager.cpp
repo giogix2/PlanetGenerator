@@ -71,5 +71,7 @@ CheckCollisionAnswer CollisionManager::checkCameraCollision()
 			answer.collidedList.push_back(*iter);
 		}
     }
+    delete spbox;
+
 	return answer;
 }

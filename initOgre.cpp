@@ -194,37 +194,6 @@ void initOgre::setSceneAndRun(PSphere *planet){
 
     }
 
-    // # ################################### PLANET 2 #############################################
-    float waterfraction = 0.6;
-    float radius = 7.5;
-    unsigned int seed = 60;
-    std::string frequencyAmplitude = "1.0 0.02 0.3 0.008 0.1 0.005 0.06666 0.006666";
-    std::vector < std::pair < std::string, int > > meshlocs;
-    std::ResourceParameter *params2;
-    std::ResourceParameter *params3;
-    params2 = new std::ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#32CDFF"
-        ,(std::string)"#64FFFF",(std::string)"#B4B4B4",(std::string)"#FFFFFF",waterfraction,radius,seed,frequencyAmplitude, meshlocs);
-    params3 = new std::ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#c88500"
-        ,(std::string)"#d6c502",(std::string)"#874300",(std::string)"#FFFFFF",0.4, 4.5,70,frequencyAmplitude, meshlocs);
-
-    PSphere *mySphere2;
-    PSphere *mySphere3;
-    mySphere2 = new PSphere(100, 40, *params2);
-    mySphere3 = new PSphere(100, 40, *params3);
-    mySphere2->load(planet->getNode(), Scene, "planet2");
-    mySphere3->load(mySphere2->getNode(), Scene, "planet3");
-
-
-//    planet->attachAstroChild(mySphere2, 40.0f, 0.0f, 0.0f);
-    mySphere2->getNode()->setPosition(40.0f, 0.0f, 0.0f);
-//    mySphere2->attachAstroChild(mySphere3, 20.0f, 0.0f, 0.0f);
-    mySphere3->getNode()->setPosition(20.0f, 0.0f, 0.0f);
-
-	/*planet->attachMeshOnGround(sphere1, Scene, "ram.mesh", "Ramiro", 0.0, 270.0);*/
-//    planet->attachMesh(sphere1, Scene, "asteroid.mesh", "CK7", 0.0, 180.0);
-//    planet->attachMesh(sphere1, Scene, "planet.mesh", "CK7", 0.0, 180.0, 10.0f);
-
-
     /********************************************************************************
      *                   PLANET ORIENTATION, COLLISION MANAGER, FRAME LISTENER
      * ******************************************************************************/
@@ -245,6 +214,7 @@ void initOgre::setSceneAndRun(PSphere *planet){
 void initOgre::cleanup(){
 
 	// Clean up our mess before exiting
+    delete CollisionDetectionManager;
 	Scene->destroySceneNode("DefaultCameraNode");
 	Scene->destroyCamera(Camera);
 	Scene->destroyLight("PointLight");
