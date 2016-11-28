@@ -51,6 +51,19 @@ public:
 
     /* Detach and destroy entity */
     void unload(Ogre::SceneNode *node, Ogre::SceneManager *scene);
+
+    /* Creates 4 children, unless at least one child pointer is already
+     * non-null, which results in not creating any children. */
+    bool createChildren();
+
+    /* Deletes 4 children, unless at least one child pointer is already null,
+     * which results in no children to be deleted. */
+    bool deleteChildren();
+
+    /* Returns pointers to children */
+    void getChildren(HeightMap *&upperLeft, HeightMap *&upperRight,
+                     HeightMap *&lowerLeft, HeightMap *&lowerRight);
+
 private:
     float           **height;
     float           minHeight;
@@ -59,6 +72,8 @@ private:
     Ogre::uint16    textureResolution;
     Ogre::uint8     *squareTexture;
     Ogre::Vector3   randomTranslate;
+
+    HeightMap       *child[4];
 
 	Ogre::Vector3	*vertexes;
 	Ogre::Vector3	*verNorms;

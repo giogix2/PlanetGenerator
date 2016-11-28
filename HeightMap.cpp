@@ -33,6 +33,11 @@ HeightMap::HeightMap(unsigned int size,
 {
     Ogre::Real maxAmplitude=0;
 
+    child[0] = NULL;
+    child[1] = NULL;
+    child[2] = NULL;
+    child[3] = NULL;
+
     RParam = param;
     seaHeight = Height_sea;
     textureResolution = 256;
@@ -433,4 +438,87 @@ void HeightMap::bufferTexture(const std::string &textureName)
     }
 
     pixelBuffer->unlock();
+}
+
+bool HeightMap::createChildren()
+{
+    bool notNull = false;
+
+    /* Check all 4 are null pointers */
+    for(int i=0; i < 4; i++)
+    {
+        if (child[i] != NULL)
+            notNull = true;
+    }
+
+    if (notNull)
+    {
+        std::cerr << "Can't create children heightmaps, at least one non-Null"
+                     "pointer!" << std::endl;
+        return false;
+    }
+    else
+    {
+        Ogre::Vector2 upperL, lowerR;
+
+        upperL = this->UpperLeft;
+        lowerR = upperL + (this->LowerRight-this->UpperLeft)/2.0f;
+        this->child[0] = new HeightMap(this->gridSize, this->orientation, upperL,
+                                       lowerR, this->RParam, this->seaHeight);
+
+        upperL.x += (this->LowerRight.x-this->UpperLeft.x)/2.0f;
+        lowerR.x += (this->LowerRight.x-this->UpperLeft.x)/2.0f;
+        this->child[1] = new HeightMap(this->gridSize, this->orientation, upperL,
+                                       lowerR, this->RParam, this->seaHeight);
+
+        upperL = this->UpperLeft;
+        upperL.y += (this->LowerRight.y-this->UpperLeft.y)/2.0f;
+        lowerR = upperL + (this->LowerRight-this->UpperLeft)/2.0f;
+        this->child[2] = new HeightMap(this->gridSize, this->orientation, upperL,
+                                       lowerR, this->RParam, this->seaHeight);
+
+        upperL.x += (this->LowerRight.x-this->UpperLeft.x)/2.0f;
+        lowerR.x += (this->LowerRight.x-this->UpperLeft.x)/2.0f;
+        this->child[3] = new HeightMap(this->gridSize, this->orientation, upperL,
+                                       lowerR, this->RParam, this->seaHeight);
+    }
+
+    return true;
+}
+
+bool HeightMap::deleteChildren()
+{
+    bool isNull = false;
+
+    /* Check all 4 are non-Null */
+    for(int i=0; i < 4; i++)
+    {
+        if (child[i] == NULL)
+            isNull = true;
+    }
+
+    if (isNull)
+    {
+        std::cerr << "Can't delete children, at least one NULL pointer!"
+                  << std::endl;
+        return false;
+    }
+    else
+    {
+        delete this->child[0];
+        delete this->child[1];
+        delete this->child[2];
+        delete this->child[3];
+    }
+
+    return true;
+}
+
+void HeightMap::getChildren(HeightMap *&upperLeft, HeightMap *&upperRight,
+                            HeightMap *&lowerLeft, HeightMap *&lowerRight)
+{
+    upperLeft  = this->child[0];
+    upperRight = this->child[1];
+    lowerLeft  = this->child[2];
+    lowerRight = this->child[3];
 }
