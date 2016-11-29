@@ -509,6 +509,11 @@ bool HeightMap::deleteChildren()
         delete this->child[1];
         delete this->child[2];
         delete this->child[3];
+
+        this->child[0] = NULL;
+        this->child[1] = NULL;
+        this->child[2] = NULL;
+        this->child[3] = NULL;
     }
 
     return true;
