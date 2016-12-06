@@ -27,7 +27,7 @@ HeightMap::HeightMap(unsigned int size,
                      const Ogre::Matrix3 face,
                      Ogre::Vector2 UpperLeft,
                      Ogre::Vector2 LowerRight,
-                     std::ResourceParameter *param,
+                     ResourceParameter *param,
                      Ogre::Real Height_sea)
     : Grid(size, face, UpperLeft, LowerRight)
 {

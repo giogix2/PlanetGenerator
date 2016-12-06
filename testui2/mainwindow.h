@@ -77,7 +77,7 @@ private:
     Ui::MainWindow *ui;   
     FreqAmpDialog *dialog;
     MeshDialog *meshdialog;
-	std::ResourceParameter *params;
+    ResourceParameter *params;
     PSphere *mySphere;
     initOgre *rendering;
     QGraphicsScene *scene;

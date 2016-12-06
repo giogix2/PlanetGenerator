@@ -28,74 +28,89 @@
 
 #include <string>
 
-namespace std
+class ResourceParameter
 {
-	class ResourceParameter
-	{
-	public:
-		ResourceParameter(void);
-        ResourceParameter(string terrainFirstColor,string terrainSecondColor, string waterFirstColor
-			, string waterSecondColor, string mountainFirstColor, string mountainSecondColor
-            , float waterFraction, float radius, unsigned int seed, string frequencyAmplitude, vector <pair <string, int> > p_meshLocObjAmount);
-		~ResourceParameter(void);
-		void getTerrainFirstColor(unsigned char &red, unsigned char &green, unsigned char &blue);
-		void getTerrainSecondColor(unsigned char &red, unsigned char &green, unsigned char &blue);
-		void getWaterFirstColor(unsigned char &red, unsigned char &green, unsigned char &blue);
-		void getWaterSecondColor(unsigned char &red, unsigned char &green, unsigned char &blue);
-		void getMountainFirstColor(unsigned char &red, unsigned char &green, unsigned char &blue);
-		void getMountainSecondColor(unsigned char &red, unsigned char &green, unsigned char &blue);
-		string getTerrainFirstColor(void);
-		string getTerrainSecondColor(void);
-		string getWaterFirstColor(void);
-		string getWaterSecondColor(void);
-		string getMountainFirstColor(void);
-		string getMountainSecondColor(void);
-		float getWaterFraction(void);
-		float getRadius(void);
-        unsigned int getSeed(void);
-		vector <float>& getFrequency(void);
-		vector <float>& getAmplitude(void);
-		vector<pair <float, float> >& getFrequencyAmplitude(void);
-        vector <string>& getMeshLocations(void);
-        vector <int>& getObjectAmount(void);
-        vector <pair <string, int> >& getMeshLocObjAmount(void);
-		void setTerrainFirstColor(string);
-		void setTerrainSecondColor(string);
-		void setWaterFirstColor(string);
-		void setWaterSecondColor(string);
-		void setMountainFirstColor(string);
-		void setMountainSecondColor(string);
-		void setWaterFraction(float);
-		void setRadius(float);
-        void setSeed(unsigned int);
-		void setFrequencyAmplitude(string NewfrequencyAmplitude, char delimiter);
-		void setFrequencyAmplitude(float p_frequency, float p_amplitude);
-        void setMeshLocation(string p_location);
-        void setObjectAmount(int p_objAmount);
-        void setMeshLocObjAmount(string p_location, int p_objAmount);
-        void emptyFrequencyAmplitude();
-        void emptyMeshLocObjAmount();
-	private:
-		string terrainFirstColor;
-		string terrainSecondColor;
-		string waterFirstColor;
-		string waterSecondColor;
-		string mountainFirstColor;
-		string mountainSecondColor;
-		float waterFraction;
-		float radius;
-        unsigned int seed;
-		vector <float> frequency;
-		vector <float> amplitude;
-		vector <pair <float, float> > frequencyAmplitude;
-		unsigned char hexToBinary(const string& hexNumber);
-		void splitToFrequencyAmplitude(const string& stringToSplit, char delimiter, vector<pair <float, float> >& tempVector);
-        vector <string> meshLocation;
-        vector <int> objectAmount;
-        vector <pair <string, int> > meshLocObjAmount;
-		void setFrequency(float);
-		void setAmplitude(float);
-	};
-}
+public:
+    ResourceParameter(void);
+    ResourceParameter(std::string terrainFirstColor, std::string terrainSecondColor,
+                      std::string waterFirstColor, std::string waterSecondColor,
+                      std::string mountainFirstColor, std::string mountainSecondColor,
+                      float waterFraction, float radius, unsigned int seed,
+                      std::string frequencyAmplitude,
+                      std::vector <std::pair <std::string, int> > p_meshLocObjAmount);
+    ~ResourceParameter(void);
+    void getTerrainFirstColor(unsigned char &red,
+                              unsigned char &green,
+                              unsigned char &blue);
+    void getTerrainSecondColor(unsigned char &red,
+                               unsigned char &green,
+                               unsigned char &blue);
+    void getWaterFirstColor(unsigned char &red,
+                            unsigned char &green,
+                            unsigned char &blue);
+    void getWaterSecondColor(unsigned char &red,
+                             unsigned char &green,
+                             unsigned char &blue);
+    void getMountainFirstColor(unsigned char &red,
+                               unsigned char &green,
+                               unsigned char &blue);
+    void getMountainSecondColor(unsigned char &red,
+                                unsigned char &green,
+                                unsigned char &blue);
+    std::string getTerrainFirstColor(void);
+    std::string getTerrainSecondColor(void);
+    std::string getWaterFirstColor(void);
+    std::string getWaterSecondColor(void);
+    std::string getMountainFirstColor(void);
+    std::string getMountainSecondColor(void);
+    float getWaterFraction(void);
+    float getRadius(void);
+    unsigned int getSeed(void);
+    std::vector <float>& getFrequency(void);
+    std::vector <float>& getAmplitude(void);
+    std::vector<std::pair <float, float> >& getFrequencyAmplitude(void);
+    std::vector <std::string>& getMeshLocations(void);
+    std::vector <int>& getObjectAmount(void);
+    std::vector <std::pair <std::string, int> >& getMeshLocObjAmount(void);
+    void setTerrainFirstColor(std::string);
+    void setTerrainSecondColor(std::string);
+    void setWaterFirstColor(std::string);
+    void setWaterSecondColor(std::string);
+    void setMountainFirstColor(std::string);
+    void setMountainSecondColor(std::string);
+    void setWaterFraction(float);
+    void setRadius(float);
+    void setSeed(unsigned int);
+    void setFrequencyAmplitude(std::string NewfrequencyAmplitude, char delimiter);
+    void setFrequencyAmplitude(float p_frequency, float p_amplitude);
+    void setMeshLocation(std::string p_location);
+    void setObjectAmount(int p_objAmount);
+    void setMeshLocObjAmount(std::string p_location, int p_objAmount);
+    void emptyFrequencyAmplitude();
+    void emptyMeshLocObjAmount();
+private:
+    std::string terrainFirstColor;
+    std::string terrainSecondColor;
+    std::string waterFirstColor;
+    std::string waterSecondColor;
+    std::string mountainFirstColor;
+    std::string mountainSecondColor;
+    float waterFraction;
+    float radius;
+    unsigned int seed;
+    std::vector <float> frequency;
+    std::vector <float> amplitude;
+    std::vector <std::pair <float, float> > frequencyAmplitude;
+    unsigned char hexToBinary(const std::string& hexNumber);
+    void splitToFrequencyAmplitude(const std::string& stringToSplit,
+                                   char delimiter,
+                                   std::vector<std::pair <float, float> >& tempVector);
+    std::vector <std::string> meshLocation;
+    std::vector <int> objectAmount;
+    std::vector <std::pair <std::string, int> > meshLocObjAmount;
+    void setFrequency(float);
+    void setAmplitude(float);
+};
+
 #endif
 

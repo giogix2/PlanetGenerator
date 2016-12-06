@@ -36,7 +36,7 @@ public:
               const Ogre::Matrix3 face,
               Ogre::Vector2 UpperLeft,
               Ogre::Vector2 LowerRight,
-              std::ResourceParameter *param,
+              ResourceParameter *param,
               Ogre::Real Height_sea);
 	~HeightMap();
 	void setHeight(unsigned int x, unsigned int y, float elevation);
@@ -81,7 +81,7 @@ private:
 	Ogre::uint32	*indexes;
 
     Ogre::Entity    *entity;
-    std::ResourceParameter *RParam;
+    ResourceParameter *RParam;
 
 	void calculateNormals();
 

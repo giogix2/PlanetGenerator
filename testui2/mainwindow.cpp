@@ -77,7 +77,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui->lineEdit_2->setText(""+QString::number(waterfraction*100));
     ui->lineEdit_3->setText(""+QString::number(seed));
 
-    params = new std::ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#32CDFF"
+    params = new ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#32CDFF"
         ,(std::string)"#64FFFF",(std::string)"#B4B4B4",(std::string)"#FFFFFF",waterfraction,radius,seed,frequencyAmplitude, meshlocs);
 
     scene = new QGraphicsScene();

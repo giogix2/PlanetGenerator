@@ -36,7 +36,7 @@ bool initTest(PSphere **Sphere,Ogre::Root **Root, Ogre::SceneManager **Scene, Og
     std::vector < std::pair < std::string, int > > meshlocs;
 	meshlocs.push_back(std::make_pair("media/models/ram.mesh", 1));
 	meshlocs.push_back(std::make_pair("media/models/asteroid.mesh", 1));
-	std::ResourceParameter *params = new std::ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#32CDFF"
+    ResourceParameter *params = new ResourceParameter((std::string)"#00FF00",(std::string)"#FACD00",(std::string)"#32CDFF"
         ,(std::string)"#64FFFF",(std::string)"#B4B4B4",(std::string)"#FFFFFF",0.6f,7.5f,60,"1.0 0.02 0.3 0.008 0.1 0.005 0.06666 0.006666", meshlocs);
 
     *Sphere = new PSphere(100, 0, *params);
