@@ -53,6 +53,8 @@ PSphere::PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter re
 
 	exportImage =	NULL;
 	observer =	Ogre::Vector3(0.0f, 0.0f, 0.0f);
+    this->scene =   NULL;
+    this->node =    NULL;
 
 	create(iters, gridSize, resourceParameter);
 }
@@ -116,22 +118,22 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
     calculateSeaLevel(minimumHeight, maximumHeight, waterFraction);
 
     // No rotation
-    faceYP = new HeightMap(iters, noRot, upperL, lowerR, &RParameter, seaHeight);
+    faceYP = new PquadTree("YP", iters, noRot, seaHeight, &RParameter);
     gridYP = new Grid(gridSize, noRot, upperL_g, lowerR_g);
     // 90 degrees through z-axis
-    faceXM = new HeightMap(iters, rotZ_90, upperL, lowerR, &RParameter, seaHeight);
+    faceXM = new PquadTree("XM", iters, rotZ_90, seaHeight, &RParameter);
     gridXM = new Grid(gridSize, rotZ_90, upperL_g, lowerR_g);
     // 180 degrees through z-axis
-    faceYM = new HeightMap(iters, rotZ_180, upperL, lowerR, &RParameter, seaHeight);
+    faceYM = new PquadTree("YM", iters, rotZ_180, seaHeight, &RParameter);
     gridYM = new Grid(gridSize, rotZ_180, upperL_g, lowerR_g);
     // 270 degrees through z-axis
-    faceXP = new HeightMap(iters, rotZ_270, upperL, lowerR, &RParameter, seaHeight);
+    faceXP = new PquadTree("XP", iters, rotZ_270, seaHeight, &RParameter);
     gridXP = new Grid(gridSize, rotZ_270, upperL_g, lowerR_g);
     // 90 degrees through x-axis
-    faceZP = new HeightMap(iters, rotX_90, upperL, lowerR, &RParameter, seaHeight);
+    faceZP = new PquadTree("ZP", iters, rotX_90, seaHeight, &RParameter);
     gridZP = new Grid(gridSize, rotX_90, upperL_g, lowerR_g);
     // 270 degrees through x-axis
-    faceZM = new HeightMap(iters, rotX_270, upperL, lowerR, &RParameter, seaHeight);
+    faceZM = new PquadTree("ZM", iters, rotX_270, seaHeight, &RParameter);
     gridZM = new Grid(gridSize, rotX_270, upperL_g, lowerR_g);
 
     gridYP->setNeighbours(gridXM, gridXP, gridZP, gridZM);
@@ -302,7 +304,21 @@ void PSphere::setGridLandInfo(Grid *grid)
 
 void PSphere::setObserverPosition(Ogre::Vector3 position)
 {
-	observer = position;
+    /* Avoid updating before scene is set */
+    if ( (this->scene != NULL) && (this->node != NULL) )
+    {
+        /* Convert to model coordinates */
+        this->observer = this->node->convertWorldToLocalPosition(position);
+
+        faceYP->update(this->observer);
+        faceXM->update(this->observer);
+        faceYM->update(this->observer);
+        faceXP->update(this->observer);
+        faceZP->update(this->observer);
+        faceZM->update(this->observer);
+    }
+    else
+        this->observer = position;
 }
 
 Ogre::Real PSphere::getObserverDistanceToSurface()
@@ -368,24 +384,18 @@ PSphere* PSphere::getAstroChild(const std::string &objectName)
 void PSphere::load(Ogre::SceneNode *parent, Ogre::SceneManager *scene, const std::string &planetName)
 {
     this->node = parent->createChildSceneNode(planetName);
+    this->scene = scene;
 
-    faceYP->load(this->node, scene, planetName+"_YP", radius);
-    faceXM->load(this->node, scene, planetName+"_XM", radius);
-    faceYM->load(this->node, scene, planetName+"_YM", radius);
-    faceXP->load(this->node, scene, planetName+"_XP", radius);
-    faceZP->load(this->node, scene, planetName+"_ZP", radius);
-    faceZM->load(this->node, scene, planetName+"_ZM", radius);
+    faceYP->setScene(scene, node);
+    faceXM->setScene(scene, node);
+    faceYM->setScene(scene, node);
+    faceXP->setScene(scene, node);
+    faceZP->setScene(scene, node);
+    faceZM->setScene(scene, node);
 }
 
 void PSphere::unload(Ogre::SceneManager *scene)
 {
-    faceYP->unload(this->node, scene);
-    faceXM->unload(this->node, scene);
-    faceYM->unload(this->node, scene);
-    faceXP->unload(this->node, scene);
-    faceZP->unload(this->node, scene);
-    faceZM->unload(this->node, scene);
-
     scene->destroySceneNode(this->node);
 }
 

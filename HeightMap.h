@@ -64,6 +64,11 @@ public:
     void getChildren(HeightMap *&upperLeft, HeightMap *&upperRight,
                      HeightMap *&lowerLeft, HeightMap *&lowerRight);
 
+    HeightMap *getChild(unsigned char child);
+
+    Ogre::Vector3 getCenterPosition();
+
+    bool isLoaded();
 private:
     float           **height;
     float           minHeight;
