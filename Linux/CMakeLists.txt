@@ -90,6 +90,7 @@ set(HDRS
     ../initOgre.h
     ../Grid.h
     ../HeightMap.h
+    ../PquadTree.h
     ../CollisionManager.h
     ../Common.h
     ../ResourceParameter.h
@@ -108,6 +109,7 @@ set(SRCS
     ../main.cpp
     ../Grid.cpp
     ../HeightMap.cpp
+    ../PquadTree.cpp
     ../CollisionManager.cpp
     ../Common.cpp
     ../ResourceParameter.cpp

@@ -20,6 +20,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE. */
 
+#include <assert.h>
 #include "HeightMap.h"
 #include "Common.h"
 
@@ -40,7 +41,8 @@ HeightMap::HeightMap(unsigned int size,
 
     RParam = param;
     seaHeight = Height_sea;
-    textureResolution = 256;
+    textureResolution = 128;
+    this->entity = NULL;
 
 	height = allocate2DArray<float>(size, size);
 	memset(height[0], 0, sizeof(float)*size*size);
@@ -323,6 +325,7 @@ void HeightMap::unload(Ogre::SceneNode *node, Ogre::SceneManager *scene)
 {
     node->detachObject(this->entity->getName());
     scene->destroyEntity(this->entity->getName());
+    this->entity = NULL;
 }
 
 void HeightMap::bufferMesh(const std::string &meshName, float scalingFactor)
@@ -526,4 +529,29 @@ void HeightMap::getChildren(HeightMap *&upperLeft, HeightMap *&upperRight,
     upperRight = this->child[1];
     lowerLeft  = this->child[2];
     lowerRight = this->child[3];
+}
+
+HeightMap *HeightMap::getChild(unsigned char child)
+{
+    assert(child < 4);
+    return this->child[child];
+}
+
+Ogre::Vector3 HeightMap::getCenterPosition()
+{
+    Ogre::Vector2 tileCenter;
+    Ogre::Vector3 pos;
+
+    tileCenter = (this->UpperLeft + this->LowerRight)/2.0f;
+    pos = Ogre::Vector3(tileCenter.x, 1.0f, tileCenter.y).normalisedCopy();
+
+    return this->orientation*pos*RParam->getRadius();
+}
+
+bool HeightMap::isLoaded()
+{
+    if (this->entity != NULL)
+        return true;
+    else
+        return false;
 }

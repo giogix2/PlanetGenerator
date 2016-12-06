@@ -28,6 +28,8 @@
 #include "HeightMap.h"
 #include "ResourceParameter.h"
 #include "CollisionManager.h"
+#include "PquadTree.h"
+
 using namespace std;
 
 
@@ -132,14 +134,15 @@ private:
 	Ogre::Real			radius;
 	Ogre::Real			seaHeight;
     Ogre::SceneNode     *node;
+    Ogre::SceneManager  *scene;
 	unsigned char		*exportImage;
 	Ogre::Vector3		observer;
-	HeightMap			*faceYP;
-	HeightMap			*faceXM;
-	HeightMap			*faceYM;
-	HeightMap			*faceXP;
-	HeightMap			*faceZP;
-	HeightMap			*faceZM;
+    PquadTree           *faceYP;
+    PquadTree           *faceXM;
+    PquadTree           *faceYM;
+    PquadTree           *faceXP;
+    PquadTree           *faceZP;
+    PquadTree           *faceZM;
 	Grid			*gridYP;
 	Grid			*gridXM;
 	Grid			*gridYM;
