@@ -31,7 +31,7 @@ class PquadTree
 public:
     PquadTree(const std::string name, Ogre::uint16 levelSize,
               Ogre::Matrix3 orientation, Ogre::Real seaHeight,
-              std::ResourceParameter *parameters);
+              ResourceParameter *parameters);
     ~PquadTree();
 
     /* Set viewer position and render face accordingly. */
@@ -44,7 +44,7 @@ private:
     std::string             name;
     Ogre::SceneManager      *scene;
     Ogre::SceneNode         *scNode;
-    std::ResourceParameter  *params;
+    ResourceParameter       *params;
     Ogre::uint32            runningNumber;
 
     /* Recursively subdivide face. Three states: match, subdivide, leaf reached. */

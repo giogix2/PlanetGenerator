@@ -25,7 +25,7 @@
 
 PquadTree::PquadTree(const std::string name, Ogre::uint16 levelSize,
                      Ogre::Matrix3 orientation, Ogre::Real seaHeight,
-                     std::ResourceParameter *parameters)
+                     ResourceParameter *parameters)
 {
     Ogre::Vector2 upperLeft, lowerRight;
     
