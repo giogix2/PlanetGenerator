@@ -99,6 +99,9 @@ private:
     /* Creates square bitmap to be used as a texture */
     void createTexture();
 
+    /* Calculate AABox for HeightMap mesh */
+    Ogre::AxisAlignedBox tileAABox(void);
+
     /* Creates and fills hardware-buffer with vertex-data */
     void bufferMesh(const std::string &meshName, float scalingFactor);
 
