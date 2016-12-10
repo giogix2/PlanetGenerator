@@ -330,48 +330,57 @@ void HeightMap::unload(Ogre::SceneNode *node, Ogre::SceneManager *scene)
 
 Ogre::AxisAlignedBox HeightMap::tileAABox(void)
 {
-    Ogre::Vector3 corner[8], max, min;
+    Ogre::Vector3 corner[9], max, min;
 
     // Upper left with positive height
     corner[0].x = this->UpperLeft.x;
-    corner[0].y = this->maxHeight;
+    corner[0].y = this->maxHeight+1.0f;
     corner[0].z = this->UpperLeft.y;
     //Upper left with minimum height
     corner[1].x = this->UpperLeft.x;
-    corner[1].y = this->minHeight;
+    corner[1].y = this->minHeight+1.0f;
     corner[1].z = this->UpperLeft.y;
     // Upper right
     corner[2].x = this->LowerRight.x;
-    corner[2].y = this->maxHeight;
+    corner[2].y = this->maxHeight+1.0f;
     corner[2].z = this->UpperLeft.y;
 
     corner[3].x = this->LowerRight.x;
-    corner[3].y = this->minHeight;
+    corner[3].y = this->minHeight+1.0f;
     corner[3].z = this->UpperLeft.y;
     // Lower left
     corner[4].x = this->UpperLeft.x;
-    corner[4].y = this->maxHeight;
+    corner[4].y = this->maxHeight+1.0f;
     corner[4].z = this->LowerRight.y;
 
     corner[5].x = this->UpperLeft.x;
-    corner[5].y = this->minHeight;
+    corner[5].y = this->minHeight+1.0f;
     corner[5].z = this->LowerRight.y;
     // Lower right
     corner[6].x = this->LowerRight.x;
-    corner[6].y = this->maxHeight;
+    corner[6].y = this->maxHeight+1.0f;
     corner[6].z = this->LowerRight.y;
 
     corner[7].x = this->LowerRight.x;
-    corner[7].y = this->minHeight;
+    corner[7].y = this->minHeight+1.0f;
     corner[7].z = this->LowerRight.y;
 
+    /* Tile center protrudes considerably (especially with full face), so add
+     * it as one of the corners. */
+    corner[8].x = (this->UpperLeft.x + this->LowerRight.x)/2.0f;
+    corner[8].y = this->maxHeight+1.0f;
+    corner[8].z = (this->UpperLeft.y + this->LowerRight.y)/2.0f;
+
     // Rotate and scale
-    for(int i=0; i < 8; i++)
+    for(int i=0; i < 9; i++)
+    {
+        corner[i].normalise();
         corner[i] = this->orientation*corner[i]*RParam->getRadius();
+    }
 
     max = corner[0];
     min = corner[0];
-    for(int i=1; i < 8; i++)
+    for(int i=1; i < 9; i++)
     {
         max.makeCeil(corner[i]);
         min.makeFloor(corner[i]);
@@ -452,7 +461,6 @@ void HeightMap::bufferMesh(const std::string &meshName, float scalingFactor)
     subMesh->indexData->indexStart = 0;
 
     mesh->_setBounds(tileAABox());
-    mesh->_setBoundingSphereRadius(scalingFactor);
 
     mesh->load();
 }
