@@ -67,8 +67,6 @@ public:
     Two node are put between the actual planet and the astrological object*/
     void attachAstroChild(PSphere *object, Ogre::Real x, Ogre::Real y, Ogre::Real z);
 
-    void setNode(Ogre::SceneNode *node);
-
     Ogre::SceneNode* getNode();
 
     void moveObject(const std::string &objectName, int direction, float pace);
@@ -131,11 +129,9 @@ public:
 	~PSphere();
 
 private:
-	Ogre::Real			radius;
 	Ogre::Real			seaHeight;
     Ogre::SceneNode     *node;
     Ogre::SceneManager  *scene;
-	unsigned char		*exportImage;
 	Ogre::Vector3		observer;
     PquadTree           *faceYP;
     PquadTree           *faceXM;
@@ -157,8 +153,6 @@ private:
 	CollisionManager	*CollisionDetectionManager;
 	Ogre::Real			maximumHeight;
 	Ogre::Real			minimumHeight;
-    string              meshName[6];
-    string              textureName[6];
 
     // Makes a sphere out of a cube that is made of 6 squares
 	void create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter);

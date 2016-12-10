@@ -307,9 +307,9 @@ void MainWindow::on_pushButton_11_clicked()
 	QImage image = QImage(array, width, height, QImage::Format_RGB888);
 	image = image.mirrored();
 
-
 	scene->addPixmap(QPixmap::fromImage(image));
 
+    delete[] array;
 	delete mySphere;
 	ui->graphicsView->setScene(scene);
 

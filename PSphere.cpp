@@ -34,7 +34,7 @@
 #include "OgreConfigFile.h"
 #include "Common.h"
 #include "ResourceParameter.h"
-#include <qdebug.h>
+
 #define FREEIMAGE_LIB
 #include "FreeImage.h"
 #include <assert.h>
@@ -51,7 +51,6 @@ using namespace std;
 
 PSphere::PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter resourceParameter){
 
-	exportImage =	NULL;
 	observer =	Ogre::Vector3(0.0f, 0.0f, 0.0f);
     this->scene =   NULL;
     this->node =    NULL;
@@ -61,8 +60,6 @@ PSphere::PSphere(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParameter re
 
 PSphere::~PSphere()
 {
-    delete[] exportImage;
-
     delete faceXM;
     delete faceXP;
     delete faceYM;
@@ -82,7 +79,6 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
 {
     RParameter = resourceParameter;
     float waterFraction = resourceParameter.getWaterFraction();
-    radius = resourceParameter.getRadius();
 
     // Iters less than 3 are pointless
     if(iters < 3)
@@ -323,50 +319,31 @@ void PSphere::setObserverPosition(Ogre::Vector3 position)
 
 Ogre::Real PSphere::getObserverDistanceToSurface()
 {
-	Ogre::Real height;
-	Ogre::Vector3 direction, surfacePos;
-	Ogre::Real distance;
-
-	// Hardcode these values for now, waiting for parameter class.
-	vector <float> frequency = RParameter.getFrequency();
-	vector <float> amplitude = RParameter.getAmplitude();
-
-	// normal vector that points from the origo to the observer
-	direction = observer.normalisedCopy();
-	/* Get position of the surface along the line that goes from
-	 * the planet origo to the observer */
-	height = heightNoise(amplitude, frequency, direction + randomTranslate);
-	surfacePos = direction*(height*radius + radius);
-
-	distance = fabsf(observer.length()) - fabsf(surfacePos.length());
-
-	return distance;
+    return observer.length() - getSurfaceHeight(this->observer);
 }
 
 Ogre::Real PSphere::getSurfaceHeight(Ogre::Vector3 Position)
 {
-	Ogre::Real height;
+    Ogre::Real height, radius;
 	Ogre::Vector3 direction, surfacePos;
 
-	// Hardcode these values for now, waiting for parameter class.
 	vector <float> frequency = RParameter.getFrequency();
 	vector <float> amplitude = RParameter.getAmplitude();
+    radius = this->RParameter.getRadius();
 
-	// normal vector that points from the origo to the observer
+    // normal vector that points from the origo to a given position
 	direction = Position.normalisedCopy();
 	/* Get position of the surface along the line that goes from
-	 * the planet origo to the observer */
+     * the planet origo to a given position */
 	height = heightNoise(amplitude, frequency, direction + randomTranslate);
 	surfacePos = direction*(height*radius + radius);
-
-	//distance = fabsf(observer.length()) - fabsf(surfacePos.length());
 
 	return surfacePos.length();
 }
 
 Ogre::Real PSphere::getRadius()
 {
-	return radius;
+    return this->RParameter.getRadius();
 }
 
 PSphere* PSphere::getAstroChild(const std::string &objectName)
@@ -487,7 +464,7 @@ void PSphere::attachMeshSphereCoord(Ogre::SceneNode *node, Ogre::SceneManager *s
 
 void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude, Ogre::Real dist) {
     if (dist == 0.0f)
-        dist = radius;
+        dist = this->RParameter.getRadius();
     Ogre::Vector3 cart_coord = convertSphericalToCartesian(latitude, longitude);
     Ogre::Real x = dist*2*cart_coord.x;
     Ogre::Real y = dist*2*cart_coord.y;
@@ -497,6 +474,7 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 }
 
 void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, Ogre::Real latitude, Ogre::Real longitude, Ogre::Real dist) {
+    Ogre::Real radius = this->RParameter.getRadius();
     if (dist == 0.0f)
         dist = radius;
     Ogre::Vector3 cart_coord = convertSphericalToCartesian(latitude, longitude);
@@ -509,6 +487,7 @@ void PSphere::attachMesh(Ogre::SceneNode *node, Ogre::SceneManager *scene, const
 
 void PSphere::attachMeshOnGround(Ogre::SceneNode *node, Ogre::SceneManager *scene, const std::string &meshName, const std::string &objectName, Ogre::Real latitude, Ogre::Real longitude) {
 	Ogre::Vector3 cart_coord = convertSphericalToCartesian(latitude, longitude);
+    Ogre::Real radius = this->RParameter.getRadius();
 	Ogre::Real x = radius*cart_coord.x;
 	Ogre::Real y = radius*cart_coord.y;
 	Ogre::Real z = radius*cart_coord.z;
@@ -571,11 +550,6 @@ void PSphere::attachAstroChild(PSphere *object, Ogre::Real x, Ogre::Real y, Ogre
 //    nodeAstroChild->attachObject(entity);
 //    object->setNode(nodeAstroChild);
 //    nodeAstroChild->setPosition(x, y, z);
-}
-
-void PSphere::setNode(Ogre::SceneNode *node)
-{
-    this->node = node;
 }
 
 Ogre::SceneNode* PSphere::getNode()
@@ -786,9 +760,7 @@ void PSphere::setCollisionManager(CollisionManager	*CDM)
 
 unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, MapType type) {
 
-	// Check if exportImage is already allocated
-	if (exportImage != NULL)
-		delete[] exportImage;
+    unsigned char *exportImage;
 
 	if (type == MAP_EQUIRECTANGULAR)
 	{
@@ -942,10 +914,10 @@ unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, M
 
 bool PSphere::exportMap(unsigned short width, unsigned short height, std::string fileName, MapType type) {
 	RGBQUAD color;
+    unsigned char *exportImage;
 
-	/* Create map to memory location pointed by exportImage.
-	 * It is class private variable. */
-	exportMap(width, height, type);
+	/* Create map to memory location pointed by exportImage. */
+    exportImage = exportMap(width, height, type);
 
 	if (exportImage == NULL)
 	{
@@ -979,6 +951,8 @@ bool PSphere::exportMap(unsigned short width, unsigned short height, std::string
 	}
 	FreeImage_Unload(bitmap);
 	FreeImage_DeInitialise();
+
+    delete[] exportImage;
 
 	return true;
 }
