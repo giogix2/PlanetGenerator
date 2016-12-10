@@ -20,15 +20,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE. */
 
-
-
 #include <iostream>
 #include <exception>
 
 #include "initOgre.h"
 #include "PSphere.h"
 #include "Common.h"
-#include "Test.h"
 #include "testui2/mainwindow.h"
 #include <QApplication>
 #include "ResourceParameter.h"
@@ -43,73 +40,23 @@ using namespace std;
 #include "windows.h"
 #endif
 
-
 int main(int argc, char *argv[])
 {
-	if(argc==1) //no arguments, run planet generator
-	{
-		unsigned int fontSize;
-		//#pragma comment( linker, "/subsystem:windows" )
-		QApplication a(argc, argv);
-		MainWindow w;
+    unsigned int fontSize;
+    QApplication a(argc, argv);
+    MainWindow w;
 
-		// Calculate fontsize. size 8 is for dpi 96
-		fontSize = 8;
-		qDebug() << "DPI is:" << w.logicalDpiX() << w.logicalDpiY();
-		fontSize = (unsigned int)((((float)fontSize+0.25f) * (96.0f / w.logicalDpiY()))+0.5f);
-		qDebug() << "Setting fontsize to:" << fontSize;
-		
-		QFont font("Arial", fontSize);
-		a.setFont(font);
+    // Calculate fontsize. size 8 is for dpi 96
+    fontSize = 8;
+    qDebug() << "DPI is:" << w.logicalDpiX() << w.logicalDpiY();
+    fontSize = (unsigned int)((((float)fontSize+0.25f) * (96.0f / w.logicalDpiY()))+0.5f);
+    qDebug() << "Setting fontsize to:" << fontSize;
 
-		w.show();
-		a.exec();
-	}else if(argc==2 && (std::strcmp(argv[1],"t")==0) )
-	{
-#ifdef linux
+    QFont font("Arial", fontSize);
+    a.setFont(font);
 
-		cout<<"  linux OS!"<<endl;
+    w.show();
+    a.exec();
 
-#endif
-#ifdef __WINDOWS_
-
-		AllocConsole();
-		HANDLE handle_out = GetStdHandle(STD_OUTPUT_HANDLE);
-		int hCrt = _open_osfhandle((long) handle_out, _O_TEXT);
-		FILE* hf_out = _fdopen(hCrt, "w");
-		setvbuf(hf_out, NULL, _IONBF, 1);
-		*stdout = *hf_out;
-
-		HANDLE handle_in = GetStdHandle(STD_INPUT_HANDLE);
-		hCrt = _open_osfhandle((long) handle_in, _O_TEXT);
-		FILE* hf_in = _fdopen(hCrt, "r");
-		setvbuf(hf_in, NULL, _IONBF, 128);
-		*stdin = *hf_in;
-		cout<<"  Windows OS!  "<<endl;
-
-#endif
-#ifdef _WIN32
-		AllocConsole();
-		HANDLE handle_out = GetStdHandle(STD_OUTPUT_HANDLE);
-		int hCrt = _open_osfhandle((long) handle_out, _O_TEXT);
-		FILE* hf_out = _fdopen(hCrt, "w");
-		setvbuf(hf_out, NULL, _IONBF, 1);
-		*stdout = *hf_out;
-
-		HANDLE handle_in = GetStdHandle(STD_INPUT_HANDLE);
-		hCrt = _open_osfhandle((long) handle_in, _O_TEXT);
-		FILE* hf_in = _fdopen(hCrt, "r");
-		setvbuf(hf_in, NULL, _IONBF, 128);
-		*stdin = *hf_in;
-		cout<<"  WIN32 OS!  "<<endl;
-#endif
-		
-
-		cout << "Testing Mode" << endl;
-		testAll();
-		cout << "Test Ended. Press Enter to exit." << endl;
-		cin.get();
-	}
-
-	return 0;
+    return 0;
 }
