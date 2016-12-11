@@ -23,6 +23,8 @@
 #include <sstream>
 #include "PquadTree.h"
 
+#define MAX_LEVEL 6
+
 PquadTree::PquadTree(const std::string name, Ogre::uint16 levelSize,
                      Ogre::Matrix3 orientation, Ogre::Real seaHeight,
                      ResourceParameter *parameters)
@@ -38,29 +40,6 @@ PquadTree::PquadTree(const std::string name, Ogre::uint16 levelSize,
 
     this->root = new HeightMap(levelSize, orientation, upperLeft, lowerRight,
                                parameters, seaHeight);
-
-    std::vector <HeightMap *> childQueue;
-    HeightMap *child[4];
-    Ogre::uint8 level = 0;
-
-    /* Create full static quadtree up to level 4 for leaf-nodes. Breadth-first. */
-    childQueue.push_back(this->root);
-    while(level < 4)
-    {
-        int i = childQueue.size() - static_cast<int>(Ogre::Math::Pow(4, level));
-        int iters = childQueue.size();
-        for(; i < iters; i++)
-        {
-            childQueue[i]->createChildren();
-            childQueue[i]->getChildren(child[0], child[1], child[2], child[3]);
-            childQueue.push_back(child[0]);
-            childQueue.push_back(child[1]);
-            childQueue.push_back(child[2]);
-            childQueue.push_back(child[3]);
-
-        }
-        level++;
-    }
 }
 
 PquadTree::~PquadTree()
@@ -139,11 +118,12 @@ void PquadTree::recursiveTest(HeightMap *node, Ogre::Vector3 viewer,
                     if (node->getChild(i)->isLoaded() == true)
                         node->getChild(i)->unload(scNode, scene);
                 }
+                node->deleteChildren();
             }
         }
     }
     /* Sub-divide. */
-    else if (node->getChild(0) != NULL)
+    else if (level < MAX_LEVEL)
     {
         if (node->isLoaded() == true)
             node->unload(scNode, scene);
@@ -151,13 +131,18 @@ void PquadTree::recursiveTest(HeightMap *node, Ogre::Vector3 viewer,
         distanceTest /= 2.0f;
 
         level++;
+
+        /* Create children if not done in previous frame */
+        if (node->getChild(0) == NULL)
+            node->createChildren();
+
         for(int i=0; i < 4; i++)
         {
             recursiveTest(node->getChild(i), viewer, distanceTest, level);
 
         }
     }
-    /* Leaf reached. */
+    /* MAX_LEVEL reached. */
     else
     {
         if (node->isLoaded() == false)
