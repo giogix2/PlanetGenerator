@@ -324,6 +324,16 @@ void HeightMap::load(Ogre::SceneNode *node, Ogre::SceneManager *scene,
 void HeightMap::unload(Ogre::SceneNode *node, Ogre::SceneManager *scene)
 {
     node->detachObject(this->entity->getName());
+
+    std::string mshName = this->entity->getMesh()->getName();
+    std::string texName = this->entity->getName() + "_texture";
+    std::string matName = this->entity->getName() + "_material";
+
+    // Unload and remove material, texture and mesh.
+    Ogre::MaterialManager::getSingleton().remove(matName);
+    Ogre::TextureManager::getSingleton().remove(texName);
+    Ogre::MeshManager::getSingleton().remove(mshName);
+
     scene->destroyEntity(this->entity->getName());
     this->entity = NULL;
 }
