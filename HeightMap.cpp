@@ -43,9 +43,7 @@ HeightMap::HeightMap(unsigned int size,
     seaHeight = Height_sea;
     textureResolution = 128;
     this->entity = NULL;
-
-	height = allocate2DArray<float>(size, size);
-	memset(height[0], 0, sizeof(float)*size*size);
+    this->height = NULL;
 
     /* Calculate minimum and maximum possible height assuming noise
      * range between -1 - +1 */
@@ -57,31 +55,26 @@ HeightMap::HeightMap(unsigned int size,
     minHeight = -maxAmplitude;
     maxHeight = +maxAmplitude;
 
-	vertexes = new Ogre::Vector3[gridSize*gridSize];
-	verNorms = new Ogre::Vector3[gridSize*gridSize];
-	txCoords = new Ogre::Vector2[gridSize*gridSize];
-	indexes = new Ogre::uint32[(gridSize-1)*(gridSize-1)*6];
-
     /* Re-create randomTranslate using seed. Avoids passing it as a costructor
      * parameter. */
     srand(RParam->getSeed());
     randomTranslate.x = (float)((rand() % 1000)-500)/100.0f;
     randomTranslate.y = (float)((rand() % 1000)-500)/100.0f;
     randomTranslate.z = (float)((rand() % 1000)-500)/100.0f;
-
-    createGeometry();
-    createTexture();
 }
 
 HeightMap::~HeightMap()
 {
-	free2DArray(height);
+    if (this->height != NULL)
+    {
+        free2DArray(height);
 
-	delete[] vertexes;
-	delete[] verNorms;
-	delete[] txCoords;
-	delete[] indexes;
-    delete[] squareTexture;
+        delete[] vertexes;
+        delete[] verNorms;
+        delete[] txCoords;
+        delete[] indexes;
+        delete[] squareTexture;
+    }
 }
 
 void HeightMap::setHeight(unsigned int x, unsigned int y, float elevation)
@@ -200,7 +193,8 @@ void HeightMap::createGeometry()
     {
         for(x=0; x < gSize; x++)
         {
-            spherePos = this->projectToSphere(x, y);
+            /* SpherePos is a point on a smooth sphere */
+            spherePos = Grid::projectToSphere(x, y);
             elev = heightNoise(RParam->getAmplitude(), RParam->getFrequency(),
                                spherePos+this->randomTranslate);
             this->setHeight(x, y, elev);
@@ -299,8 +293,23 @@ void HeightMap::load(Ogre::SceneNode *node, Ogre::SceneManager *scene,
     const std::string matName = Name + "_material";
     std::string defGrpName = Ogre::ResourceGroupManager::DEFAULT_RESOURCE_GROUP_NAME;
 
-    generateMeshData(scalingFactor);
-    bufferMesh(meshName, scalingFactor);
+    /* Do allocation and geometry only when calling load, and remember data is
+     * already there in subsequent loads. */
+    if (this->height == NULL)
+    {
+        height = allocate2DArray<float>(this->gridSize, this->gridSize);
+        vertexes = new Ogre::Vector3[gridSize*gridSize];
+        verNorms = new Ogre::Vector3[gridSize*gridSize];
+        txCoords = new Ogre::Vector2[gridSize*gridSize];
+        indexes = new Ogre::uint32[(gridSize-1)*(gridSize-1)*6];
+
+        createGeometry();
+        createTexture();
+
+        generateMeshData(scalingFactor);
+    }
+
+    bufferMesh(meshName);
     bufferTexture(textureName);
 
     this->entity = scene->createEntity(Name, meshName);
@@ -399,7 +408,7 @@ Ogre::AxisAlignedBox HeightMap::tileAABox(void)
     return Ogre::AxisAlignedBox(min, max);
 }
 
-void HeightMap::bufferMesh(const std::string &meshName, float scalingFactor)
+void HeightMap::bufferMesh(const std::string &meshName)
 {
     Ogre::uint32 i, gSize = this->gridSize;
     Ogre::MeshPtr mesh;

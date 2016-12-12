@@ -103,7 +103,7 @@ private:
     Ogre::AxisAlignedBox tileAABox(void);
 
     /* Creates and fills hardware-buffer with vertex-data */
-    void bufferMesh(const std::string &meshName, float scalingFactor);
+    void bufferMesh(const std::string &meshName);
 
     /* Creates and fills hardware-buffer with texture-data */
     void bufferTexture(const std::string &textureName);
