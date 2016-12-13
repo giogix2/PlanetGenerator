@@ -30,6 +30,7 @@ PquadTree::PquadTree(const std::string name, Ogre::uint16 levelSize,
                      ResourceParameter *parameters)
 {
     Ogre::Vector2 upperLeft, lowerRight;
+    Ogre::Real angle, diff;
     
     this->name = name;
     this->params = parameters;
@@ -40,6 +41,21 @@ PquadTree::PquadTree(const std::string name, Ogre::uint16 levelSize,
 
     this->root = new HeightMap(levelSize, orientation, upperLeft, lowerRight,
                                parameters, seaHeight);
+
+    // Scaling factor for corners
+    this->cornerScaling = (this->params->getRadius() - this->root->getAmplitude())
+                          / this->params->getRadius();
+
+    /* Calculates comparison value for determining HeightMap visibility.
+     * Assumes horizon as a lowest plain which has highest possible feature as
+     * background. First calculates angle from horizon to feature which is enough
+     * to hide feature behind horizon. Then adds Pi/2 which is horizons
+     * (or rather its normals) angle to the viewer. Finally, converts it to be
+     * used as a comparator against dot product calculation. */
+    diff = (parameters->getRadius() - this->root->getAmplitude())
+            /(parameters->getRadius() + this->root->getAmplitude());
+    angle = Ogre::Math::ACos(diff).valueRadians();
+    this->dotCutoff = Ogre::Math::Cos(angle+Ogre::Math::HALF_PI);
 }
 
 PquadTree::~PquadTree()
@@ -82,8 +98,8 @@ PquadTree::~PquadTree()
 void PquadTree::recursiveTest(HeightMap *node, Ogre::Vector3 viewer,
                               float distanceTest, Ogre::uint16 level)
 {
-    Ogre::Vector3 distTocenter;
-    float distance;
+    Ogre::Vector3 dist, corner[4];
+    float distance, dProd, smallestAngle;
     std::stringstream levelSS, runningSS;
     std::string hName, ss_str;
 
@@ -98,56 +114,79 @@ void PquadTree::recursiveTest(HeightMap *node, Ogre::Vector3 viewer,
 
     this->runningNumber++;
 
-    distTocenter = node->getCenterPosition() - viewer;
-    distance = distTocenter.length();
+    dist = node->getCenterPosition() - viewer;
+    distance = dist.length();
 
-    /* If distance is bigger than test, render tile. */
-    if (distance > distanceTest )
+    node->getCornerPosition(corner[0], corner[1], corner[2], corner[3]);
+
+    // Find corner with least tilt away from the viewer
+    smallestAngle = -1.0f;
+    for(int i=0; i < 4; i++)
     {
-        if (node->isLoaded() == false)
-        {
-            node->load(this->scNode, this->scene, hName, params->getRadius());
+        // Scale corner to minimum height
+        corner[i] *= this->cornerScaling;
 
-            /* FIXME: Assumes checking one level up is enough, but might not be
-             * in every case, e.g. camera backing off quicly. */
-            if (node->getChild(0) != NULL)
+        dist = viewer - corner[i];
+        corner[i].normalise();
+        dist.normalise();
+        dProd = dist.dotProduct(corner[i]);
+        if (smallestAngle < dProd)
+            smallestAngle = dProd;
+    }
+
+    /* If HeightMap is not visible, just return. */
+    if (this->dotCutoff < smallestAngle)
+    {
+        /* If distance is bigger than test, render tile. */
+        if (distance > distanceTest)
+        {
+
+            if (node->isLoaded() == false)
             {
-                for(int i=0; i < 4; i++)
+                node->load(this->scNode, this->scene, hName, params->getRadius());
+
+                /* FIXME: Assumes checking one level up is enough, but might not be
+                 * in every case, e.g. camera backing off quicly. */
+                if (node->getChild(0) != NULL)
                 {
-                    /* Unload child-tiles, if previously loaded. */
-                    if (node->getChild(i)->isLoaded() == true)
-                        node->getChild(i)->unload(scNode, scene);
+                    for(int i=0; i < 4; i++)
+                    {
+                        /* Unload child-tiles, if previously loaded. */
+                        if (node->getChild(i)->isLoaded() == true)
+                            node->getChild(i)->unload(scNode, scene);
+                    }
+                    node->deleteChildren();
                 }
-                node->deleteChildren();
             }
         }
-    }
-    /* Sub-divide. */
-    else if (level < MAX_LEVEL)
-    {
-        if (node->isLoaded() == true)
-            node->unload(scNode, scene);
-
-        distanceTest /= 2.0f;
-
-        level++;
-
-        /* Create children if not done in previous frame */
-        if (node->getChild(0) == NULL)
-            node->createChildren();
-
-        for(int i=0; i < 4; i++)
+        /* Sub-divide. */
+        else if (level < MAX_LEVEL)
         {
-            recursiveTest(node->getChild(i), viewer, distanceTest, level);
+            if (node->isLoaded() == true)
+                node->unload(scNode, scene);
 
+            distanceTest /= 2.0f;
+
+            level++;
+
+            /* Create children if not done in previous frame */
+            if (node->getChild(0) == NULL)
+                node->createChildren();
+
+            for(int i=0; i < 4; i++)
+            {
+                recursiveTest(node->getChild(i), viewer, distanceTest, level);
+
+            }
+        }
+        /* MAX_LEVEL reached. */
+        else
+        {
+            if (node->isLoaded() == false)
+                node->load(this->scNode, this->scene, hName, params->getRadius());
         }
     }
-    /* MAX_LEVEL reached. */
-    else
-    {
-        if (node->isLoaded() == false)
-            node->load(this->scNode, this->scene, hName, params->getRadius());
-    }
+
     return;
 }
 

@@ -631,3 +631,28 @@ bool HeightMap::isLoaded()
     else
         return false;
 }
+
+void HeightMap::getCornerPosition(Ogre::Vector3 &upperLeft, Ogre::Vector3 &upperRight,
+                                  Ogre::Vector3 &lowerLeft, Ogre::Vector3 &lowerRight)
+{
+    upperLeft = Ogre::Vector3(this->UpperLeft.x, 1.0f, this->UpperLeft.y);
+    upperLeft.normalise();
+    upperLeft = this->orientation*upperLeft*RParam->getRadius();
+
+    upperRight = Ogre::Vector3(this->LowerRight.x, 1.0f, this->UpperLeft.y);
+    upperRight.normalise();
+    upperRight = this->orientation*upperRight*RParam->getRadius();
+
+    lowerLeft = Ogre::Vector3(this->UpperLeft.x, 1.0f, this->LowerRight.y);
+    lowerLeft.normalise();
+    lowerLeft = this->orientation*lowerLeft*RParam->getRadius();
+
+    lowerRight = Ogre::Vector3(this->LowerRight.x, 1.0f, this->LowerRight.y);
+    lowerRight.normalise();
+    lowerRight = this->orientation*lowerRight*RParam->getRadius();
+}
+
+Ogre::Real HeightMap::getAmplitude()
+{
+    return this->maxHeight;
+}

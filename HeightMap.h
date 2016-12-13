@@ -68,6 +68,11 @@ public:
 
     Ogre::Vector3 getCenterPosition();
 
+    void getCornerPosition(Ogre::Vector3 &upperLeft, Ogre::Vector3 &upperRight,
+                           Ogre::Vector3 &lowerLeft, Ogre::Vector3 &lowerRight);
+
+    Ogre::Real getAmplitude();
+
     bool isLoaded();
 private:
     float           **height;

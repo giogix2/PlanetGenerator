@@ -46,6 +46,8 @@ private:
     Ogre::SceneNode         *scNode;
     ResourceParameter       *params;
     Ogre::uint32            runningNumber;
+    Ogre::Real              dotCutoff;
+    Ogre::Real              cornerScaling;
 
     /* Recursively subdivide face. Three states: match, subdivide, leaf reached. */
     void recursiveTest(HeightMap *node, Ogre::Vector3 viewer,
