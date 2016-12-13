@@ -654,5 +654,5 @@ void HeightMap::getCornerPosition(Ogre::Vector3 &upperLeft, Ogre::Vector3 &upper
 
 Ogre::Real HeightMap::getAmplitude()
 {
-    return this->maxHeight;
+    return this->maxHeight*RParam->getRadius();
 }
