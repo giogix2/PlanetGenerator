@@ -60,38 +60,22 @@ PquadTree::PquadTree(const std::string name, Ogre::uint16 levelSize,
 
 PquadTree::~PquadTree()
 {
-    std::vector <HeightMap *> childQueue;
-    HeightMap *child[4];
+    merge(this->root);
+    delete this->root;
+}
 
-    /* Get all nodes in the tree. Breadth-first. */
-    childQueue.push_back(this->root);
-    unsigned int i=0, previousSize;
-    while (1) {
-        previousSize = childQueue.size();
-        /* i should be correct from previous iteration */
-        for(; i < previousSize; i++)
-        {
-            childQueue[i]->getChildren(child[0], child[1], child[2], child[3]);
-            /* Correct quadtree has either all 4 children or none at all. */
-            if (child[0] != NULL)
-            {
-                childQueue.push_back(child[0]);
-                childQueue.push_back(child[1]);
-                childQueue.push_back(child[2]);
-                childQueue.push_back(child[3]);
-            }
-        }
-        if (previousSize == childQueue.size())
-            break;
-    }
-
-    std::cout << "PquadTree \"" << this->name << "\": deleting "
-              << childQueue.size() << " nodes." << std::endl;
-
-    while (childQueue.size() > 0)
+void PquadTree::merge(HeightMap *node)
+{
+    if (node->getChild(0) != NULL)
     {
-        delete childQueue[childQueue.size()-1];
-        childQueue.pop_back();
+        for(int i=0; i < 4; i++)
+        {
+            merge(node->getChild(i));
+
+            if (node->getChild(i)->isLoaded() == true)
+                node->getChild(i)->unload(this->scNode, this->scene);
+        }
+        node->deleteChildren();
     }
 }
 
@@ -134,7 +118,7 @@ void PquadTree::recursiveTest(HeightMap *node, Ogre::Vector3 viewer,
             smallestAngle = dProd;
     }
 
-    /* If HeightMap is not visible, just return. */
+    /* If HeightMap is not visible, just merge and return. */
     if (this->dotCutoff < smallestAngle)
     {
         /* If distance is bigger than test, render tile. */
@@ -144,20 +128,9 @@ void PquadTree::recursiveTest(HeightMap *node, Ogre::Vector3 viewer,
             if (node->isLoaded() == false)
             {
                 node->load(this->scNode, this->scene, hName, params->getRadius());
-
-                /* FIXME: Assumes checking one level up is enough, but might not be
-                 * in every case, e.g. camera backing off quicly. */
-                if (node->getChild(0) != NULL)
-                {
-                    for(int i=0; i < 4; i++)
-                    {
-                        /* Unload child-tiles, if previously loaded. */
-                        if (node->getChild(i)->isLoaded() == true)
-                            node->getChild(i)->unload(scNode, scene);
-                    }
-                    node->deleteChildren();
-                }
             }
+            /* Delete tree from here on */
+            merge(node);
         }
         /* Sub-divide. */
         else if (level < MAX_LEVEL)
@@ -186,6 +159,8 @@ void PquadTree::recursiveTest(HeightMap *node, Ogre::Vector3 viewer,
                 node->load(this->scNode, this->scene, hName, params->getRadius());
         }
     }
+    else
+        merge(node);
 
     return;
 }

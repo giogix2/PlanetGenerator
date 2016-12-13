@@ -34,6 +34,9 @@ public:
               ResourceParameter *parameters);
     ~PquadTree();
 
+    /* Unload and delete the whole tree up to this node. Depth-first */
+    void merge(HeightMap *node);
+
     /* Set viewer position and render face accordingly. */
     void update(Ogre::Vector3 viewer);
 
