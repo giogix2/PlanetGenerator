@@ -30,8 +30,18 @@ HeightMap::HeightMap(unsigned int size,
                      Ogre::Vector2 LowerRight,
                      ResourceParameter *param,
                      Ogre::Real Height_sea)
-    : Grid(size, face, UpperLeft, LowerRight)
+    /* Resize by 2 iterations per dimension to include flange */
+    : Grid(size+2, face,
+           UpperLeft+Ogre::Vector2(-(LowerRight.x-UpperLeft.x),
+                                   -(LowerRight.y-UpperLeft.y))/(size-1),
+           LowerRight+Ogre::Vector2((LowerRight.x-UpperLeft.x),
+                                    (LowerRight.y-UpperLeft.y))/(size-1))
 {
+    /* Save tile dimensions */
+    this->cornerULeft = UpperLeft;
+    this->cornerLRight = LowerRight;
+    this->cornerGSize = size;
+
     Ogre::Real maxAmplitude=0;
 
     child[0] = NULL;
@@ -83,21 +93,22 @@ void HeightMap::setHeight(unsigned int x, unsigned int y, float elevation)
 }
 
 /* Return vector for a normalized (radius 1.0) sphere */
-Ogre::Vector3 HeightMap::projectToSphere(unsigned int x, unsigned int y)
+Ogre::Vector3 HeightMap::projectToSphere(unsigned int x, unsigned int y,
+                                         float elevation)
 {
 	Ogre::Vector3 pos;
 
     // project heightMap to unit sphere by calling parent-class function
     pos = Grid::projectToSphere(x, y);
 	/* add height */
-	pos = pos + pos*height[y][x];
+    pos = pos + pos*elevation;
 	return pos;
 }
 
 // scalingFactor scales size of the mesh
 void HeightMap::generateMeshData(float scalingFactor)
 {
-	unsigned int x, y, idx;
+    unsigned int x, y, idx;
 
 	idx = 0;
 	for(x=0; x < gridSize; x++)
@@ -105,7 +116,7 @@ void HeightMap::generateMeshData(float scalingFactor)
 		for(y=0; y < gridSize; y++)
 		{
 			// Project height-map location to a sphere
-			vertexes[idx] = projectToSphere(x, y) * scalingFactor;
+            vertexes[idx] = projectToSphere(x, y, height[y][x]) * scalingFactor;
 
             // Flatten vertices that are under sea-level
             if (vertexes[idx].length() < (1.0f+seaHeight)*scalingFactor)
@@ -147,6 +158,8 @@ void HeightMap::generateMeshData(float scalingFactor)
 
 	// Generate normals
 	calculateNormals();
+
+    foldSkirts(scalingFactor);
 }
 
 void HeightMap::calculateNormals()
@@ -182,13 +195,43 @@ void HeightMap::calculateNormals()
 	}
 }
 
+void HeightMap::foldSkirts(float scaling)
+{
+    Ogre::uint32 x=0, y=0, gSize;
+    Ogre::Real xProj, yProj;
+
+    gSize = this->gridSize;
+    for(x=0; x < gSize; x++)
+    {
+        y=0;
+        xProj = x;
+        if (x==0)
+            xProj = x+1;
+        else if (x==gSize-1)
+            xProj = x-1;
+
+        /* Cases x=first and x=last */
+        if ( (x==0) || (x == gSize-1) )
+        {
+            for(y=1; y < gSize-1; y++)
+            {
+                yProj = y;
+                vertexes[x*gSize+y] = projectToSphere(xProj, yProj, this->minHeight) * scaling;
+            }
+        }
+        /* vertexes y=first and y=last */
+        vertexes[x*gSize+0] = projectToSphere(xProj, 1, this->minHeight) * scaling;
+        vertexes[x*gSize+gSize-1] = projectToSphere(xProj, gSize-2, this->minHeight) * scaling;
+    }
+}
+
 void HeightMap::createGeometry()
 {
     Ogre::uint16 x, y, gSize;
     Ogre::Real elev;
     Ogre::Vector3 spherePos;
 
-    gSize = this->getSize();
+    gSize = this->gridSize;
     for(y=0; y < gSize; y++)
     {
         for(x=0; x < gSize; x++)
@@ -352,43 +395,43 @@ Ogre::AxisAlignedBox HeightMap::tileAABox(void)
     Ogre::Vector3 corner[9], max, min;
 
     // Upper left with positive height
-    corner[0].x = this->UpperLeft.x;
+    corner[0].x = this->cornerULeft.x;
     corner[0].y = this->maxHeight+1.0f;
-    corner[0].z = this->UpperLeft.y;
+    corner[0].z = this->cornerULeft.y;
     //Upper left with minimum height
-    corner[1].x = this->UpperLeft.x;
+    corner[1].x = this->cornerULeft.x;
     corner[1].y = this->minHeight+1.0f;
-    corner[1].z = this->UpperLeft.y;
+    corner[1].z = this->cornerULeft.y;
     // Upper right
-    corner[2].x = this->LowerRight.x;
+    corner[2].x = this->cornerLRight.x;
     corner[2].y = this->maxHeight+1.0f;
-    corner[2].z = this->UpperLeft.y;
+    corner[2].z = this->cornerULeft.y;
 
-    corner[3].x = this->LowerRight.x;
+    corner[3].x = this->cornerLRight.x;
     corner[3].y = this->minHeight+1.0f;
-    corner[3].z = this->UpperLeft.y;
+    corner[3].z = this->cornerULeft.y;
     // Lower left
-    corner[4].x = this->UpperLeft.x;
+    corner[4].x = this->cornerULeft.x;
     corner[4].y = this->maxHeight+1.0f;
-    corner[4].z = this->LowerRight.y;
+    corner[4].z = this->cornerLRight.y;
 
-    corner[5].x = this->UpperLeft.x;
+    corner[5].x = this->cornerULeft.x;
     corner[5].y = this->minHeight+1.0f;
-    corner[5].z = this->LowerRight.y;
+    corner[5].z = this->cornerLRight.y;
     // Lower right
-    corner[6].x = this->LowerRight.x;
+    corner[6].x = this->cornerLRight.x;
     corner[6].y = this->maxHeight+1.0f;
-    corner[6].z = this->LowerRight.y;
+    corner[6].z = this->cornerLRight.y;
 
-    corner[7].x = this->LowerRight.x;
+    corner[7].x = this->cornerLRight.x;
     corner[7].y = this->minHeight+1.0f;
-    corner[7].z = this->LowerRight.y;
+    corner[7].z = this->cornerLRight.y;
 
     /* Tile center protrudes considerably (especially with full face), so add
      * it as one of the corners. */
-    corner[8].x = (this->UpperLeft.x + this->LowerRight.x)/2.0f;
+    corner[8].x = (this->cornerULeft.x + this->cornerLRight.x)/2.0f;
     corner[8].y = this->maxHeight+1.0f;
-    corner[8].z = (this->UpperLeft.y + this->LowerRight.y)/2.0f;
+    corner[8].z = (this->cornerULeft.y + this->cornerLRight.y)/2.0f;
 
     // Rotate and scale
     for(int i=0; i < 9; i++)
@@ -540,25 +583,25 @@ bool HeightMap::createChildren()
     {
         Ogre::Vector2 upperL, lowerR;
 
-        upperL = this->UpperLeft;
-        lowerR = upperL + (this->LowerRight-this->UpperLeft)/2.0f;
-        this->child[0] = new HeightMap(this->gridSize, this->orientation, upperL,
+        upperL = this->cornerULeft;
+        lowerR = upperL + (this->cornerLRight-this->cornerULeft)/2.0f;
+        this->child[0] = new HeightMap(this->cornerGSize, this->orientation, upperL,
                                        lowerR, this->RParam, this->seaHeight);
 
-        upperL.x += (this->LowerRight.x-this->UpperLeft.x)/2.0f;
-        lowerR.x += (this->LowerRight.x-this->UpperLeft.x)/2.0f;
-        this->child[1] = new HeightMap(this->gridSize, this->orientation, upperL,
+        upperL.x += (this->cornerLRight.x-this->cornerULeft.x)/2.0f;
+        lowerR.x += (this->cornerLRight.x-this->cornerULeft.x)/2.0f;
+        this->child[1] = new HeightMap(this->cornerGSize, this->orientation, upperL,
                                        lowerR, this->RParam, this->seaHeight);
 
-        upperL = this->UpperLeft;
-        upperL.y += (this->LowerRight.y-this->UpperLeft.y)/2.0f;
-        lowerR = upperL + (this->LowerRight-this->UpperLeft)/2.0f;
-        this->child[2] = new HeightMap(this->gridSize, this->orientation, upperL,
+        upperL = this->cornerULeft;
+        upperL.y += (this->cornerLRight.y-this->cornerULeft.y)/2.0f;
+        lowerR = upperL + (this->cornerLRight-this->cornerULeft)/2.0f;
+        this->child[2] = new HeightMap(this->cornerGSize, this->orientation, upperL,
                                        lowerR, this->RParam, this->seaHeight);
 
-        upperL.x += (this->LowerRight.x-this->UpperLeft.x)/2.0f;
-        lowerR.x += (this->LowerRight.x-this->UpperLeft.x)/2.0f;
-        this->child[3] = new HeightMap(this->gridSize, this->orientation, upperL,
+        upperL.x += (this->cornerLRight.x-this->cornerULeft.x)/2.0f;
+        lowerR.x += (this->cornerLRight.x-this->cornerULeft.x)/2.0f;
+        this->child[3] = new HeightMap(this->cornerGSize, this->orientation, upperL,
                                        lowerR, this->RParam, this->seaHeight);
     }
 
@@ -618,7 +661,7 @@ Ogre::Vector3 HeightMap::getCenterPosition()
     Ogre::Vector2 tileCenter;
     Ogre::Vector3 pos;
 
-    tileCenter = (this->UpperLeft + this->LowerRight)/2.0f;
+    tileCenter = (this->cornerULeft + this->cornerLRight)/2.0f;
     pos = Ogre::Vector3(tileCenter.x, 1.0f, tileCenter.y).normalisedCopy();
 
     return this->orientation*pos*RParam->getRadius();
@@ -635,19 +678,19 @@ bool HeightMap::isLoaded()
 void HeightMap::getCornerPosition(Ogre::Vector3 &upperLeft, Ogre::Vector3 &upperRight,
                                   Ogre::Vector3 &lowerLeft, Ogre::Vector3 &lowerRight)
 {
-    upperLeft = Ogre::Vector3(this->UpperLeft.x, 1.0f, this->UpperLeft.y);
+    upperLeft = Ogre::Vector3(this->cornerULeft.x, 1.0f, this->cornerULeft.y);
     upperLeft.normalise();
     upperLeft = this->orientation*upperLeft*RParam->getRadius();
 
-    upperRight = Ogre::Vector3(this->LowerRight.x, 1.0f, this->UpperLeft.y);
+    upperRight = Ogre::Vector3(this->cornerLRight.x, 1.0f, this->cornerULeft.y);
     upperRight.normalise();
     upperRight = this->orientation*upperRight*RParam->getRadius();
 
-    lowerLeft = Ogre::Vector3(this->UpperLeft.x, 1.0f, this->LowerRight.y);
+    lowerLeft = Ogre::Vector3(this->cornerULeft.x, 1.0f, this->cornerLRight.y);
     lowerLeft.normalise();
     lowerLeft = this->orientation*lowerLeft*RParam->getRadius();
 
-    lowerRight = Ogre::Vector3(this->LowerRight.x, 1.0f, this->LowerRight.y);
+    lowerRight = Ogre::Vector3(this->cornerLRight.x, 1.0f, this->cornerLRight.y);
     lowerRight.normalise();
     lowerRight = this->orientation*lowerRight*RParam->getRadius();
 }

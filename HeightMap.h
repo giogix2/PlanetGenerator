@@ -40,7 +40,7 @@ public:
               Ogre::Real Height_sea);
 	~HeightMap();
 	void setHeight(unsigned int x, unsigned int y, float elevation);
-	Ogre::Vector3 projectToSphere(unsigned int x, unsigned int y);
+    Ogre::Vector3 projectToSphere(unsigned int x, unsigned int y, float elevation);
 
     /* Fills hardware-buffers with vertice- and texture-data. Creates entity
      * called Name, mesh called Name+"_mesh", material called Name+"_material",
@@ -85,6 +85,11 @@ private:
 
     HeightMap       *child[4];
 
+    /* Tile dimensions without flange/skirt */
+    Ogre::Vector2   cornerULeft;
+    Ogre::Vector2   cornerLRight;
+    Ogre::uint32    cornerGSize;
+
 	Ogre::Vector3	*vertexes;
 	Ogre::Vector3	*verNorms;
 	Ogre::Vector2	*txCoords;
@@ -94,6 +99,9 @@ private:
     ResourceParameter *RParam;
 
 	void calculateNormals();
+
+    /* Fold tile flanges into skirts */
+    void foldSkirts(float scaling);
 
     /* Creates vertex-data and indexes */
     void generateMeshData(float scalingFactor);
