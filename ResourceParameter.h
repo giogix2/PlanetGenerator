@@ -66,6 +66,7 @@ public:
     float getWaterFraction(void);
     float getRadius(void);
     unsigned int getSeed(void);
+    void getRandomTranslate(float &x, float &y, float &z);
     std::vector <float>& getFrequency(void);
     std::vector <float>& getAmplitude(void);
     std::vector<std::pair <float, float> >& getFrequencyAmplitude(void);

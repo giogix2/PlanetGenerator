@@ -24,6 +24,7 @@
 #include <algorithm>
 #include <vector>
 #include <sstream>
+#include <stdlib.h>
 
 using namespace std;
 
@@ -150,6 +151,13 @@ float ResourceParameter::getRadius(void)
 unsigned int ResourceParameter::getSeed(void)
 {
     return seed;
+}
+void ResourceParameter::getRandomTranslate(float &x, float &y, float &z)
+{
+    srand(this->seed);
+    x = (float)((rand() % 1000)-500)/100.0f;
+    y = (float)((rand() % 1000)-500)/100.0f;
+    z = (float)((rand() % 1000)-500)/100.0f;
 }
 vector <float>& ResourceParameter::getFrequency(void)
 {

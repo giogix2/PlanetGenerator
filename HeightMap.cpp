@@ -65,12 +65,7 @@ HeightMap::HeightMap(unsigned int size,
     minHeight = -maxAmplitude;
     maxHeight = +maxAmplitude;
 
-    /* Re-create randomTranslate using seed. Avoids passing it as a costructor
-     * parameter. */
-    srand(RParam->getSeed());
-    randomTranslate.x = (float)((rand() % 1000)-500)/100.0f;
-    randomTranslate.y = (float)((rand() % 1000)-500)/100.0f;
-    randomTranslate.z = (float)((rand() % 1000)-500)/100.0f;
+    RParam->getRandomTranslate(randomTranslate.x, randomTranslate.y, randomTranslate.z);
 }
 
 HeightMap::~HeightMap()

@@ -106,10 +106,7 @@ void PSphere::create(Ogre::uint32 iters, Ogre::uint32 gridSize, ResourceParamete
     rotX_90 = Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, -1.0f, 0.0f, 1.0f, 0.0f);
     rotX_270 = Ogre::Matrix3(1.0f, 0.0f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, -1.0f, 0.0f);
 
-    srand(RParameter.getSeed());
-    randomTranslate.x = (float)((rand() % 1000)-500)/100.0f;
-    randomTranslate.y = (float)((rand() % 1000)-500)/100.0f;
-    randomTranslate.z = (float)((rand() % 1000)-500)/100.0f;
+    RParameter.getRandomTranslate(randomTranslate.x, randomTranslate.y, randomTranslate.z);
 
     calculateSeaLevel(minimumHeight, maximumHeight, waterFraction);
 
