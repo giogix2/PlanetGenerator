@@ -31,12 +31,11 @@
 #include <OgreMeshSerializer.h>
 #include <OgreDataStream.h>
 #include <OgreException.h>
+#include <OgreImageCodec.h>
 #include "OgreConfigFile.h"
 #include "Common.h"
 #include "ResourceParameter.h"
 
-#define FREEIMAGE_LIB
-#include "FreeImage.h"
 #include <assert.h>
 
 using namespace std;
@@ -910,7 +909,6 @@ unsigned char *PSphere::exportMap(unsigned short width, unsigned short height, M
 }
 
 bool PSphere::exportMap(unsigned short width, unsigned short height, std::string fileName, MapType type) {
-	RGBQUAD color;
     unsigned char *exportImage;
 
 	/* Create map to memory location pointed by exportImage. */
@@ -918,7 +916,7 @@ bool PSphere::exportMap(unsigned short width, unsigned short height, std::string
 
 	if (exportImage == NULL)
 	{
-		std::cerr << "Map not created!" << std::endl;
+        std::cerr << "Map not created!" << std::endl;
 		return false;
 	}
 
@@ -926,28 +924,30 @@ bool PSphere::exportMap(unsigned short width, unsigned short height, std::string
 	if (type == MAP_CUBE)
 		height = width/4*3;
 
-	// Use freeimage to save the map as a file
-	FreeImage_Initialise();
-	FIBITMAP *bitmap = FreeImage_Allocate(width, height, 24);
-	for(int i=0; i < width; i++) {
-		for (int j=0; j < height; j++) {
-			color.rgbRed = exportImage[((width*j)+i)*3];
-			color.rgbGreen = exportImage[((width*j)+i)*3+1];
-			color.rgbBlue = exportImage[((width*j)+i)*3+2];
-			FreeImage_SetPixelColor(bitmap, i, j, &color);
-		}
-	}
-	if ( !FreeImage_Save(FIF_PNG, bitmap, fileName.c_str(), 0) )
-	{
-		std::cerr << "Saving image " << fileName << " failed!" << std::endl;
+    Ogre::ImageCodec::ImageData *imgData = new Ogre::ImageCodec::ImageData();
 
-		FreeImage_Unload(bitmap);
-		FreeImage_DeInitialise();
+    imgData->width = width;
+    imgData->height = height;
+    imgData->depth = 1;
+    imgData->format = Ogre::PF_BYTE_RGB;
 
-		return false;
-	}
-	FreeImage_Unload(bitmap);
-	FreeImage_DeInitialise();
+    Ogre::MemoryDataStreamPtr imgStreamPtr;
+    imgStreamPtr = Ogre::MemoryDataStreamPtr(new Ogre::MemoryDataStream(exportImage, width*height*3));
+    Ogre::Codec::CodecDataPtr codec(imgData);
+
+    /* Check if there already is a running root */
+    if (Ogre::Root::getSingletonPtr() == NULL)
+    {
+        Ogre::Root root(""); // Needs a root to use encodeToFile()
+
+        Ogre::Codec::getCodec("png")->encodeToFile(imgStreamPtr,
+                                                   fileName,
+                                                   codec);
+    }
+    else
+        Ogre::Codec::getCodec("png")->encodeToFile(imgStreamPtr,
+                                                   fileName,
+                                                   codec);
 
     delete[] exportImage;
 
